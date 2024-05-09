@@ -10,8 +10,6 @@ class TilesMapSketch(
     private val canvasHeight: Int = 640,
 ) : PApplet() {
 
-    private val mappa = Mappa
-
     override fun settings() {
         size(600, 600)
     }

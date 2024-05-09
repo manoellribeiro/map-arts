@@ -5,13 +5,17 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.lifecycle.lifecycleScope
+import com.example.generatemaparts.core.data.network.mapbox.MapboxApiService
+import com.example.generatemaparts.core.data.repositories.MapboxRepository
 import com.example.generatemaparts.core.extensions.executeIfNotNull
+import kotlinx.coroutines.launch
 import processing.android.CompatUtils
 import processing.android.PFragment
 
 class MainActivity : AppCompatActivity() {
 
-    private var sketch: Sketch? = null
+    private var sketch: TilesMapSketch? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +28,25 @@ class MainActivity : AppCompatActivity() {
         )
         setContentView(frameLayout, layoutParams)
 
-        sketch = Sketch()
+        sketch = TilesMapSketch(
+            horizontalTilesCount = 5,
+            verticalTilesCount = 10,
+            padding = 20,
+            canvasWidth = 600,
+            canvasHeight = 1200
+        )
+
+        val repository = MapboxRepository(
+            MapboxApiService()
+        )
+
+        lifecycleScope.launch {
+            repository.fetchStaticMapImageUrlAsync(
+                mapWidth = 480,
+                mapHeight = 980
+            ).await()
+        }
+
 
         val processingFragment = PFragment(sketch)
         processingFragment.setView(frameLayout, this)

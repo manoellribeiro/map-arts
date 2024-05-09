@@ -1,7 +1,11 @@
 package com.example.generatemaparts.core.data.network.mapbox
 
+import com.example.generatemaparts.BuildConfig
+import com.example.generatemaparts.core.data.network.mapbox.models.MapboxStaticMapImageResponse
+import kotlinx.coroutines.Deferred
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
@@ -14,15 +18,15 @@ import retrofit2.http.Path
 
 interface MapboxApiService {
 
-    @GET("mapbox/{style_id}/static/[{lon},{lat}, 14]/{width}x{height}")
-    fun getStaticMapImage(
+    @GET("mapbox/{style_id}/static/{lon},{lat},14,0,0/{width}x{height}")
+    suspend fun getStaticMapImageAsync(
         @Path("style_id") styleId: String,
-        @Path("lat") latitude: Float,
-        @Path("lon") longitude: Float,
+        @Path("lat") latitude: Double,
+        @Path("lon") longitude: Double,
         @Path("width") mapWidth: Int,
-        @Path("height") height: Int,
+        @Path("height") mapHeight: Int,
 
-    ) // TODO: Make the response object
+    ): MapboxStaticMapImageResponse
 
     companion object {
 
@@ -32,7 +36,7 @@ interface MapboxApiService {
             val requestInterceptor = Interceptor { chain ->
 
                 val url = chain.request()
-                    .url()
+                    .url
                     .newBuilder()
                     .addQueryParameter(
                         "access_token",
@@ -48,12 +52,18 @@ interface MapboxApiService {
                 return@Interceptor chain.proceed(request)
             }
 
+            val loggingInterceptor = HttpLoggingInterceptor().apply {
+                setLevel(HttpLoggingInterceptor.Level.BODY)
+            }
+
             val okHttpClient = OkHttpClient.Builder()
                 .addInterceptor(requestInterceptor)
+                .addInterceptor(loggingInterceptor)
                 .build()
 
             return Retrofit.Builder()
                 .client(okHttpClient)
+                .baseUrl("https://api.mapbox.com/styles/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(MapboxApiService::class.java)

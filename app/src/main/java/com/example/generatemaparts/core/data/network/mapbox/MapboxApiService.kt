@@ -1,13 +1,11 @@
 package com.example.generatemaparts.core.data.network.mapbox
 
 import com.example.generatemaparts.BuildConfig
-import com.example.generatemaparts.core.data.network.mapbox.models.MapboxStaticMapImageResponse
-import kotlinx.coroutines.Deferred
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 
@@ -18,15 +16,14 @@ import retrofit2.http.Path
 
 interface MapboxApiService {
 
-    @GET("mapbox/{style_id}/static/{lon},{lat},14,0,0/{width}x{height}")
+    @GET("mapbox/{style_id}/static/{lon},{lat},15,0,0/{width}x{height}")
     suspend fun getStaticMapImageAsync(
         @Path("style_id") styleId: String,
         @Path("lat") latitude: Double,
         @Path("lon") longitude: Double,
         @Path("width") mapWidth: Int,
         @Path("height") mapHeight: Int,
-
-    ): MapboxStaticMapImageResponse
+    ): ResponseBody
 
     companion object {
 
@@ -41,6 +38,18 @@ interface MapboxApiService {
                     .addQueryParameter(
                         "access_token",
                         BuildConfig.MAPBOX_API_KEY
+                    )
+                    .addQueryParameter(
+                        "logo",
+                        "false"
+                    ).
+                    addQueryParameter(
+                        "attribution",
+                        "false"
+                    )
+                    .addQueryParameter(
+                        "before_layer",
+                        "false"
                     )
                     .build()
 
@@ -64,7 +73,6 @@ interface MapboxApiService {
             return Retrofit.Builder()
                 .client(okHttpClient)
                 .baseUrl("https://api.mapbox.com/styles/v1/")
-                .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(MapboxApiService::class.java)
         }

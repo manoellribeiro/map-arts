@@ -16,7 +16,14 @@ import androidx.lifecycle.lifecycleScope
 import com.example.generatemaparts.core.data.network.mapbox.MapboxApiService
 import com.example.generatemaparts.core.data.repositories.MapboxRepository
 import com.example.generatemaparts.core.extensions.executeIfNotNull
+import com.example.generatemaparts.core.services.LocationService
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationToken
+import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 import processing.android.CompatUtils
 import processing.android.PFragment
 
@@ -24,51 +31,64 @@ class MainActivity : AppCompatActivity() {
 
     private var sketch: TilesMapSketch? = null
     private lateinit var requireLocationPermissionLauncher: ActivityResultLauncher<String>
+    private lateinit var repository: MapboxRepository
+    private lateinit var locationService: LocationService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val frameLayout = FrameLayout(this)
-        frameLayout.id = CompatUtils.getUniqueViewId()
-        val layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-        setContentView(frameLayout, layoutParams)
-
-        val repository = MapboxRepository(
+        setupRequireLocationPermissionLauncher()
+        locationService = LocationService(LocationServices.getFusedLocationProviderClient(this))
+        repository = MapboxRepository(
             MapboxApiService()
         )
+    }
 
-        var imagePath = ""
-        lifecycleScope.launch {
-            imagePath = repository.fetchStaticMapImageUrlAsync(
-                mapWidth = 600,
-                mapHeight = 600,
-                this@MainActivity.filesDir
-            ).await()
-            applicationContext.filesDir
-            Log.i("IMAGEPATH", imagePath)
-
-            sketch = TilesMapSketch(
-                horizontalTilesCount = 5,
-                verticalTilesCount = 10,
-                padding = 20,
-                canvasWidth = 600,
-                canvasHeight = 1200,
-                imagePath
-            )
-
-            val processingFragment = PFragment(sketch)
-            processingFragment.setView(frameLayout, this@MainActivity)
-
-        }
+    override fun onResume() {
+        super.onResume()
+        requestForPermissionToAccessLocation()
     }
 
     private fun setupRequireLocationPermissionLauncher() {
         requireLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { wasGranted ->
             if(wasGranted) {
-                //do logic to require permission
+                try {
+                    lifecycleScope.launch {
+                        val location = locationService.getCurrentLocation().await()
+                        var imagePath = ""
+                        imagePath = repository.fetchStaticMapImageUrlAsync(
+                            longitude = location.longitude,
+                            latitude = location.latitude,
+                            mapWidth = 600,
+                            mapHeight = 600,
+                            dir = this@MainActivity.filesDir
+                        ).await()
+                        applicationContext.filesDir
+                        Log.i("IMAGEPATH", imagePath)
+
+                        sketch = TilesMapSketch(
+                            horizontalTilesCount = 5,
+                            verticalTilesCount = 10,
+                            padding = 20,
+                            canvasWidth = 600,
+                            canvasHeight = 1200,
+                            imagePath
+                        )
+
+                        val frameLayout = FrameLayout(this@MainActivity)
+                        frameLayout.id = CompatUtils.getUniqueViewId()
+                        val layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                        setContentView(frameLayout, layoutParams)
+
+                        val processingFragment = PFragment(sketch)
+                        processingFragment.setView(frameLayout, this@MainActivity)
+                    }
+
+                } catch (e: SecurityException) {
+                    //throw some error about not having the location access
+                }
             } else {
                 // show user some thing about how we use their data
             }
@@ -89,7 +109,7 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) -> {
-
+                // I need to show ui to my user explaining how I'm using their location and why they should give it to me
             }
             else -> {
                 requireLocationPermissionLauncher.launch(
@@ -99,19 +119,6 @@ class MainActivity : AppCompatActivity() {
 
 
         }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        sketch.executeIfNotNull {
-            sketch?.onRequestPermissionsResult(
-                requestCode, permissions, grantResults
-            )
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onNewIntent(intent: Intent?) {

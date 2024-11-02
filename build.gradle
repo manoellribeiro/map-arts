@@ -11,18 +11,9 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:8.0.2'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10'
-        classpath "org.jlleitschuh.gradle:ktlint-gradle:11.5.0"
     }
 }
 
 plugins {
-    id "org.jlleitschuh.gradle.ktlint" version "11.5.0"
     id "org.jetbrains.gradle.plugin.idea-ext" version "0.7"
-}
-
-idea.project.settings {
-    taskTriggers {
-        afterSync tasks.getByName("addKtlintFormatGitPreCommitHook")
-        afterSync tasks.getByName("ktlintApplyToIdea")
-    }
 }

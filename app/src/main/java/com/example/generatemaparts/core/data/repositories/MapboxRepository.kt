@@ -17,6 +17,8 @@ class MapboxRepository(
     private val ioScope = CoroutineScope(Dispatchers.IO)
 
     fun fetchStaticMapImageUrlAsync(
+        latitude: Double,
+        longitude: Double,
         mapWidth: Int,
         mapHeight: Int,
         dir: File
@@ -24,8 +26,8 @@ class MapboxRepository(
         try {
             val response: ResponseBody = mapboxApiService.getStaticMapImageAsync(
                 styleId = MapboxMapStyle.DarkV11.id,
-                latitude = -12.999917850449139, //TODO: get from location services
-                longitude = -38.50773055149209, //TODO: get from location services
+                latitude = latitude,
+                longitude = longitude,
                 mapWidth = mapWidth,
                 mapHeight = mapHeight
             )

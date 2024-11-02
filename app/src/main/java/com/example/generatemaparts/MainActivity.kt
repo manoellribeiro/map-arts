@@ -12,6 +12,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.example.generatemaparts.core.data.network.mapbox.MapboxApiService
 import com.example.generatemaparts.core.data.repositories.MapboxRepository
@@ -35,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationService: LocationService
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         setupRequireLocationPermissionLauncher()
         locationService = LocationService(LocationServices.getFusedLocationProviderClient(this))

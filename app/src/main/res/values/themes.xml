@@ -12,7 +12,7 @@
         <item name="windowSplashScreenBackground">#fff0e5</item>
         <!-- Use windowSplashScreenAnimatedIcon to add a drawable or an animated
              drawable. -->
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_screen</item>
+        <item name="windowSplashScreenAnimatedIcon" >@drawable/ic_logo_splash_screen</item>
         <!-- Set the theme of the Activity that follows your splash screen. -->
         <item name="postSplashScreenTheme">@style/Theme.GenerateMapArts</item>
     </style>

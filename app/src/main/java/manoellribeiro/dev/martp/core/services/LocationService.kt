@@ -1,4 +1,4 @@
-package com.example.generatemaparts.core.services
+package manoellribeiro.dev.martp.core.services
 
 import android.location.Location
 import com.google.android.gms.location.FusedLocationProviderClient

@@ -1,4 +1,4 @@
-package com.example.generatemaparts
+package manoellribeiro.dev.martp
 
 import android.Manifest
 import android.content.Intent
@@ -14,17 +14,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import com.example.generatemaparts.core.data.network.mapbox.MapboxApiService
-import com.example.generatemaparts.core.data.repositories.MapboxRepository
-import com.example.generatemaparts.core.extensions.executeIfNotNull
-import com.example.generatemaparts.core.services.LocationService
-import com.google.android.gms.location.FusedLocationProviderClient
+import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
+import manoellribeiro.dev.martp.core.data.repositories.MapboxRepository
+import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
+import manoellribeiro.dev.martp.core.services.LocationService
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationToken
-import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 import processing.android.CompatUtils
 import processing.android.PFragment
 

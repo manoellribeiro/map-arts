@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.generatemaparts'
+    namespace 'manoellribeiro.dev.martp'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.generatemaparts"
+        applicationId "manoellribeiro.dev.martp"
         minSdk 23
         targetSdk 34
         versionCode 1

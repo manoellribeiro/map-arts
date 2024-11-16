@@ -1,6 +1,6 @@
-package com.example.generatemaparts.core.data.network.mapbox
+package manoellribeiro.dev.martp.core.data.network.mapbox
 
-import com.example.generatemaparts.BuildConfig
+import manoellribeiro.dev.martp.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody

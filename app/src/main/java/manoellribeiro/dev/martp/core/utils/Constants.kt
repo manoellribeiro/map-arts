@@ -1,4 +1,4 @@
-package com.example.generatemaparts.core.utils
+package manoellribeiro.dev.martp.core.utils
 
 const val ZERO_LONG = 0L
 const val EMPTY_STRING = ""

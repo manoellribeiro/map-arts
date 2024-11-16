@@ -1,4 +1,4 @@
-package com.example.generatemaparts.core.data.network.mapbox.models
+package manoellribeiro.dev.martp.core.data.network.mapbox.models
 
 import com.google.gson.annotations.SerializedName
 

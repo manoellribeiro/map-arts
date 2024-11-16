@@ -1,4 +1,4 @@
-package com.example.generatemaparts.core.extensions
+package manoellribeiro.dev.martp.core.extensions
 
 fun<T> Any?.executeIfNotNull(executable: () -> T){
     if(this != null) executable()

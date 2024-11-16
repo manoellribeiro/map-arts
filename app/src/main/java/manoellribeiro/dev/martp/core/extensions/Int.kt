@@ -1,7 +1,7 @@
-package com.example.generatemaparts.core.extensions
+package manoellribeiro.dev.martp.core.extensions
 
-import com.example.generatemaparts.core.utils.ONE
-import com.example.generatemaparts.core.utils.ZERO
+import manoellribeiro.dev.martp.core.utils.ONE
+import manoellribeiro.dev.martp.core.utils.ZERO
 
 fun Int?.orZero() = this ?: ZERO
 fun Int?.orOne() = this ?: ONE

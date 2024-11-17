@@ -48,47 +48,50 @@ class MainActivity : AppCompatActivity() {
     private fun setupRequireLocationPermissionLauncher() {
         requireLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { wasGranted ->
             if(wasGranted) {
-                try {
-                    lifecycleScope.launch {
-                        val location = locationService.getCurrentLocation().await()
-                        var imagePath = ""
-                        imagePath = repository.fetchStaticMapImageUrlAsync(
-                            longitude = location.longitude,
-                            latitude = location.latitude,
-                            mapWidth = 600,
-                            mapHeight = 600,
-                            dir = this@MainActivity.filesDir
-                        ).await()
-                        applicationContext.filesDir
-                        Log.i("IMAGEPATH", imagePath)
-
-                        sketch = TilesMapSketch(
-                            horizontalTilesCount = 5,
-                            verticalTilesCount = 10,
-                            padding = 20,
-                            canvasWidth = 600,
-                            canvasHeight = 1200,
-                            imagePath
-                        )
-
-                        val frameLayout = FrameLayout(this@MainActivity)
-                        frameLayout.id = CompatUtils.getUniqueViewId()
-                        val layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT
-                        )
-                        setContentView(frameLayout, layoutParams)
-
-                        val processingFragment = PFragment(sketch)
-                        processingFragment.setView(frameLayout, this@MainActivity)
-                    }
-
-                } catch (e: SecurityException) {
-                    //throw some error about not having the location access
-                }
+                generateMapArt()
             } else {
                 // show user some thing about how we use their data
             }
+        }
+    }
+
+    private fun generateMapArt() {
+        try {
+            lifecycleScope.launch {
+                val location = locationService.getCurrentLocation().await()
+                val imagePath = repository.fetchStaticMapImageUrlAsync(
+                    longitude = location.longitude,
+                    latitude = location.latitude,
+                    mapWidth = 500,
+                    mapHeight = 500,
+                    dir = this@MainActivity.filesDir
+                ).await()
+                applicationContext.filesDir
+                Log.i("IMAGEPATH", imagePath)
+
+                sketch = TilesMapSketch(
+                    horizontalTilesCount = 5,
+                    verticalTilesCount = 10,
+                    padding = 20,
+                    canvasWidth = 620F,
+                    canvasHeight = 620F,
+                    imagePath
+                )
+
+                val frameLayout = FrameLayout(this@MainActivity)
+                frameLayout.id = CompatUtils.getUniqueViewId()
+                val layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                setContentView(frameLayout, layoutParams)
+
+                val processingFragment = PFragment(sketch)
+                processingFragment.setView(frameLayout, this@MainActivity)
+            }
+
+        } catch (e: SecurityException) {
+            //throw some error about not having the location access
         }
     }
 
@@ -100,7 +103,7 @@ class MainActivity : AppCompatActivity() {
 
         when{
             didUserAlreadyGivePermission -> {
-                //My user already gave the location permission
+                generateMapArt()
             }
             ActivityCompat.shouldShowRequestPermissionRationale(
                 this@MainActivity,

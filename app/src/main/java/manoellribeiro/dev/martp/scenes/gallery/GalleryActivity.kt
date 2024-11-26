@@ -1,4 +1,4 @@
-package manoellribeiro.dev.martp
+package manoellribeiro.dev.martp.scenes.gallery
 
 import android.Manifest
 import android.content.Intent
@@ -19,25 +19,25 @@ import manoellribeiro.dev.martp.core.data.repositories.MapboxRepository
 import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
 import manoellribeiro.dev.martp.core.services.LocationService
 import com.google.android.gms.location.LocationServices
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import manoellribeiro.dev.martp.TilesMapSketch
+import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import processing.android.CompatUtils
 import processing.android.PFragment
 
-class MainActivity : AppCompatActivity() {
+@AndroidEntryPoint
+class GalleryActivity : AppCompatActivity() {
 
     private var sketch: TilesMapSketch? = null
     private lateinit var requireLocationPermissionLauncher: ActivityResultLauncher<String>
-    private lateinit var repository: MapboxRepository
+    private lateinit var repository: MartpRepository
     private lateinit var locationService: LocationService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         setupRequireLocationPermissionLauncher()
-        locationService = LocationService(LocationServices.getFusedLocationProviderClient(this))
-        repository = MapboxRepository(
-            MapboxApiService()
-        )
     }
 
     override fun onResume() {
@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                     latitude = location.latitude,
                     mapWidth = 500,
                     mapHeight = 500,
-                    dir = this@MainActivity.filesDir
+                    dir = this@GalleryActivity.filesDir
                 ).await()
                 applicationContext.filesDir
                 Log.i("IMAGEPATH", imagePath)
@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity() {
                     imagePath
                 )
 
-                val frameLayout = FrameLayout(this@MainActivity)
+                val frameLayout = FrameLayout(this@GalleryActivity)
                 frameLayout.id = CompatUtils.getUniqueViewId()
                 val layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                 setContentView(frameLayout, layoutParams)
 
                 val processingFragment = PFragment(sketch)
-                processingFragment.setView(frameLayout, this@MainActivity)
+                processingFragment.setView(frameLayout, this@GalleryActivity)
             }
 
         } catch (e: SecurityException) {
@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity() {
                 generateMapArt()
             }
             ActivityCompat.shouldShowRequestPermissionRationale(
-                this@MainActivity,
+                this@GalleryActivity,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) -> {
                 // I need to show ui to my user explaining how I'm using their location and why they should give it to me

@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Martp</string>
+    <string name="gallery">Galeria</string>
+    <string name="create_new_art">Criar nova arte</string>
+    <string name="error_executing_operation_in_the_local_database">Erro ao executar operação no banco de dados local</string>
+</resources>

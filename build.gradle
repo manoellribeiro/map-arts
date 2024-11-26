@@ -16,4 +16,5 @@ buildscript {
 
 plugins {
     id "org.jetbrains.gradle.plugin.idea-ext" version "0.7"
+    id 'com.google.dagger.hilt.android' version '2.51.1' apply false
 }

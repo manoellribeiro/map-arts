@@ -10,12 +10,12 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
-import manoellribeiro.dev.martp.core.data.repositories.MapboxRepository
 import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
 import manoellribeiro.dev.martp.core.services.LocationService
 import com.google.android.gms.location.LocationServices
@@ -31,8 +31,7 @@ class GalleryActivity : AppCompatActivity() {
 
     private var sketch: TilesMapSketch? = null
     private lateinit var requireLocationPermissionLauncher: ActivityResultLauncher<String>
-    private lateinit var repository: MartpRepository
-    private lateinit var locationService: LocationService
+    private val viewModel: GalleryViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -49,6 +48,9 @@ class GalleryActivity : AppCompatActivity() {
         requireLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { wasGranted ->
             if(wasGranted) {
                 generateMapArt()
+                lifecycleScope.launch {
+                    viewModel.printLocationData()
+                }
             } else {
                 // show user some thing about how we use their data
             }
@@ -56,43 +58,43 @@ class GalleryActivity : AppCompatActivity() {
     }
 
     private fun generateMapArt() {
-        try {
-            lifecycleScope.launch {
-                val location = locationService.getCurrentLocation().await()
-                val imagePath = repository.fetchStaticMapImageUrlAsync(
-                    longitude = location.longitude,
-                    latitude = location.latitude,
-                    mapWidth = 500,
-                    mapHeight = 500,
-                    dir = this@GalleryActivity.filesDir
-                ).await()
-                applicationContext.filesDir
-                Log.i("IMAGEPATH", imagePath)
-
-                sketch = TilesMapSketch(
-                    horizontalTilesCount = 5,
-                    verticalTilesCount = 10,
-                    padding = 20,
-                    canvasWidth = 620F,
-                    canvasHeight = 620F,
-                    imagePath
-                )
-
-                val frameLayout = FrameLayout(this@GalleryActivity)
-                frameLayout.id = CompatUtils.getUniqueViewId()
-                val layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                setContentView(frameLayout, layoutParams)
-
-                val processingFragment = PFragment(sketch)
-                processingFragment.setView(frameLayout, this@GalleryActivity)
-            }
-
-        } catch (e: SecurityException) {
-            //throw some error about not having the location access
-        }
+        // try {
+        //     lifecycleScope.launch {
+        //         val location = locationService.getCurrentLocation().await()
+        //         val imagePath = repository.fetchStaticMapImageUrlAsync(
+        //             longitude = location.longitude,
+        //             latitude = location.latitude,
+        //             mapWidth = 500,
+        //             mapHeight = 500,
+        //             dir = this@GalleryActivity.filesDir
+        //         ).await()
+        //         applicationContext.filesDir
+        //         Log.i("IMAGEPATH", imagePath)
+        //
+        //         sketch = TilesMapSketch(
+        //             horizontalTilesCount = 5,
+        //             verticalTilesCount = 10,
+        //             padding = 20,
+        //             canvasWidth = 620F,
+        //             canvasHeight = 620F,
+        //             imagePath
+        //         )
+        //
+        //         val frameLayout = FrameLayout(this@GalleryActivity)
+        //         frameLayout.id = CompatUtils.getUniqueViewId()
+        //         val layoutParams = ViewGroup.LayoutParams(
+        //             ViewGroup.LayoutParams.MATCH_PARENT,
+        //             ViewGroup.LayoutParams.MATCH_PARENT
+        //         )
+        //         setContentView(frameLayout, layoutParams)
+        //
+        //         val processingFragment = PFragment(sketch)
+        //         processingFragment.setView(frameLayout, this@GalleryActivity)
+        //     }
+        //
+        // } catch (e: SecurityException) {
+        //     //throw some error about not having the location access
+        // }
     }
 
     private fun requestForPermissionToAccessLocation() {
@@ -121,11 +123,11 @@ class GalleryActivity : AppCompatActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        sketch.executeIfNotNull {
-            sketch?.onNewIntent(intent)
-        }
-    }
+    // override fun onNewIntent(intent: Intent?) {
+    //     super.onNewIntent(intent)
+    //     sketch.executeIfNotNull {
+    //         sketch?.onNewIntent(intent)
+    //     }
+    // }
 
 }

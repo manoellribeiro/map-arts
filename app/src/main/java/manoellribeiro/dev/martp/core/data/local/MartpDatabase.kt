@@ -16,17 +16,7 @@ import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 abstract class MartpDatabase: RoomDatabase() {
 
     companion object {
-        lateinit var instance: MartpDatabase
-            private set
-
-
-        fun initialize(applicationContext: Context) {
-            instance = Room.databaseBuilder(
-                applicationContext,
-                MartpDatabase::class.java, "martp-database.db"
-            ).build()
-        }
-
+        const val databaseName = "martp-database.db"
     }
 
     abstract fun mapArtDao(): MapArtsDao

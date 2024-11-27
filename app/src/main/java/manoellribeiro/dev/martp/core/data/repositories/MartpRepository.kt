@@ -13,8 +13,9 @@ import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
+import javax.inject.Inject
 
-class MartpRepository(
+class MartpRepository @Inject constructor(
     private val mapboxApiService: MapboxApiService,
     private val mapArtDao: MapArtsDao
 ) {

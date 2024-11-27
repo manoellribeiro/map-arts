@@ -9,7 +9,6 @@ class MartpApplication: Application() {
 
     override fun onCreate() {
         super.onCreate()
-        MartpDatabase.initialize(applicationContext)
     }
 
 }

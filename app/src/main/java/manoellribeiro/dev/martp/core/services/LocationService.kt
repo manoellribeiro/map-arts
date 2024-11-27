@@ -9,9 +9,10 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.suspendCancellableCoroutine
+import javax.inject.Inject
 import kotlin.coroutines.resume
 
-class LocationService(
+class LocationService @Inject constructor(
     private val fusedLocationClient: FusedLocationProviderClient
 ) {
 

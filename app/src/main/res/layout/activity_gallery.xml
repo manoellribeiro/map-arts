@@ -50,6 +50,8 @@
             app:layout_constraintStart_toStartOf="parent"
             android:visibility="gone"
             tools:visibility="visible"
+            tools:itemCount="5"
+            tools:listitem="@layout/item_gallery_art"
             app:layout_constraintEnd_toEndOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

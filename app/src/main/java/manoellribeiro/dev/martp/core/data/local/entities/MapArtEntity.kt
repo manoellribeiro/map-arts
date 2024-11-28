@@ -8,7 +8,7 @@ data class MapArtEntity(
     @PrimaryKey
     val id: String,
     val title: String,
-    val description: String,
+    val description: String?, //description can be null and I can show the date instead of showing it on card
     val latitude: Float,
     val longitude: Float,
     val dateInMillis: Long,

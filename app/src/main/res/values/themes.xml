@@ -16,4 +16,37 @@
         <!-- Set the theme of the Activity that follows your splash screen. -->
         <item name="postSplashScreenTheme">@style/Theme.GenerateMapArts</item>
     </style>
+
+
+    <!--Button-->
+    <style name="MartpButton"/>
+    <style name="MartpButton.Primary">
+        <item name="type">filled</item>
+        <item name="buttonBackgroundColor">@color/blue</item>
+        <item name="strokeColor">@color/blue</item>
+        <item name="fontAndIconColor">@color/light_l5</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+    <style name="MartpButton.Secondary">
+        <item name="type">outlined</item>
+        <item name="strokeColor">@color/blue</item>
+        <item name="buttonBackgroundColor">@android:color/white</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="fontAndIconColor">@color/blue</item>
+    </style>
+    <style name="MartpButton.Ghost">
+        <item name="type">filled</item>
+        <item name="buttonBackgroundColor">@color/light_l5</item>
+        <item name="strokeColor">@color/light_l5</item>
+        <item name="fontAndIconColor">@color/dark_d1</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+<!--    <style name="ZigButton.Destructive">-->
+<!--        <item name="type">filled</item>-->
+<!--        <item name="buttonBackgroundColor">@color/error_medium</item>-->
+<!--        <item name="strokeColor">@color/error_medium</item>-->
+<!--        <item name="cornerRadius">@dimen/border_radius_sm</item>-->
+<!--        <item name="fontAndIconColor">@color/light_l5</item>-->
+<!--    </style>-->
+
 </resources>

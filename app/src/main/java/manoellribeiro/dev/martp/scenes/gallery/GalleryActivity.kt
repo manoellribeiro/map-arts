@@ -23,6 +23,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.TilesMapSketch
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
+import manoellribeiro.dev.martp.databinding.ActivityGalleryBinding
+import manoellribeiro.dev.martp.databinding.MartpButtonEndIconBinding
 import processing.android.CompatUtils
 import processing.android.PFragment
 
@@ -32,10 +34,13 @@ class GalleryActivity : AppCompatActivity() {
     private var sketch: TilesMapSketch? = null
     private lateinit var requireLocationPermissionLauncher: ActivityResultLauncher<String>
     private val viewModel: GalleryViewModel by viewModels()
+    private lateinit var binding: ActivityGalleryBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        binding = ActivityGalleryBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         setupRequireLocationPermissionLauncher()
     }
 

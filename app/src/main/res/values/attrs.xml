@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="MartpButton">
+        <attr name="title" />
+        <attr name="isEnabled" format="boolean"/>
+        <attr name="fontAndIconColor" format="color"/>
+        <attr name="startIcon" format="integer"/>
+        <attr name="endIcon" format="integer"/>
+        <attr name="buttonBackgroundColor" format="color"/>
+        <attr name="strokeColor"/>
+        <attr name="cornerRadius"/>
+        <attr name="type" format="enum">
+            <enum name="filled" value="0"/>
+            <enum name="outlined" value="1"/>
+        </attr>
+    </declare-styleable>
+
+</resources>

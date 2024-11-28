@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/light_l2"
+        tools:context=".scenes.gallery.GalleryActivity"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp">
+
+        <TextView
+            android:id="@+id/galleryTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/infoIB"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/gallery" />
+
+        <ImageButton
+            android:id="@+id/infoIB"
+            android:layout_gravity="end"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="A tiny info button"
+            android:src="@drawable/ic_info"
+            android:background="@android:color/transparent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/mapArtsRV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/galleryTV"
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <manoellribeiro.dev.martp.core.components.MartpButton
+        android:id="@+id/newArtMB"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="@string/create_new_art"
+        android:layout_alignParentBottom="true"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        style="@style/MartpButton.Primary"/>
+
+</RelativeLayout>

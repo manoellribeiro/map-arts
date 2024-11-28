@@ -13,6 +13,7 @@ import dagger.hilt.android.qualifiers.ActivityContext
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
+import manoellribeiro.dev.martp.core.services.LocationService
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -30,11 +31,8 @@ object ViewModelModule {
     }
 
     @Provides
-    fun provideFusedLocationProviderClient(
-        @ActivityContext context: Context
-    ): FusedLocationProviderClient {
-        return LocationServices.getFusedLocationProviderClient(context)
+    fun providesLocationService(fusedLocationProviderClient: FusedLocationProviderClient): LocationService {
+        return LocationService(fusedLocationProviderClient)
     }
-
 
 }

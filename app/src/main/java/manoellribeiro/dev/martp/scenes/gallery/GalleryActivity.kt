@@ -106,6 +106,9 @@ class GalleryActivity : AppCompatActivity() {
         when{
             didUserAlreadyGivePermission -> {
                 generateMapArt()
+                lifecycleScope.launch {
+                    viewModel.printLocationData()
+                }
             }
             ActivityCompat.shouldShowRequestPermissionRationale(
                 this@GalleryActivity,

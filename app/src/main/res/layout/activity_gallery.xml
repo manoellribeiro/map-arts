@@ -5,8 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
@@ -41,6 +39,41 @@
             android:src="@drawable/ic_info"
             android:background="@android:color/transparent" />
 
+        <TextView
+            android:id="@+id/emptyListTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:gravity="center"
+            android:textColor="@color/dark_d1"
+            android:text="@string/gallery_empty_state_state_message" />
+
+        <TextView
+            android:id="@+id/errorTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:gravity="center"
+            android:visibility="gone"
+            android:textColor="@color/dark_d1"/>
+
+        <ProgressBar
+            android:id="@+id/loadingIndicatorPB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:theme="@style/Theme.GenerateMapArts.ProgressBarTheme"
+            android:gravity="center"/>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/mapArtsRV"
             android:layout_width="match_parent"
@@ -49,13 +82,12 @@
             app:layout_constraintTop_toBottomOf="@id/galleryTV"
             app:layout_constraintStart_toStartOf="parent"
             android:visibility="gone"
-            tools:visibility="visible"
+            tools:visibility="gone"
             tools:itemCount="5"
             tools:listitem="@layout/item_gallery_art"
             app:layout_constraintEnd_toEndOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
     <manoellribeiro.dev.martp.core.components.MartpButton
         android:id="@+id/newArtMB"

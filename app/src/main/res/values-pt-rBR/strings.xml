@@ -3,4 +3,6 @@
     <string name="gallery">Galeria</string>
     <string name="create_new_art">Criar nova arte</string>
     <string name="error_executing_operation_in_the_local_database">Erro ao executar operação no banco de dados local</string>
+    <string name="gallery_empty_state_state_message">Parece que você ainda não tem nenhuma arte 😔\nClique no botão abaixo e comece a sua galeria!</string>
+    <string name="try_again">Tente novamente</string>
 </resources>

@@ -49,4 +49,16 @@
 <!--        <item name="fontAndIconColor">@color/light_l5</item>-->
 <!--    </style>-->
 
+
+    <style name="Theme.GenerateMapArts.ProgressBarTheme">
+        <item name="colorAccent">@color/blue</item>
+    </style>
+
+
+    <style name="roundedImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+
 </resources>

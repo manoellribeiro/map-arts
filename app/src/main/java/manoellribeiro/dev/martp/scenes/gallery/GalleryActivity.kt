@@ -21,8 +21,13 @@ import manoellribeiro.dev.martp.core.services.LocationService
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.TilesMapSketch
+import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
+import manoellribeiro.dev.martp.core.extensions.gone
+import manoellribeiro.dev.martp.core.extensions.visible
+import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.databinding.ActivityGalleryBinding
 import manoellribeiro.dev.martp.databinding.MartpButtonEndIconBinding
 import processing.android.CompatUtils
@@ -47,6 +52,64 @@ class GalleryActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         requestForPermissionToAccessLocation()
+    }
+
+    private fun setupObservables() {
+        viewModel.state.observe(this) { state ->
+            when(state) {
+                GalleryUiState.EmptyList -> setupEmptyListState()
+                is GalleryUiState.Error -> setupErrorState(state.failure)
+                GalleryUiState.Loading -> setupLoadingState()
+                is GalleryUiState.NotEmptyList -> setupNotEmptyListState(state.mapArts)
+            }
+
+        }
+    }
+
+    private fun setupNotEmptyListState(mapArts: List<MapArtEntity>) = with(binding) {
+        emptyListTV.gone()
+        errorTV.gone()
+        loadingIndicatorPB.gone()
+        mapArtsRV.visible()
+        mapArtsRV.adapter
+        newArtMB.visible()
+        newArtMB.title = getString(R.string.create_new_art)
+        newArtMB.setOnClickListener {
+            // call create new art
+        }
+    }
+
+    private fun setupLoadingState() = with(binding) {
+        mapArtsRV.gone()
+        emptyListTV.gone()
+        errorTV.gone()
+        loadingIndicatorPB.visible()
+        newArtMB.gone()
+    }
+
+    private fun setupErrorState(failure: Failure) = with(binding) {
+        mapArtsRV.gone()
+        emptyListTV.gone()
+        errorTV.visible()
+        errorTV.text = getString(failure.messageToBeDisplayedToUserId)
+        loadingIndicatorPB.gone()
+        newArtMB.visible()
+        newArtMB.title = getString(R.string.try_again)
+        newArtMB.setOnClickListener {
+            viewModel.getUserMapArts()
+        }
+    }
+
+    private fun setupEmptyListState() = with(binding) {
+        mapArtsRV.gone()
+        emptyListTV.visible()
+        errorTV.gone()
+        loadingIndicatorPB.gone()
+        newArtMB.visible()
+        newArtMB.title = getString(R.string.create_new_art)
+        newArtMB.setOnClickListener {
+            // call create new art
+        }
     }
 
     private fun setupRequireLocationPermissionLauncher() {

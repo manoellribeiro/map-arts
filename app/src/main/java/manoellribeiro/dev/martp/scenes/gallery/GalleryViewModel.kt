@@ -31,7 +31,7 @@ class GalleryViewModel @Inject constructor(
         Log.i("GalleryViewModel", "latitude: ${location.latitude} \n longitude: ${location.longitude}")
     }
 
-    fun getUserMapArtsLiveData() = viewModelScope.launch {
+    fun getUserMapArts() = viewModelScope.launch {
         try {
             emitNewState(GalleryUiState.Loading)
             val mapArts = repository.fetchUserMapArts().await()

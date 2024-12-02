@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
 import manoellribeiro.dev.martp.core.services.LocationService
@@ -47,11 +48,13 @@ class GalleryActivity : AppCompatActivity() {
         binding = ActivityGalleryBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupRequireLocationPermissionLauncher()
+        setupObservables()
     }
 
     override fun onResume() {
         super.onResume()
-        requestForPermissionToAccessLocation()
+        //requestForPermissionToAccessLocation()
+        viewModel.getUserMapArts()
     }
 
     private fun setupObservables() {
@@ -71,7 +74,8 @@ class GalleryActivity : AppCompatActivity() {
         errorTV.gone()
         loadingIndicatorPB.gone()
         mapArtsRV.visible()
-        mapArtsRV.adapter
+        mapArtsRV.layoutManager = LinearLayoutManager(this@GalleryActivity)
+        mapArtsRV.adapter = MapArtsRecyclerViewAdapter(mapArts) {}
         newArtMB.visible()
         newArtMB.title = getString(R.string.create_new_art)
         newArtMB.setOnClickListener {

@@ -5,4 +5,7 @@
     <string name="error_executing_operation_in_the_local_database">Error al ejecutar la operación en la base de datos local</string>
     <string name="gallery_empty_state_state_message">Parece que aún no tienes ningún arte 😔\n¡Haz clic en el botón de abajo y comienza tu galería!</string>
     <string name="try_again">Intenta de nuevo</string>
+    <string name="allow_location_access">Permitir acceso a la ubicación</string>
+    <string name="location_usage_details">Tu ubicación se utiliza para ayudarnos a generar tu arte. Nunca almacenamos ni compartimos tu ubicación con nadie. Martp es un proyecto de código abierto; si necesitas más información, consulta nuestro proyecto en GitHub.</string>
+    <string name="we_need_your_location_to_create_art_with_you">Necesitamos acceder a tu ubicación\n para crear arte contigo</string>
 </resources>

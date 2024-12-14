@@ -1,9 +1,9 @@
-package manoellribeiro.dev.martp
+package manoellribeiro.dev.martp.core.sketches
 
 import processing.core.PApplet
 import processing.core.PImage
 
-class TilesMapSketch(
+class DefaultMartpSketch(
     private val horizontalTilesCount: Int,
     private val verticalTilesCount: Int,
     private val padding: Int,
@@ -11,7 +11,6 @@ class TilesMapSketch(
     private val canvasHeight: Float = 640.0F,
     private val imagePath: String
 ) : PApplet() {
-
 
     companion object {
         const private val frameThickness = 30.0F

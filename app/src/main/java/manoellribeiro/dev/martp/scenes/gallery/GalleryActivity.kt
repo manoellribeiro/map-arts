@@ -23,7 +23,6 @@ import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
-import manoellribeiro.dev.martp.TilesMapSketch
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.extensions.gone
@@ -31,13 +30,13 @@ import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.databinding.ActivityGalleryBinding
 import manoellribeiro.dev.martp.databinding.MartpButtonEndIconBinding
+import manoellribeiro.dev.martp.scenes.locationAcessDetails.LocationAccessDetailsActivity
 import processing.android.CompatUtils
-import processing.android.PFragment
 
 @AndroidEntryPoint
 class GalleryActivity : AppCompatActivity() {
 
-    private var sketch: TilesMapSketch? = null
+    // private var sketch: TilesMapSketch? = null
     private lateinit var requireLocationPermissionLauncher: ActivityResultLauncher<String>
     private val viewModel: GalleryViewModel by viewModels()
     private lateinit var binding: ActivityGalleryBinding
@@ -53,7 +52,6 @@ class GalleryActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        //requestForPermissionToAccessLocation()
         viewModel.getUserMapArts()
     }
 
@@ -79,7 +77,7 @@ class GalleryActivity : AppCompatActivity() {
         newArtMB.visible()
         newArtMB.title = getString(R.string.create_new_art)
         newArtMB.setOnClickListener {
-            // call create new art
+            verifyPermissionToAccessLocation()
         }
     }
 
@@ -112,20 +110,56 @@ class GalleryActivity : AppCompatActivity() {
         newArtMB.visible()
         newArtMB.title = getString(R.string.create_new_art)
         newArtMB.setOnClickListener {
-            // call create new art
+            verifyPermissionToAccessLocation()
         }
     }
 
     private fun setupRequireLocationPermissionLauncher() {
         requireLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { wasGranted ->
             if(wasGranted) {
-                generateMapArt()
                 lifecycleScope.launch {
                     viewModel.printLocationData()
                 }
             } else {
-                // show user some thing about how we use their data
+                if(ActivityCompat.shouldShowRequestPermissionRationale(this@GalleryActivity, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    openLocationAccessDetailScene()
+                }
             }
+        }
+    }
+
+    private fun openLocationAccessDetailScene() {
+        val intent = Intent(this, LocationAccessDetailsActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun verifyPermissionToAccessLocation() {
+        val didUserAlreadyGivePermission = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        when{
+            didUserAlreadyGivePermission -> {
+                //Go to screen to create art
+                generateMapArt()
+                lifecycleScope.launch {
+                    viewModel.printLocationData()
+                }
+            }
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                this@GalleryActivity,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) -> {
+                openLocationAccessDetailScene()
+            }
+            else -> {
+                requireLocationPermissionLauncher.launch(
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+            }
+
+
         }
     }
 
@@ -169,34 +203,7 @@ class GalleryActivity : AppCompatActivity() {
         // }
     }
 
-    private fun requestForPermissionToAccessLocation() {
-        val didUserAlreadyGivePermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
 
-        when{
-            didUserAlreadyGivePermission -> {
-                generateMapArt()
-                lifecycleScope.launch {
-                    viewModel.printLocationData()
-                }
-            }
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                this@GalleryActivity,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) -> {
-                // I need to show ui to my user explaining how I'm using their location and why they should give it to me
-            }
-            else -> {
-                requireLocationPermissionLauncher.launch(
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-            }
-
-
-        }
-    }
 
     // override fun onNewIntent(intent: Intent?) {
     //     super.onNewIntent(intent)

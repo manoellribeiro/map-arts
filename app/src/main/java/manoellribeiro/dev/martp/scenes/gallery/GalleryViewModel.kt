@@ -16,7 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class GalleryViewModel @Inject constructor(
     private val repository: MartpRepository,
-    private val locationService: LocationService
+    private val locationService: LocationService,
 ): ViewModel() {
 
     private val _state: MutableLiveData<GalleryUiState> = MutableLiveData<GalleryUiState>()

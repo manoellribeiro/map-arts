@@ -16,4 +16,26 @@
         </attr>
     </declare-styleable>
 
+    <declare-styleable name="MartpTextInput">
+        <attr name="label" format="string"/>
+        <attr name="placeholder" format="string"/>
+        <attr name="placeholderColor" format="color"/>
+        <attr name="hint" format="string"/>
+        <attr name="hintColor" format="color"/>
+        <attr name="icon" format="reference"/>
+        <attr name="iconColor" format="reference"/>
+        <attr name="strokeColor"/>
+        <attr name="inputBackgroundColor" format="color"/>
+        <attr name="obfuscated" format="boolean"/>
+        <attr name="cornerRadius"/>
+        <attr name="iconPosition" format="enum">
+            <enum name="start" value="0"/>
+            <enum name="end" value="1"/>
+        </attr>
+        <attr name="android:imeOptions"/>
+        <attr name="android:inputType"/>
+        <attr name="android:gravity"/>
+        <attr name="android:minLines"/>
+    </declare-styleable>
+
 </resources>

@@ -22,5 +22,10 @@
     <color name="light_l4">#F5F5F7</color>
     <color name="light_l5">@color/white</color>
 
+    <color name="error_darkest">#730A46</color>
+    <color name="error_dark">#AF1E50</color>
+    <color name="error_medium">#F53C5A</color>
+    <color name="error_light">#FA8C8C</color>
+    <color name="error_lightest">#FFE1D7</color>
 
 </resources>

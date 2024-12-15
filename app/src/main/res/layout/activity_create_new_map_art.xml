@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/galleryTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/create_new_art" />
+
+
+
+    <FrameLayout android:id="@+id/mapArtsContainer"
+        tools:background="@color/green"
+        android:layout_width="match_parent"
+        android:layout_marginHorizontal="16dp"
+        android:layout_height="200dp" >
+
+        <ProgressBar
+            android:id="@+id/loadingIndicatorPB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:theme="@style/Theme.GenerateMapArts.ProgressBarTheme"
+            android:layout_gravity="center"/>
+
+    </FrameLayout>
+
+    <manoellribeiro.dev.martp.core.components.MartpTextInput
+        android:id="@+id/titleMTI"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:imeOptions="actionNext"
+        android:layout_marginTop="16dp"
+        app:label="@string/choose_a_title_for_you_map_art"
+        app:placeholder="@string/enter_title" />
+
+    <manoellribeiro.dev.martp.core.components.MartpTextInput
+        android:id="@+id/descriptionTV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:imeOptions="actionDone"
+        android:layout_marginTop="16dp"
+        app:label="@string/add_a_description_for_you_map_art"
+        app:placeholder="@string/enter_description" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
+
+    <manoellribeiro.dev.martp.core.components.MartpButton
+        android:id="@+id/saveArtMB"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="@string/save_art"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        style="@style/MartpButton.Primary"/>
+
+</LinearLayout>

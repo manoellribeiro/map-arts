@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.services.LocationService
+import manoellribeiro.dev.martp.scenes.createNewMapArt.CreateNewMapArtViewModel
 import manoellribeiro.dev.martp.scenes.gallery.GalleryViewModel
 
 @Module
@@ -20,6 +21,16 @@ object ActivityModule {
         return GalleryViewModel(
             repository = repository,
             locationService = locationService
+        )
+    }
+
+    @Provides
+    fun providesCreateNewMapArtViewModel(
+        repository: MartpRepository,
+        locationService: LocationService
+    ): CreateNewMapArtViewModel {
+        return CreateNewMapArtViewModel(
+            repository, locationService
         )
     }
 

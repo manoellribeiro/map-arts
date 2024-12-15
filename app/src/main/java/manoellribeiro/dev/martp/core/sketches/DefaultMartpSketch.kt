@@ -13,12 +13,12 @@ class DefaultMartpSketch(
 ) : PApplet() {
 
     companion object {
-        const private val frameThickness = 30.0F
-        const private val framePadding = 30.0F
+        const val frameThickness = 30.0F
+        const val framePadding = 30.0F
     }
 
     override fun settings() {
-        size(600, 600)
+        size(canvasWidth.toInt(), canvasHeight.toInt())
     }
 
     override fun setup() {
@@ -30,6 +30,7 @@ class DefaultMartpSketch(
         changePixelColors(mapImage)
         drawArtFrame()
         image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
+        filter(ERODE)
     }
 
     private fun changePixelColors(mapImage: PImage) {
@@ -63,6 +64,7 @@ class DefaultMartpSketch(
         }
 
         mapImage.updatePixels()
+
     }
 
     private fun isStreetPixel(

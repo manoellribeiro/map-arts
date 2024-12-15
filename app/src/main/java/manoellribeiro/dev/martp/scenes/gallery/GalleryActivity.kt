@@ -30,6 +30,7 @@ import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.databinding.ActivityGalleryBinding
 import manoellribeiro.dev.martp.databinding.MartpButtonEndIconBinding
+import manoellribeiro.dev.martp.scenes.createNewMapArt.CreateNewMapArtActivity
 import manoellribeiro.dev.martp.scenes.locationAcessDetails.LocationAccessDetailsActivity
 import processing.android.CompatUtils
 
@@ -117,15 +118,18 @@ class GalleryActivity : AppCompatActivity() {
     private fun setupRequireLocationPermissionLauncher() {
         requireLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { wasGranted ->
             if(wasGranted) {
-                lifecycleScope.launch {
-                    viewModel.printLocationData()
-                }
+                openCreateNewMapArtScene()
             } else {
                 if(ActivityCompat.shouldShowRequestPermissionRationale(this@GalleryActivity, Manifest.permission.ACCESS_FINE_LOCATION)) {
                     openLocationAccessDetailScene()
                 }
             }
         }
+    }
+
+    private fun openCreateNewMapArtScene() {
+        val intent = Intent(this, CreateNewMapArtActivity::class.java)
+        startActivity(intent)
     }
 
     private fun openLocationAccessDetailScene() {
@@ -141,11 +145,7 @@ class GalleryActivity : AppCompatActivity() {
 
         when{
             didUserAlreadyGivePermission -> {
-                //Go to screen to create art
-                generateMapArt()
-                lifecycleScope.launch {
-                    viewModel.printLocationData()
-                }
+                openCreateNewMapArtScene()
             }
             ActivityCompat.shouldShowRequestPermissionRationale(
                 this@GalleryActivity,

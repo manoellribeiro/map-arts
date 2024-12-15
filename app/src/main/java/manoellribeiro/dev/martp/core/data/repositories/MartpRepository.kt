@@ -1,5 +1,6 @@
 package manoellribeiro.dev.martp.core.data.repositories
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
@@ -30,7 +31,7 @@ class MartpRepository @Inject constructor(
         }
     }
 
-    fun fetchStaticMapImageUrlAsync(
+    fun fetchStaticMapImageAsync(
         latitude: Double,
         longitude: Double,
         mapWidth: Int,
@@ -56,6 +57,7 @@ class MartpRepository @Inject constructor(
 
             return@async imageFile.path
         } catch (e: Exception) {
+            Log.i("MartpRepository", e.message ?: "")
             throw e
         }
     }

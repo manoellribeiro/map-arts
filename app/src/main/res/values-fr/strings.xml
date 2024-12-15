@@ -8,4 +8,11 @@
     <string name="allow_location_access">Autoriser l\'accès à la localisation</string>
     <string name="location_usage_details">Votre localisation est utilisée pour nous aider à générer votre art. Nous ne stockons ni ne partageons jamais votre localisation avec qui que ce soit. Martp est un projet open source ; si vous avez besoin de plus d\'informations, consultez notre projet sur GitHub.</string>
     <string name="we_need_your_location_to_create_art_with_you">Nous devons accéder à votre localisation\n pour créer de l\'art avec vous</string>
+    <string name="enter_title">Entrez le titre</string>
+    <string name="enter_description">Entrez la description</string>
+    <string name="choose_a_title_for_you_map_art">Choisissez un titre pour votre nouvelle œuvre d\'art cartographique</string>
+    <string name="add_a_description_for_you_map_art">Ajoutez une description à votre œuvre cartographique</string>
+    <string name="save_art">Enregistrer l\'art</string>
+    <string name="location_permission_not_granted_failure_error">Pour poursuivre cette action, vous devez autoriser l\'accès à votre position.</string>
+    <string name="unknown_error_failure">Une erreur inconnue s\'est produite. Veuillez réessayer.</string>
 </resources>

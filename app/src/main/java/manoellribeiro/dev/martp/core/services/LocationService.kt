@@ -9,6 +9,8 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.suspendCancellableCoroutine
+import manoellribeiro.dev.martp.core.models.failures.LocationPermissionNotGrantedFailure
+import manoellribeiro.dev.martp.core.models.failures.UnknownErrorFailure
 import javax.inject.Inject
 import kotlin.coroutines.resume
 
@@ -34,11 +36,13 @@ class LocationService @Inject constructor(
                 return@async result
             }
         } catch (e: Exception) {
-            throw e
-            //throw failure of unknown location service
+            throw UnknownErrorFailure(
+                originalExceptionMessage = e.message
+            )
         } catch (e: SecurityException) {
-            throw e
-            //throw failure of permission not granted
+            throw LocationPermissionNotGrantedFailure(
+                originalExceptionMessage = e.message
+            )
         }
     }
 }

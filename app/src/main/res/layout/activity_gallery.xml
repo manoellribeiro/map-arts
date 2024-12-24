@@ -9,7 +9,7 @@
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/light_l2"
+        android:background="@color/light_l5"
         tools:context=".scenes.gallery.GalleryActivity"
         android:paddingHorizontal="16dp"
         android:paddingTop="16dp">

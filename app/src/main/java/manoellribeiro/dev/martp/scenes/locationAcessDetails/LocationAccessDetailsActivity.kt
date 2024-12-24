@@ -1,6 +1,7 @@
 package manoellribeiro.dev.martp.scenes.locationAcessDetails
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
@@ -11,6 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.databinding.ActivityLocationAccessDetailsBinding
+import manoellribeiro.dev.martp.scenes.createNewMapArt.CreateNewMapArtActivity
 
 class LocationAccessDetailsActivity: AppCompatActivity() {
 
@@ -36,7 +38,9 @@ class LocationAccessDetailsActivity: AppCompatActivity() {
     private fun setupRequireLocationPermissionLauncher() {
         requireLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { wasGranted ->
             if(wasGranted) {
-                //go to create art scene and close this one
+                val intent = Intent(this, CreateNewMapArtActivity::class.java)
+                finish()
+                startActivity(intent)
             }
         }
     }

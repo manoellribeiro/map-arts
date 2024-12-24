@@ -37,7 +37,6 @@ import processing.android.CompatUtils
 @AndroidEntryPoint
 class GalleryActivity : AppCompatActivity() {
 
-    // private var sketch: TilesMapSketch? = null
     private lateinit var requireLocationPermissionLauncher: ActivityResultLauncher<String>
     private val viewModel: GalleryViewModel by viewModels()
     private lateinit var binding: ActivityGalleryBinding
@@ -162,54 +161,4 @@ class GalleryActivity : AppCompatActivity() {
 
         }
     }
-
-    private fun generateMapArt() {
-        // try {
-        //     lifecycleScope.launch {
-        //         val location = locationService.getCurrentLocation().await()
-        //         val imagePath = repository.fetchStaticMapImageUrlAsync(
-        //             longitude = location.longitude,
-        //             latitude = location.latitude,
-        //             mapWidth = 500,
-        //             mapHeight = 500,
-        //             dir = this@GalleryActivity.filesDir
-        //         ).await()
-        //         applicationContext.filesDir
-        //         Log.i("IMAGEPATH", imagePath)
-        //
-        //         sketch = TilesMapSketch(
-        //             horizontalTilesCount = 5,
-        //             verticalTilesCount = 10,
-        //             padding = 20,
-        //             canvasWidth = 620F,
-        //             canvasHeight = 620F,
-        //             imagePath
-        //         )
-        //
-        //         val frameLayout = FrameLayout(this@GalleryActivity)
-        //         frameLayout.id = CompatUtils.getUniqueViewId()
-        //         val layoutParams = ViewGroup.LayoutParams(
-        //             ViewGroup.LayoutParams.MATCH_PARENT,
-        //             ViewGroup.LayoutParams.MATCH_PARENT
-        //         )
-        //         setContentView(frameLayout, layoutParams)
-        //
-        //         val processingFragment = PFragment(sketch)
-        //         processingFragment.setView(frameLayout, this@GalleryActivity)
-        //     }
-        //
-        // } catch (e: SecurityException) {
-        //     //throw some error about not having the location access
-        // }
-    }
-
-
-
-    // override fun onNewIntent(intent: Intent?) {
-    //     super.onNewIntent(intent)
-    //     sketch.executeIfNotNull {
-    //         sketch?.onNewIntent(intent)
-    //     }
-    // }
-
 }

@@ -1,14 +1,18 @@
 package manoellribeiro.dev.martp.scenes.createNewMapArt
 
 import android.os.Bundle
+import android.text.InputType
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
+import androidx.core.view.drawToBitmap
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.extensions.gone
+import manoellribeiro.dev.martp.core.extensions.toBitmap
 import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
@@ -48,8 +52,25 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 is CreateNewMapArtUiState.Error -> handleStateError(state.failure)
                 is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state.imagePath)
                 CreateNewMapArtUiState.Loading -> handleLoadingState()
+                CreateNewMapArtUiState.ActionButtonLoading -> handleActionButtonLoadingState()
+                CreateNewMapArtUiState.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState()
             }
         }
+    }
+
+    private fun handleActionButtonLoadingState() = with(binding) {
+        actionMB.enableLoadingState(
+            ContextCompat.getColor(
+                this@CreateNewMapArtActivity,
+                R.color.white
+            )
+        )
+        titleMTI.inputType = InputType.TYPE_NULL
+        descriptionMTI.inputType = InputType.TYPE_NULL
+    }
+
+    private fun handleArtCreatedSuccessfullyState() {
+        finish()
     }
 
     private fun handleStateError(failure: Failure) = with(binding) {
@@ -80,9 +101,13 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         errorImageIV.gone()
         errorTextTV.gone()
         actionMB.gone()
+        mapArtsContainer.visible()
+        titleTV.visible()
     }
 
     private fun handleImageDownloadedState(imagePath: String) = with(binding) {
+        mapArtsContainer.visible()
+        titleTV.visible()
         val sketch = DefaultMartpSketch(
             horizontalTilesCount = 0,
             verticalTilesCount = 0,
@@ -91,7 +116,6 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             canvasHeight = mapArtsContainer.height.toFloat(),
             imagePath = imagePath
         )
-
         val processingFragment = PFragment(sketch)
         processingFragment.setView(mapArtsContainer, this@CreateNewMapArtActivity)
         titleMTI.visible()
@@ -102,5 +126,15 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         titleTV.text = getString(R.string.this_is_your_new_art)
         actionMB.visible()
         actionMB.title = getString(R.string.save_art)
+        actionMB.setOnClickListener {
+            lifecycleScope.launch {
+                viewModel.saveArtToLocalDatabase(
+                    title = titleMTI.currentText,
+                    description = descriptionMTI.currentText,
+                    directory = this@CreateNewMapArtActivity.filesDir,
+                    newArtBitMap = mapArtsContainer.toBitmap()
+                )
+            }
+        }
     }
 }

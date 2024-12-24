@@ -17,6 +17,7 @@ abstract class MartpDatabase: RoomDatabase() {
 
     companion object {
         const val databaseName = "martp-database.db"
+        const val artsDirectoryName = "/map-arts/"
     }
 
     abstract fun mapArtDao(): MapArtsDao

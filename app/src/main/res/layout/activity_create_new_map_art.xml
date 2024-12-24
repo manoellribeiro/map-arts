@@ -21,7 +21,7 @@
         android:text="@string/create_new_art" />
 
     <FrameLayout android:id="@+id/mapArtsContainer"
-        tools:background="@color/green"
+        android:background="@color/green"
         android:layout_width="match_parent"
         android:layout_marginHorizontal="16dp"
         tools:visibility="gone"

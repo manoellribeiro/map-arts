@@ -1,5 +1,6 @@
 package manoellribeiro.dev.martp.core.data.repositories
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.LiveData
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
@@ -7,6 +8,7 @@ import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
@@ -24,7 +26,7 @@ class MartpRepository @Inject constructor(
     private val mapArtDao: MapArtsDao
 ) {
 
-    private val ioScope = CoroutineScope(Dispatchers.IO)
+    private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     fun fetchUserMapArts(): Deferred<List<MapArtEntity>> = ioScope.async {
         try {
@@ -66,6 +68,35 @@ class MartpRepository @Inject constructor(
             }
         } else {
             throw NoInternetConnectionFailure(originalExceptionMessage = null)
+        }
+    }
+
+    fun saveNewArtBitMap(
+        bitmap: Bitmap,
+        pathToSaveArt: String,
+        pathToArtsDirectory: String
+    ): Deferred<Unit> = ioScope.async {
+        try {
+
+            val artsDirectory = File(pathToArtsDirectory)
+            if(!artsDirectory.exists()) {
+                artsDirectory.mkdir()
+            }
+
+            val fileOutputStream = FileOutputStream(pathToSaveArt)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream)
+            fileOutputStream.close()
+        } catch (e: Exception) {
+            //throw failure
+            throw e
+        }
+    }
+
+    fun saveMapArtEntity(mapArtEntity: MapArtEntity): Deferred<Unit> = ioScope.async {
+        try {
+            mapArtDao.insert(mapArtEntity)
+        } catch (e: Exception) {
+            throw LocalStorageErrorFailure(originalExceptionMessage = e.message)
         }
     }
 

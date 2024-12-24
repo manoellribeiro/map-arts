@@ -15,4 +15,7 @@
     <string name="save_art">Enregistrer l\'art</string>
     <string name="location_permission_not_granted_failure_error">Pour poursuivre cette action, vous devez autoriser l\'accès à votre position.</string>
     <string name="unknown_error_failure">Une erreur inconnue s\'est produite. Veuillez réessayer.</string>
+    <string name="this_is_your_new_art">Voici votre nouvelle œuvre d\'art !</string>
+    <string name="we_are_generating_your_art">Nous générons votre œuvre d\'art…</string>
+    <string name="no_internet_connection_failure_message">Il semble que vous n\'avez pas de connexion Internet pour terminer cette action. Vérifiez la connexion de votre téléphone et réessayez.</string>
 </resources>

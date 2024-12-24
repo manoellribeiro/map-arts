@@ -13,6 +13,7 @@ import dagger.hilt.android.qualifiers.ActivityContext
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
+import manoellribeiro.dev.martp.core.services.ConnectivityService
 import manoellribeiro.dev.martp.core.services.LocationService
 
 @Module
@@ -22,10 +23,12 @@ object ViewModelModule {
     @Provides
     fun bindsMartpRepository(
         mapArtsDao: MapArtsDao,
-        mapboxApiService: MapboxApiService
+        mapboxApiService: MapboxApiService,
+        connectivityService: ConnectivityService
     ): MartpRepository {
         return MartpRepository(
             mapArtDao = mapArtsDao,
+            connectivityService = connectivityService,
             mapboxApiService = mapboxApiService
         )
     }

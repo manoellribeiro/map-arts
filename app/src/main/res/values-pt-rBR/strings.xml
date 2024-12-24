@@ -15,4 +15,7 @@
     <string name="save_art">Salvar arte</string>
     <string name="location_permission_not_granted_failure_error">Para prosseguir com essa ação você precisa conceder acesso à sua localização.</string>
     <string name="unknown_error_failure">Um erro desconhecido aconteceu. Tente novamente.</string>
+    <string name="this_is_your_new_art">Essa é a sua nova arte!</string>
+    <string name="we_are_generating_your_art">Estamos gerando a sua arte…</string>
+    <string name="no_internet_connection_failure_message">Parece que você está sem conexão com a internet para concluir esta ação. Verifique a conexão do seu telefone e tente novamente.</string>
 </resources>

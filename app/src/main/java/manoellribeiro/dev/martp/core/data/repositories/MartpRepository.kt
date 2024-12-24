@@ -11,6 +11,8 @@ import kotlinx.coroutines.async
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
+import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
+import manoellribeiro.dev.martp.core.services.ConnectivityService
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
@@ -18,6 +20,7 @@ import javax.inject.Inject
 
 class MartpRepository @Inject constructor(
     private val mapboxApiService: MapboxApiService,
+    private val connectivityService: ConnectivityService,
     private val mapArtDao: MapArtsDao
 ) {
 
@@ -38,27 +41,31 @@ class MartpRepository @Inject constructor(
         mapHeight: Int,
         dir: File
     ): Deferred<String> = ioScope.async {
-        try {
-            val response: ResponseBody = mapboxApiService.getStaticMapImageAsync(
-                styleId = MapboxMapStyle.DarkV11.id,
-                latitude = latitude,
-                longitude = longitude,
-                mapWidth = mapWidth,
-                mapHeight = mapHeight
-            )
+        if(connectivityService.isInternetConnected()) {
+            try {
+                val response: ResponseBody = mapboxApiService.getStaticMapImageAsync(
+                    styleId = MapboxMapStyle.DarkV11.id,
+                    latitude = latitude,
+                    longitude = longitude,
+                    mapWidth = mapWidth,
+                    mapHeight = mapHeight
+                )
 
-            val imageFile = File(dir,"image.png")
+                val imageFile = File(dir,"image.png")
 
-            imageFile.createNewFile()
+                imageFile.createNewFile()
 
-            val fileOutputStream = FileOutputStream(imageFile)
-            fileOutputStream.write(response.bytes())
-            fileOutputStream.close()
+                val fileOutputStream = FileOutputStream(imageFile)
+                fileOutputStream.write(response.bytes())
+                fileOutputStream.close()
 
-            return@async imageFile.path
-        } catch (e: Exception) {
-            Log.i("MartpRepository", e.message ?: "")
-            throw e
+                return@async imageFile.path
+            } catch (e: Exception) {
+                Log.i("MartpRepository", e.message ?: "")
+                throw e //TODO: this exception can't be thrown here
+            }
+        } else {
+            throw NoInternetConnectionFailure(originalExceptionMessage = null)
         }
     }
 

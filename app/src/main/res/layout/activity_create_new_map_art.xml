@@ -8,7 +8,8 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/galleryTV"
+        android:id="@+id/titleTV"
+        tools:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -19,12 +20,11 @@
         android:layout_marginBottom="16dp"
         android:text="@string/create_new_art" />
 
-
-
     <FrameLayout android:id="@+id/mapArtsContainer"
         tools:background="@color/green"
         android:layout_width="match_parent"
         android:layout_marginHorizontal="16dp"
+        tools:visibility="gone"
         android:layout_height="200dp" >
 
         <ProgressBar
@@ -36,6 +36,34 @@
 
     </FrameLayout>
 
+    <Space
+        android:id="@+id/stateErrorS"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5"
+        android:visibility="gone"
+        tools:visibility="visible"
+        />
+
+    <ImageView
+        android:id="@+id/errorImageIV"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="56dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_error_general"/>
+
+    <TextView
+        android:id="@+id/errorTextTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textAlignment="center"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp"
+        android:textColor="@color/dark_d1"
+        tools:text="It seems like something wrong happened. Please try again" />
+
     <manoellribeiro.dev.martp.core.components.MartpTextInput
         android:id="@+id/titleMTI"
         android:layout_width="match_parent"
@@ -43,17 +71,19 @@
         android:layout_marginHorizontal="16dp"
         android:imeOptions="actionNext"
         android:layout_marginTop="16dp"
+        tools:visibility="gone"
         app:label="@string/choose_a_title_for_you_map_art"
         app:placeholder="@string/enter_title" />
 
     <manoellribeiro.dev.martp.core.components.MartpTextInput
-        android:id="@+id/descriptionTV"
+        android:id="@+id/descriptionMTI"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:imeOptions="actionDone"
         android:layout_marginTop="16dp"
         app:label="@string/add_a_description_for_you_map_art"
+        tools:visibility="gone"
         app:placeholder="@string/enter_description" />
 
     <Space
@@ -63,7 +93,7 @@
         />
 
     <manoellribeiro.dev.martp.core.components.MartpButton
-        android:id="@+id/saveArtMB"
+        android:id="@+id/actionMB"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:title="@string/save_art"

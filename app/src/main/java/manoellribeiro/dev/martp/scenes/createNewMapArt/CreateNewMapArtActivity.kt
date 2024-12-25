@@ -25,6 +25,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
 
     private lateinit var binding: ActivityCreateNewMapArtBinding
     private val viewModel: CreateNewMapArtViewModel by viewModels()
+    private var sketch: DefaultMartpSketch? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,10 +51,10 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         viewModel.state.observe(this@CreateNewMapArtActivity) { state ->
             when(state) {
                 is CreateNewMapArtUiState.Error -> handleStateError(state.failure)
-                is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state.imagePath)
+                is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state.staticMapImagePath)
                 CreateNewMapArtUiState.Loading -> handleLoadingState()
                 CreateNewMapArtUiState.ActionButtonLoading -> handleActionButtonLoadingState()
-                CreateNewMapArtUiState.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState()
+                is CreateNewMapArtUiState.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState(state.pathToStoreArtImage)
             }
         }
     }
@@ -69,7 +70,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         descriptionMTI.inputType = InputType.TYPE_NULL
     }
 
-    private fun handleArtCreatedSuccessfullyState() {
+    private fun handleArtCreatedSuccessfullyState(pathToStoreArtImage: String) {
+        sketch?.save(pathToStoreArtImage) //maybe this run on the main thread?
         finish()
     }
 
@@ -108,7 +110,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     private fun handleImageDownloadedState(imagePath: String) = with(binding) {
         mapArtsContainer.visible()
         titleTV.visible()
-        val sketch = DefaultMartpSketch(
+        sketch = DefaultMartpSketch(
             horizontalTilesCount = 0,
             verticalTilesCount = 0,
             padding = 0,

@@ -7,7 +7,7 @@ sealed interface CreateNewMapArtUiState {
     object Loading: CreateNewMapArtUiState
     object ActionButtonLoading: CreateNewMapArtUiState
     class Error(val failure: Failure): CreateNewMapArtUiState
-    class ImageDownloaded(val imagePath: String): CreateNewMapArtUiState
-    object ArtCreatedSuccessfully: CreateNewMapArtUiState
+    class ImageDownloaded(val staticMapImagePath: String): CreateNewMapArtUiState
+    class ArtCreatedSuccessfully(val pathToStoreArtImage: String): CreateNewMapArtUiState
 
 }

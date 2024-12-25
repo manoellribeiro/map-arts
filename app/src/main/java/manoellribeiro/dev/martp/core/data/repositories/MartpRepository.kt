@@ -71,27 +71,6 @@ class MartpRepository @Inject constructor(
         }
     }
 
-    fun saveNewArtBitMap(
-        bitmap: Bitmap,
-        pathToSaveArt: String,
-        pathToArtsDirectory: String
-    ): Deferred<Unit> = ioScope.async {
-        try {
-
-            val artsDirectory = File(pathToArtsDirectory)
-            if(!artsDirectory.exists()) {
-                artsDirectory.mkdir()
-            }
-
-            val fileOutputStream = FileOutputStream(pathToSaveArt)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream)
-            fileOutputStream.close()
-        } catch (e: Exception) {
-            //throw failure
-            throw e
-        }
-    }
-
     fun saveMapArtEntity(mapArtEntity: MapArtEntity): Deferred<Unit> = ioScope.async {
         try {
             mapArtDao.insert(mapArtEntity)

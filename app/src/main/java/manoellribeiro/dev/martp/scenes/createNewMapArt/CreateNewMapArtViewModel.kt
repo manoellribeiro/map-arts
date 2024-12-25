@@ -76,15 +76,14 @@ class CreateNewMapArtViewModel @Inject constructor(
                 dateInMillis = Calendar.getInstance().timeInMillis,
                 imagePathLocation = directory.path + MartpDatabase.artsDirectoryName + artId + ".png"
             )
-            repository.saveNewArtBitMap(
-                newArtBitMap,
-                newMartp.imagePathLocation,
-                directory.path + MartpDatabase.artsDirectoryName
-            ).await()
 
             repository.saveMapArtEntity(newMartp).await()
 
-            emitNewState(CreateNewMapArtUiState.ArtCreatedSuccessfully)
+            emitNewState(
+                CreateNewMapArtUiState.ArtCreatedSuccessfully(
+                    pathToStoreArtImage = newMartp.imagePathLocation
+                )
+            )
         } catch (failure: Failure) {
             emitNewState(CreateNewMapArtUiState.Error(failure))
         } catch (e: Exception) {

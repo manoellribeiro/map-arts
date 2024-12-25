@@ -11,11 +11,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
-import manoellribeiro.dev.martp.core.extensions.returnIfNull
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.services.LocationService
 import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
-import manoellribeiro.dev.martp.scenes.gallery.GalleryUiState
 import java.io.File
 import java.util.Calendar
 import java.util.UUID
@@ -71,8 +69,8 @@ class CreateNewMapArtViewModel @Inject constructor(
                 id = artId,
                 title = title,
                 description = description,
-                latitude = currentArtLocation?.latitude?.toFloat().returnIfNull { 0F },
-                longitude = currentArtLocation?.longitude?.toFloat().returnIfNull { 0F },
+                latitude = currentArtLocation?.latitude?.toFloat() ?: 0F ,
+                longitude = currentArtLocation?.longitude?.toFloat() ?:0F ,
                 dateInMillis = Calendar.getInstance().timeInMillis,
                 imagePathLocation = directory.path + MartpDatabase.artsDirectoryName + artId + ".png"
             )

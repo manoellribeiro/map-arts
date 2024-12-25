@@ -1,15 +1,15 @@
 package manoellribeiro.dev.martp.scenes.gallery
 
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
-import manoellribeiro.dev.martp.core.extensions.returnIfNull
+import manoellribeiro.dev.martp.core.extensions.formatDateHour
+import manoellribeiro.dev.martp.core.extensions.gone
+import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.databinding.ItemGalleryArtBinding
-import java.io.File
-import java.io.FileInputStream
+import java.util.Calendar
 
 class MapArtsRecyclerViewAdapter(
     private val mapArts: List<MapArtEntity>,
@@ -34,7 +34,14 @@ class MapArtsRecyclerViewAdapter(
             val artBitmap = BitmapFactory.decodeFile(mapArt.imagePathLocation)
             artMiniatureIV.setImageBitmap(artBitmap)
             artTitleTV.text = mapArt.title
-            artDescriptionTV.text = mapArt.description.returnIfNull { mapArt.dateInMillis.toString() }
+            if(mapArt.description.isNullOrEmpty()) {
+                artDescriptionTV.gone()
+            } else {
+                artDescriptionTV.visible()
+                artDescriptionTV.text = mapArt.description
+            }
+            artDescriptionTV.text = mapArt.description
+            dateTV.text = Calendar.getInstance().apply { timeInMillis = mapArt.dateInMillis }.formatDateHour()
             root.setOnClickListener { onClickListener.invoke(mapArt) }
         }
     }

@@ -22,9 +22,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/infoIB"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:textSize="16sp"
+            style="@style/Text.ScreenTitle"
             android:layout_marginBottom="16dp"
             android:text="@string/gallery" />
 
@@ -39,6 +37,17 @@
             android:src="@drawable/ic_info"
             android:background="@android:color/transparent" />
 
+        <ImageView
+            android:id="@+id/emptyGalleryImageIV"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="56dp"
+            android:layout_gravity="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/emptyListTV"
+            android:src="@drawable/ic_adventure_map"/>
+
         <TextView
             android:id="@+id/emptyListTV"
             android:layout_width="wrap_content"
@@ -48,7 +57,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:gravity="center"
-            android:textColor="@color/dark_d1"
+            style="@style/Text.MiddleScreenInfoText"
             android:text="@string/gallery_empty_state_state_message" />
 
         <TextView
@@ -97,6 +106,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="16dp"
+        app:cornerRadius="50dp"
         style="@style/MartpButton.Primary"/>
 
 </RelativeLayout>

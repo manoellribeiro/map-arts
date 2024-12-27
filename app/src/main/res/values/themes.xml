@@ -17,7 +17,6 @@
         <item name="postSplashScreenTheme">@style/Theme.GenerateMapArts</item>
     </style>
 
-
     <!--Button-->
     <style name="MartpButton"/>
     <style name="MartpButton.Primary">
@@ -26,6 +25,8 @@
         <item name="strokeColor">@color/blue</item>
         <item name="fontAndIconColor">@color/light_l5</item>
         <item name="cornerRadius">8dp</item>
+        <item name="fontFamily">@font/nunito_italic</item>
+        <item name="android:fontFamily">@font/nunito_italic</item>
     </style>
     <style name="MartpButton.Secondary">
         <item name="type">outlined</item>
@@ -54,11 +55,38 @@
         <item name="colorAccent">@color/blue</item>
     </style>
 
-
     <style name="roundedImageView" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">8dp</item>
     </style>
 
+
+    <!--Text-->
+    <style name="Text">
+        <item name="android:textColor">@color/dark_d1</item>
+    </style>
+
+    <!--Text Display-->
+    <style name="Text.ScreenTitle">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">@font/nunito_extra_bold</item>
+    </style>
+
+    <style name="Text.Title">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/nunito_bold</item>
+    </style>
+
+    <style name="Text.GraySubTitle">
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">@font/nunito_regular</item>
+        <item name="android:textColor">@color/dark_d4</item>
+    </style>
+
+    <style name="Text.MiddleScreenInfoText">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/nunito_medium</item>
+        <item name="android:textColor">@color/dark_d1</item>
+    </style>
 
 </resources>

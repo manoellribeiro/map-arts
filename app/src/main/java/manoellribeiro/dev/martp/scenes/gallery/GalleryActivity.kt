@@ -70,6 +70,7 @@ class GalleryActivity : AppCompatActivity() {
     private fun setupNotEmptyListState(mapArts: List<MapArtEntity>) = with(binding) {
         emptyListTV.gone()
         errorTV.gone()
+        emptyGalleryImageIV.gone()
         loadingIndicatorPB.gone()
         mapArtsRV.visible()
         mapArtsRV.layoutManager = LinearLayoutManager(this@GalleryActivity)
@@ -85,6 +86,7 @@ class GalleryActivity : AppCompatActivity() {
         mapArtsRV.gone()
         emptyListTV.gone()
         errorTV.gone()
+        emptyGalleryImageIV.gone()
         loadingIndicatorPB.visible()
         newArtMB.gone()
     }
@@ -93,6 +95,7 @@ class GalleryActivity : AppCompatActivity() {
         mapArtsRV.gone()
         emptyListTV.gone()
         errorTV.visible()
+        emptyGalleryImageIV.gone()
         errorTV.text = getString(failure.messageToBeDisplayedToUserId)
         loadingIndicatorPB.gone()
         newArtMB.visible()
@@ -105,6 +108,7 @@ class GalleryActivity : AppCompatActivity() {
     private fun setupEmptyListState() = with(binding) {
         mapArtsRV.gone()
         emptyListTV.visible()
+        emptyGalleryImageIV.visible()
         errorTV.gone()
         loadingIndicatorPB.gone()
         newArtMB.visible()

@@ -89,4 +89,17 @@
         <item name="android:textColor">@color/dark_d1</item>
     </style>
 
+    <style name="Text.InputLabel">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/nunito_medium</item>
+        <item name="android:textColor">@color/dark_d1</item>
+    </style>
+
+    <style name="Text.InputText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">@font/nunito_medium</item>
+        <item name="android:textColor">@color/dark_d1</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+    </style>
+
 </resources>

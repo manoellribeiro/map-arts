@@ -13,7 +13,8 @@ import java.util.Calendar
 
 class MapArtsRecyclerViewAdapter(
     private val mapArts: List<MapArtEntity>,
-    private val onClickListener: (mapArt: MapArtEntity) -> Unit // we will have one screen with all the details of the art
+    private val onClickListener: (mapArt: MapArtEntity) -> Unit, // maybe we will have one screen with all the details of the art
+    private val onShareButtonClickListener: (imagePathLocation: String) -> Unit
 ): RecyclerView.Adapter<MapArtsRecyclerViewAdapter.MapArtViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MapArtViewHolder {
@@ -40,12 +41,14 @@ class MapArtsRecyclerViewAdapter(
                 artDescriptionTV.visible()
                 artDescriptionTV.text = mapArt.description
             }
+            shareFAB.setOnClickListener {
+                onShareButtonClickListener.invoke(mapArt.imagePathLocation)
+            }
             artDescriptionTV.text = mapArt.description
             dateTV.text = Calendar.getInstance().apply { timeInMillis = mapArt.dateInMillis }.formatDateHour()
             root.setOnClickListener { onClickListener.invoke(mapArt) }
         }
     }
-
 
     class MapArtViewHolder(val binding: ItemGalleryArtBinding): RecyclerView.ViewHolder(binding.root)
 }

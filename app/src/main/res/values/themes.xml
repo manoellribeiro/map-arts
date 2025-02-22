@@ -55,6 +55,10 @@
         <item name="colorAccent">@color/blue</item>
     </style>
 
+    <style name="Theme.GenerateMapArts.FloatingActionButton">
+        <item name="colorAccent">@color/white</item>
+    </style>
+
     <style name="roundedImageView" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">8dp</item>

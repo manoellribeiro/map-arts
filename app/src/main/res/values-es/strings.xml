@@ -18,4 +18,5 @@
     <string name="this_is_your_new_art">¡Este es tu nuevo arte!</string>
     <string name="we_are_generating_your_art">Estamos generando tu arte…</string>
     <string name="no_internet_connection_failure_message">Parece que no tienes conexión a internet para completar esta acción. Revisa la conexión de tu teléfono e intenta de nuevo.</string>
+    <string name="share_art_message">Creé esta arte interactiva con mi ubicación utilizando Martp. Conoce el proyecto descargando la aplicación y crea tus propias obras también!!</string>
 </resources>

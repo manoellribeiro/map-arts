@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,6 +34,7 @@ import manoellribeiro.dev.martp.databinding.MartpButtonEndIconBinding
 import manoellribeiro.dev.martp.scenes.createNewMapArt.CreateNewMapArtActivity
 import manoellribeiro.dev.martp.scenes.locationAcessDetails.LocationAccessDetailsActivity
 import processing.android.CompatUtils
+import java.io.File
 
 @AndroidEntryPoint
 class GalleryActivity : AppCompatActivity() {
@@ -67,6 +69,20 @@ class GalleryActivity : AppCompatActivity() {
         }
     }
 
+    private fun shareArtImage(imagePathLocation: String) {
+        val sharingIntent = Intent(Intent.ACTION_SEND)
+        sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        sharingIntent.type = "image/*"
+        val uri = FileProvider.getUriForFile(
+            this,
+            applicationContext.packageName + ".provider",
+            File(imagePathLocation)
+        )
+        sharingIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_art_message))
+        sharingIntent.putExtra(Intent.EXTRA_STREAM, uri)
+        startActivities(arrayOf(Intent.createChooser(sharingIntent, "Share with")))
+    }
+
     private fun setupNotEmptyListState(mapArts: List<MapArtEntity>) = with(binding) {
         emptyListTV.gone()
         errorTV.gone()
@@ -74,7 +90,11 @@ class GalleryActivity : AppCompatActivity() {
         loadingIndicatorPB.gone()
         mapArtsRV.visible()
         mapArtsRV.layoutManager = LinearLayoutManager(this@GalleryActivity)
-        mapArtsRV.adapter = MapArtsRecyclerViewAdapter(mapArts) {}
+        mapArtsRV.adapter = MapArtsRecyclerViewAdapter(
+            mapArts = mapArts,
+            onClickListener = { mapArt ->  },
+            onShareButtonClickListener = { imagePath -> shareArtImage(imagePath)}
+        )
         newArtMB.visible()
         newArtMB.title = getString(R.string.create_new_art)
         newArtMB.setOnClickListener {

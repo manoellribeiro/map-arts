@@ -14,6 +14,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -436,4 +437,13 @@ class MartpTextInput(
     fun getInputEditText(): EditText = mInputEditText
 
     fun hasError() = inputBinding.textInputLayout.isErrorEnabled
+
+    fun showKeyboard() {
+        inputBinding.textInputEditText.requestFocus()
+        post {
+            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(inputBinding.textInputEditText, 0)
+            imm.showSoftInput(inputBinding.textInputEditText, InputMethodManager.SHOW_IMPLICIT)
+        }
+    }
 }

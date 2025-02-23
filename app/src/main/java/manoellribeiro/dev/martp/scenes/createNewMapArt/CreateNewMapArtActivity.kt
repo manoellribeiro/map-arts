@@ -1,15 +1,19 @@
 package manoellribeiro.dev.martp.scenes.createNewMapArt
 
 import android.os.Bundle
+import android.os.Handler
 import android.text.InputType
+import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
-import androidx.core.view.drawToBitmap
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.extensions.gone
 import manoellribeiro.dev.martp.core.extensions.toBitmap
@@ -17,8 +21,9 @@ import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
-import manoellribeiro.dev.martp.scenes.gallery.GalleryViewModel
 import processing.android.PFragment
+import java.util.Timer
+import kotlin.concurrent.schedule
 
 @AndroidEntryPoint
 class CreateNewMapArtActivity: AppCompatActivity() {
@@ -71,7 +76,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     }
 
     private fun handleArtCreatedSuccessfullyState(pathToStoreArtImage: String) {
-        sketch?.save(pathToStoreArtImage) //maybe this run on the main thread?
+        sketch?.save(pathToStoreArtImage)
         finish()
     }
 
@@ -116,7 +121,12 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             padding = 0,
             canvasWidth = mapArtsContainer.width.toFloat(),
             canvasHeight = mapArtsContainer.height.toFloat(),
-            imagePath = imagePath
+            imagePath = imagePath,
+            drawingFinishedCallback = {
+                runOnUiThread {
+                    titleMTI.showKeyboard()
+                }
+            }
         )
         val processingFragment = PFragment(sketch)
         processingFragment.setView(mapArtsContainer, this@CreateNewMapArtActivity)

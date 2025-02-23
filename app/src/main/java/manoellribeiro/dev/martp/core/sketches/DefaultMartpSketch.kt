@@ -9,7 +9,8 @@ class DefaultMartpSketch(
     private val padding: Int,
     private val canvasWidth: Float = 640.0F,
     private val canvasHeight: Float = 640.0F,
-    private val imagePath: String
+    private val imagePath: String,
+    private val drawingFinishedCallback: () -> Unit
 ) : PApplet() {
 
     companion object {
@@ -31,6 +32,8 @@ class DefaultMartpSketch(
         drawArtFrame()
         image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
         filter(ERODE)
+        noLoop()
+        drawingFinishedCallback.invoke()
     }
 
     private fun changePixelColors(mapImage: PImage) {

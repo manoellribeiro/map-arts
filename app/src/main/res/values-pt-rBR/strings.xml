@@ -19,4 +19,10 @@
     <string name="we_are_generating_your_art">Estamos gerando a sua arte…</string>
     <string name="no_internet_connection_failure_message">Parece que você está sem conexão com a internet para concluir esta ação. Verifique a conexão do seu telefone e tente novamente.</string>
     <string name="share_art_message">Criei essa arte interativa com a minha localização utilizando o Martp. Conheça o projeto baixando o aplicativo e crie artes para você também!!</string>
+    <string name="art_title_hint_botanical_garden">Jardim botânico</string>
+    <string name="art_title_hint_city_center">Centro da cidade</string>
+    <string name="art_title_hint_grandma_house">Casa da minha vó</string>
+    <string name="art_description_hint_beautiful_place">Um lugar muito lindo, queria deixar registrado</string>
+    <string name="art_description_hint_crazy_streets">As ruas aqui eram malucas, a arte ficou muito boa</string>
+    <string name="art_description_hint_special_place">Um lugar muito especial para mim durante a viagem</string>
 </resources>

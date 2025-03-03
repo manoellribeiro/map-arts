@@ -1,13 +1,13 @@
 package manoellribeiro.dev.martp.scenes.createNewMapArt
 
 import android.graphics.Bitmap
-import android.health.connect.datatypes.HeightRecord
 import android.location.Location
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
@@ -64,6 +64,11 @@ class CreateNewMapArtViewModel @Inject constructor(
     ) {
         try {
             emitNewState(CreateNewMapArtUiState.ActionButtonLoading)
+
+            if(title.isEmpty()) {
+
+            }
+
             val artId = UUID.randomUUID().toString()
             val newMartp = MapArtEntity(
                 id = artId,
@@ -89,4 +94,27 @@ class CreateNewMapArtViewModel @Inject constructor(
         }
     }
 
+    fun handleActionButtonState(
+        titleCurrentText: String
+    ) {
+        if(titleCurrentText.length > 2) {
+            emitNewState(CreateNewMapArtUiState.EnableActionButton)
+        } else {
+            emitNewState(CreateNewMapArtUiState.DisableActionButton)
+        }
+    }
+
+    fun getRandomInputHintsIds(): CreateNewMapArtInputsHint {
+        val titleHints = arrayListOf(
+            R.string.art_title_hint_city_center, R.string.art_title_hint_grandma_house, R.string.art_title_hint_botanical_garden
+        )
+        val descriptionHints = arrayListOf(
+            R.string.art_description_hint_beautiful_place, R.string.art_description_hint_special_place, R.string.art_description_hint_crazy_streets
+        )
+
+        return CreateNewMapArtInputsHint(
+            titleInputId = titleHints.random(),
+            descriptionInputId = descriptionHints.random()
+        )
+    }
 }

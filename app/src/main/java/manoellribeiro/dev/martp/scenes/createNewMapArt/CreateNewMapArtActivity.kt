@@ -60,7 +60,29 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 CreateNewMapArtUiState.Loading -> handleLoadingState()
                 CreateNewMapArtUiState.ActionButtonLoading -> handleActionButtonLoadingState()
                 is CreateNewMapArtUiState.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState(state.pathToStoreArtImage)
+                CreateNewMapArtUiState.DisableActionButton -> disableActionButton()
+                CreateNewMapArtUiState.EnableActionButton -> enableActionButton()
             }
+        }
+    }
+
+    private fun disableActionButton() = with(binding) {
+        actionMB.isEnabled = false
+        actionMB.isClickable = false
+        descriptionMTI.setOnEditorActionListener { _, _, _ ->
+            true
+        }
+    }
+
+    private fun enableActionButton()  = with(binding) {
+        actionMB.isEnabled = true
+        actionMB.isClickable = true
+        actionMB.setOnClickListener {
+            saveArtToLocalDatabase()
+        }
+        descriptionMTI.setOnEditorActionListener { _, _, _ ->
+            saveArtToLocalDatabase()
+            true
         }
     }
 
@@ -135,18 +157,27 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         stateErrorS.gone()
         errorImageIV.gone()
         errorTextTV.gone()
+        val hints = viewModel.getRandomInputHintsIds()
+        titleMTI.hint = getString(hints.titleInputId)
+        descriptionMTI.hint = getString(hints.descriptionInputId)
         titleTV.text = getString(R.string.this_is_your_new_art)
         actionMB.visible()
+        actionMB.isClickable = false
+        titleMTI.setOnChangedTextListener {
+            viewModel.handleActionButtonState(titleMTI.currentText)
+        }
         actionMB.title = getString(R.string.save_art)
-        actionMB.setOnClickListener {
-            lifecycleScope.launch {
-                viewModel.saveArtToLocalDatabase(
-                    title = titleMTI.currentText,
-                    description = descriptionMTI.currentText,
-                    directory = this@CreateNewMapArtActivity.filesDir,
-                    newArtBitMap = mapArtsContainer.toBitmap()
-                )
-            }
+    }
+
+    private fun saveArtToLocalDatabase() = with(binding) {
+        lifecycleScope.launch {
+            viewModel.saveArtToLocalDatabase(
+                title = titleMTI.currentText,
+                description = descriptionMTI.currentText,
+                directory = this@CreateNewMapArtActivity.filesDir,
+                newArtBitMap = mapArtsContainer.toBitmap()
+            )
         }
     }
+
 }

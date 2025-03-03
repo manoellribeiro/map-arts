@@ -25,4 +25,6 @@
     <string name="art_description_hint_beautiful_place">A very beautiful place, I wanted to record it</string>
     <string name="art_description_hint_crazy_streets">The streets here were crazy, the art turned out really good</string>
     <string name="art_description_hint_special_place">A very special place for me during the trip</string>
+    <string name="martp_info_description">Martp is an interactive art generator that uses geolocation as a user interaction interface. It is an open-source and educational project developed at the Federal University of Bahia by student Manoel Ribeiro. \nTo learn more about the project, you can contact me on LinkedIn, visit my GitHub, or check out the project repository.</string>
+    <string name="review_on_play_store">Review on Play Store</string>
 </resources>

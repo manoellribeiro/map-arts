@@ -5,9 +5,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -15,25 +12,17 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
-import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
-import manoellribeiro.dev.martp.core.services.LocationService
-import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
-import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.extensions.gone
 import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.databinding.ActivityGalleryBinding
-import manoellribeiro.dev.martp.databinding.MartpButtonEndIconBinding
 import manoellribeiro.dev.martp.scenes.createNewMapArt.CreateNewMapArtActivity
 import manoellribeiro.dev.martp.scenes.locationAcessDetails.LocationAccessDetailsActivity
-import processing.android.CompatUtils
+import manoellribeiro.dev.martp.scenes.martpProjectInfo.MartpProjectInfoActivity
 import java.io.File
 
 @AndroidEntryPoint
@@ -84,6 +73,8 @@ class GalleryActivity : AppCompatActivity() {
     }
 
     private fun setupNotEmptyListState(mapArts: List<MapArtEntity>) = with(binding) {
+        infoIB.visible()
+        infoIB.setOnClickListener { openMartpProjectInfoActivity() }
         emptyListTV.gone()
         errorTV.gone()
         emptyGalleryImageIV.gone()
@@ -103,6 +94,7 @@ class GalleryActivity : AppCompatActivity() {
     }
 
     private fun setupLoadingState() = with(binding) {
+        infoIB.gone()
         mapArtsRV.gone()
         emptyListTV.gone()
         errorTV.gone()
@@ -112,6 +104,8 @@ class GalleryActivity : AppCompatActivity() {
     }
 
     private fun setupErrorState(failure: Failure) = with(binding) {
+        infoIB.visible()
+        infoIB.setOnClickListener { openMartpProjectInfoActivity() }
         mapArtsRV.gone()
         emptyListTV.gone()
         errorTV.visible()
@@ -126,6 +120,8 @@ class GalleryActivity : AppCompatActivity() {
     }
 
     private fun setupEmptyListState() = with(binding) {
+        infoIB.visible()
+        infoIB.setOnClickListener { openMartpProjectInfoActivity() }
         mapArtsRV.gone()
         emptyListTV.visible()
         emptyGalleryImageIV.visible()
@@ -136,6 +132,11 @@ class GalleryActivity : AppCompatActivity() {
         newArtMB.setOnClickListener {
             verifyPermissionToAccessLocation()
         }
+    }
+
+    private fun openMartpProjectInfoActivity() {
+        val intent = Intent(this, MartpProjectInfoActivity::class.java)
+        startActivity(intent)
     }
 
     private fun setupRequireLocationPermissionLauncher() {

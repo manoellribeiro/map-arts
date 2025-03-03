@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/light_yellow">
+
+    <ImageView
+        android:id="@+id/locationImageIV"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="56dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_martp_logo"/>
+
+    <TextView
+        android:id="@+id/descriptionTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="start"
+        style="@style/Text.MiddleScreenInfoText"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/martp_info_description" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:orientation="horizontal">
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+
+        <ImageView
+            android:id="@+id/linkedinIV"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_linkedin"/>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+
+        <ImageView
+            android:id="@+id/githubIV"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_github"/>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+
+        <ImageView
+            android:id="@+id/codeBaseIV"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_code_base"/>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+
+    </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
+
+    <manoellribeiro.dev.martp.core.components.MartpButton
+        android:id="@+id/allowLocationAccessMB"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="@string/review_on_play_store"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        style="@style/MartpButton.Primary"/>
+
+</LinearLayout>

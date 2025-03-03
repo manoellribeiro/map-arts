@@ -43,6 +43,10 @@
             android:exported="true">
         </activity>
         <activity
+            android:name=".scenes.martpProjectInfo.MartpProjectInfoActivity"
+            android:exported="true">
+        </activity>
+        <activity
             android:name=".scenes.createNewMapArt.CreateNewMapArtActivity"
             android:windowSoftInputMode="adjustResize"
             android:exported="true">

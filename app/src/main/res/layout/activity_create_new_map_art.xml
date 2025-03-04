@@ -7,16 +7,36 @@
     android:background="@color/light_l5"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/titleTV"
-        tools:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        style="@style/Text.ScreenTitle"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        android:text="@string/create_new_art" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/backIB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/ic_arrow_back"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <TextView
+            android:id="@+id/titleTV"
+            tools:visibility="visible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            style="@style/Text.ScreenTitle"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/create_new_art" />
+
+    </RelativeLayout>
+
+
 
     <FrameLayout android:id="@+id/mapArtsContainer"
         android:background="@color/dark_d5"

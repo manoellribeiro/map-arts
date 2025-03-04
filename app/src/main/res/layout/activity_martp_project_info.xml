@@ -37,11 +37,13 @@
             android:layout_weight="1"
             />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/linkedinIV"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
+            android:scaleType="fitXY"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_linkedin"/>
 
         <Space
@@ -50,11 +52,13 @@
             android:layout_weight="1"
             />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/githubIV"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
+            android:scaleType="fitXY"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_github"/>
 
         <Space
@@ -63,11 +67,13 @@
             android:layout_weight="1"
             />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/codeBaseIV"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
+            android:scaleType="fitXY"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_code_base"/>
 
         <Space
@@ -83,6 +89,17 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         />
+
+    <manoellribeiro.dev.martp.core.components.MartpButton
+        android:id="@+id/closeMB"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="Back"
+        app:startIcon="@drawable/ic_arrow_back"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        app:buttonBackgroundColor="@color/light_yellow"
+        style="@style/MartpButton.Secondary"/>
 
     <manoellribeiro.dev.martp.core.components.MartpButton
         android:id="@+id/allowLocationAccessMB"

@@ -33,6 +33,9 @@ class MartpProjectInfoActivity: AppCompatActivity() {
         codeBaseIV.setOnClickListener {
             openUrl(MARTP_GITHUB_REPOSITORY_URL)
         }
+        closeMB.setOnClickListener {
+            finish()
+        }
     }
 
     private fun openUrl(url: String) {

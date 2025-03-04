@@ -29,13 +29,14 @@
         <ImageButton
             android:id="@+id/infoIB"
             android:layout_gravity="end"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            android:padding="4dp"
             android:contentDescription="A tiny info button"
             android:src="@drawable/ic_info"
-            android:background="@android:color/transparent" />
+            android:background="?attr/selectableItemBackgroundBorderless" />
 
         <ImageView
             android:id="@+id/emptyGalleryImageIV"

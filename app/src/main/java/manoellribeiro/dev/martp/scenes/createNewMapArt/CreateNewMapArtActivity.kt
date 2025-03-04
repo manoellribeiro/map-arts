@@ -96,6 +96,10 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     }
 
     private fun handleStateError(failure: Failure) = with(binding) {
+        backIB.visible()
+        backIB.setOnClickListener {
+            finish()
+        }
         stateErrorS.visible()
         errorImageIV.visible()
         errorTextTV.visible()
@@ -116,6 +120,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     }
 
     private fun handleLoadingState() = with(binding) {
+        backIB.gone()
         titleTV.text = getString(R.string.we_are_generating_your_art)
         titleMTI.gone()
         descriptionMTI.gone()
@@ -128,6 +133,10 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     }
 
     private fun handleImageDownloadedState(imagePath: String) = with(binding) {
+        backIB.visible()
+        backIB.setOnClickListener {
+            finish()
+        }
         mapArtsContainer.visible()
         titleTV.visible()
         sketch = DefaultMartpSketch(
@@ -172,5 +181,4 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             )
         }
     }
-
 }

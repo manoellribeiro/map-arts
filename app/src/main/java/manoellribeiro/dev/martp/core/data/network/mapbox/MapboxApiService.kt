@@ -13,6 +13,7 @@ import retrofit2.http.Path
 // https://docs.mapbox.com/api/maps/static-images/
 // https://square.github.io/retrofit/
 // https://github.com/manoellribeiro/forecast-app/blob/master/app/src/main/java/com/example/forecastmvvm/data/network/WeatherApiService.kt
+// https://docs.mapbox.com/api/maps/static-images/#marker -> to add optional pin to image
 
 interface MapboxApiService {
 

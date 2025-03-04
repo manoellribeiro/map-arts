@@ -29,7 +29,9 @@ class LocationService @Inject constructor(
                         if(it.isSuccessful) {
                             continuation.resume(it.result)
                         } else {
-                            //throw error getting location
+                            throw LocationPermissionNotGrantedFailure(
+                                originalExceptionMessage = it.exception?.message
+                            )
                         }
                     }
                 }

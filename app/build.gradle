@@ -3,6 +3,8 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
     id 'com.google.dagger.hilt.android'
+    id("com.google.gms.google-services")
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -80,6 +82,11 @@ dependencies {
 
     //Google Play Services
     implementation 'com.google.android.gms:play-services-location:21.3.0'
+
+    //Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation("com.google.firebase:firebase-crashlytics")
+    implementation("com.google.firebase:firebase-analytics")
 }
 
 kapt {

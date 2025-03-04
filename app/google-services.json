@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "814915753343",
+    "project_id": "martp-2e001",
+    "storage_bucket": "martp-2e001.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:814915753343:android:c0fb0c5fd419082eedf64a",
+        "android_client_info": {
+          "package_name": "manoellribeiro.dev.martp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVACNAcHW-NVQCc3I7A9UadcTzyOHrJC8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

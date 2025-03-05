@@ -18,9 +18,11 @@
 
 Martp is an interactive art generator that uses geolocation as a user interaction interface. It is an open-source and educational project developed at the Federal University of Bahia by student Manoel Ribeiro. To learn more about the project, you can contact me on [LinkedIn](https://www.linkedin.com/in/manoellribeiro/), visit my GitHub, or check out the project repository.
 
-Features:
+### Features
+
 * Uses the Processing android library to manipulate pixels of a static map image and creates a beautiful map art.
-* Fetch static map images from Mapbox API using android location services.
+* Fetch static map images from Mapbox API.
+* Use Android location services to get user location in real time.
 * Share your arts through any social media as Whatsapp or Instagram.
 
 ### Built With

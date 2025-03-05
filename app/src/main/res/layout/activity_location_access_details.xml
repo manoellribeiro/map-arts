@@ -50,6 +50,7 @@
         app:title="@string/allow_location_access"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="16dp"
+        app:cornerRadius="50dp"
         style="@style/MartpButton.Primary"/>
 
 </LinearLayout>

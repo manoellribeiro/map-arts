@@ -1,8 +1,6 @@
+![Martp - ShowCase](https://github.com/user-attachments/assets/1380ef12-c2cb-40a1-9a71-c19a87ddea38)
 <br />
 <div align="center">
-  <a href="https://github.com/user-attachments/assets/1afc604a-07c1-4cb4-8a9b-e83b0a091ade">
-    <img src="https://github.com/user-attachments/assets/1afc604a-07c1-4cb4-8a9b-e83b0a091ade" alt="Logo" width="300" height="300">
-  </a>
   <p align="center">
     Generate amazing interactive arts using geolocation
     <br />
@@ -28,8 +26,7 @@ Martp is an interactive art generator that uses geolocation as a user interactio
 * Kotlin
 * Processing
 * Mapbox
-
-<!-- GETTING STARTED -->
+  
 ## Getting Started
 
 If you want to just use Martp, you can download it at Google Play Store, but if you want to run the code on your machine, make modifications or contribute with the project, follow these steps.

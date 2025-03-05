@@ -1,11 +1,8 @@
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  <a href="https://github.com/user-attachments/assets/1afc604a-07c1-4cb4-8a9b-e83b0a091ade">
+    <img src="https://github.com/user-attachments/assets/1afc604a-07c1-4cb4-8a9b-e83b0a091ade" alt="Logo" width="300" height="300">
   </a>
-
-<h3 align="center">MARTP</h3>
-
   <p align="center">
     Generate amazing interactive arts using geolocation
     <br />

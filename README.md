@@ -63,7 +63,7 @@ Contributions are what make the open source community such an amazing place to l
 <!-- LICENSE -->
 ## License
 
-Distributed under the Unlicense License. See `LICENSE.txt` for more information.
+Distributed under the GNU GENERAL PUBLIC LICENSE. See `LICENSE` for more information.
 
 <!-- CONTACT -->
 ## Contact
@@ -76,4 +76,5 @@ Manoel Ribeiro - [Linkedin](https://www.linkedin.com/in/manoellribeiro/)
 * [Icon Lab UFBA](https://www.instagram.com/lab.icon/)
 * [IHAC UFBA](https://ihac.ufba.br/pt/home/)
 * [Steves Makerspace - Youtube Channel ](https://www.youtube.com/@StevesMakerspace)
+* [Privacy Policy - Templates](https://github.com/ArthurGareginyan/privacy-policy-template)
 

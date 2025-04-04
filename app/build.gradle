@@ -38,6 +38,7 @@ android {
         }
 
         release {
+            debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField("String", "MAPBOX_API_KEY", "\"${System.getenv("MAPBOX_API_KEY") ?: localProperties.getProperty("MAPBOX_API_KEY")}\"")

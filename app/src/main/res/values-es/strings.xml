@@ -27,4 +27,6 @@
     <string name="art_description_hint_special_place">Un lugar muy especial para mí durante el viaje</string>
     <string name="martp_info_description">Martp es un generador de arte interactivo que utiliza la geolocalización como interfaz de interacción para el usuario. Es un proyecto de código abierto y educativo desarrollado en la Universidad Federal de Bahía por el estudiante Manoel Ribeiro. \nPara conocer más sobre el proyecto, puedes contactarme en LinkedIn, visitar mi GitHub o consultar el repositorio del proyecto.</string>
     <string name="review_on_play_store">Calificar en Play Store</string>
+    <string name="back">Volver</string>
+    <string name="share_without_saving">Compartir sin guardar</string>
 </resources>

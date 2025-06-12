@@ -4,7 +4,7 @@
   <p align="center">
     Generate amazing interactive arts using geolocation
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Download at Play Store</strong></a>
+    <a href="https://play.google.com/store/apps/details?id=manoellribeiro.dev.martp"><strong>Download at Play Store</strong></a>
     <br />
   </p>
 </div>

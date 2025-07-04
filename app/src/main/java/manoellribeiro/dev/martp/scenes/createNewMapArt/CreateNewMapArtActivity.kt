@@ -120,7 +120,10 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     }
 
     private fun handleLoadingState() = with(binding) {
-        backIB.gone()
+        backIB.visible()
+        backIB.setOnClickListener {
+            finish()
+        }
         titleTV.text = getString(R.string.we_are_generating_your_art)
         titleMTI.gone()
         descriptionMTI.gone()

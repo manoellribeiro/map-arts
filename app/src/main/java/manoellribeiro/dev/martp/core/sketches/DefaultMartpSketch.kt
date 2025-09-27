@@ -34,15 +34,16 @@ class DefaultMartpSketch(
         image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
         filter(ERODE)
         fill(color(18, 13, 49))
-        streetPixels.forEach {
-            circle(it.first.toFloat() + framePadding + frameThickness, it.second.toFloat() + framePadding + frameThickness, 20F)
+        pixelsToAddCircles.forEach {
+            ellipseMode(RADIUS)
+            ellipse(it.first.toFloat() + frameThickness + framePadding, it.second.toFloat() + frameThickness + framePadding, 5F, 5F)
         }
 
         noLoop()
         drawingFinishedCallback.invoke()
     }
 
-    private val streetPixels = arrayListOf<Pair<Int, Int>>()
+    private val pixelsToAddCircles = arrayListOf<Pair<Int, Int>>()
 
     private fun changePixelColors(mapImage: PImage) {
         val colorsArray = arrayListOf(
@@ -58,19 +59,30 @@ class DefaultMartpSketch(
 
         //val streetPixels = arrayListOf();
 
+        var nextXPixelAllowedToPutCircle = 0F
+        var nextYPixelAllowedToPutCircle = 0F
+
         mapImage.loadPixels()
 
         for (y in 0..mapImage.height) {
             val xValuesForSameY = arrayListOf<Int>()
             for (x in 0..mapImage.width) {
                 val currentPixelColor = mapImage.get(x, y)
-                if(isStreetPixel(currentPixelColor)) {
+                if(isStreetPixel(currentPixelColor) && y >= nextYPixelAllowedToPutCircle) {
                     val newPixelColor = colorsArray[(0 until colorsArray.size).random()]
                     //mapImage.set(x, y, color(255, 255, 255))
-                    streetPixels.add(Pair(x, y))
+                    if(x >= nextXPixelAllowedToPutCircle) {
+                        pixelsToAddCircles.add(Pair(x, y))
+                        nextXPixelAllowedToPutCircle = nextXPixelAllowedToPutCircle + 7
+                    }
                 } else {
                     mapImage.set(x, y, color(255, 201, 113))
                 }
+            }
+            nextXPixelAllowedToPutCircle = 0F
+
+            if(y >= nextYPixelAllowedToPutCircle) {
+                nextYPixelAllowedToPutCircle = nextYPixelAllowedToPutCircle + 7
             }
             //streetPixels.add()
         }

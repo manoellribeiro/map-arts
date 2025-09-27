@@ -1,5 +1,6 @@
 package manoellribeiro.dev.martp.core.sketches
 
+import android.R
 import processing.core.PApplet
 import processing.core.PImage
 
@@ -32,9 +33,16 @@ class DefaultMartpSketch(
         drawArtFrame()
         image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
         filter(ERODE)
+        fill(color(18, 13, 49))
+        streetPixels.forEach {
+            circle(it.first.toFloat() + framePadding + frameThickness, it.second.toFloat() + framePadding + frameThickness, 20F)
+        }
+
         noLoop()
         drawingFinishedCallback.invoke()
     }
+
+    private val streetPixels = arrayListOf<Pair<Int, Int>>()
 
     private fun changePixelColors(mapImage: PImage) {
         val colorsArray = arrayListOf(
@@ -58,7 +66,8 @@ class DefaultMartpSketch(
                 val currentPixelColor = mapImage.get(x, y)
                 if(isStreetPixel(currentPixelColor)) {
                     val newPixelColor = colorsArray[(0 until colorsArray.size).random()]
-                    mapImage.set(x, y, color(18, 13, 49))
+                    //mapImage.set(x, y, color(255, 255, 255))
+                    streetPixels.add(Pair(x, y))
                 } else {
                     mapImage.set(x, y, color(255, 201, 113))
                 }

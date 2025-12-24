@@ -15,6 +15,7 @@ import manoellribeiro.dev.martp.core.extensions.toBitmap
 import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
+import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import processing.android.PFragment
 
@@ -23,7 +24,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
 
     private lateinit var binding: ActivityCreateNewMapArtBinding
     private val viewModel: CreateNewMapArtViewModel by viewModels()
-    private var sketch: DefaultMartpSketch? = null
+    private var sketch: MartpSketch? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

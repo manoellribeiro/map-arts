@@ -29,4 +29,10 @@
     <string name="review_on_play_store">Avaliar na Play Store</string>
     <string name="back">Voltar</string>
     <string name="share_without_saving">Compartilhar sem salvar</string>
+    <string name="choose_art_style_title">Escolha seu estilo de arte</string>
+    <string name="martp_default">Martp Padrão</string>
+    <string name="martp_default_description">O primeiro estilo de arte criado, ele existe antes mesmo que o aplicativo. Ele mantém a forma do mapa e apenas aplica cores. É muito legal para ver os padrões das ruas dos lugares.</string>
+    <string name="pointillism">Pontilhismo</string>
+    <string name="pointillism_description">O pontilhismo é uma técnica de pintura em que pequenos pontos distintos de cor pura são aplicados em padrões para formar uma imagem. É mais abstrato, mas ainda preserva um pouco da forma das ruas.</string>
+    <string name="choose_art_style_description">Os estilos vão definir se a sua arte vai se aproximar mais de um mapa normal ou ser algo mais abstrato. Você pode escolher utilizar alguma corrente artística como o pontilhismo ou até mesmo escolher estilos para destacar lugares cortados por rios.</string>
 </resources>

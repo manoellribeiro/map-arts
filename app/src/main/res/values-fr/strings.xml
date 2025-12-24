@@ -29,4 +29,10 @@
     <string name="review_on_play_store">Noter sur le Play Store</string>
     <string name="back">Retour</string>
     <string name="share_without_saving">Partager sans enregistrer</string>
+    <string name="choose_art_style_title">Choisissez votre style d’art</string>
+    <string name="martp_default">Martp par défaut</string>
+    <string name="martp_default_description">Le premier style artistique créé ; il existait même avant l’application. Il conserve la forme de la carte et applique uniquement des couleurs. C’est idéal pour observer les motifs des rues des lieux.</string>
+    <string name="pointillism">Pointillisme</string>
+    <string name="pointillism_description">Le pointillisme est une technique de peinture où de petits points distincts de couleur pure sont appliqués en motifs pour former une image. Il est plus abstrait, mais conserve encore un peu la forme des rues.</string>
+    <string name="choose_art_style_description">Les styles définiront si votre art se rapprochera davantage d’une carte classique ou de quelque chose de plus abstrait. Vous pouvez choisir d’utiliser un courant artistique comme le pointillisme ou encore sélectionner des styles pour mettre en valeur des lieux traversés par des rivières.</string>
 </resources>

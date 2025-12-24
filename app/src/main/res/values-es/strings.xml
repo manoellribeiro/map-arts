@@ -29,4 +29,10 @@
     <string name="review_on_play_store">Calificar en Play Store</string>
     <string name="back">Volver</string>
     <string name="share_without_saving">Compartir sin guardar</string>
+    <string name="choose_art_style_title">Elige tu estilo de arte</string>
+    <string name="martp_default">Martp predeterminado</string>
+    <string name="martp_default_description">El primer estilo de arte creado; existe incluso antes de la aplicación. Mantiene la forma del mapa y solo aplica colores. Es genial para ver los patrones de las calles de los lugares.</string>
+    <string name="pointillism">Puntillismo</string>
+    <string name="pointillism_description">El puntillismo es una técnica de pintura en la que pequeños puntos distintos de color puro se aplican en patrones para formar una imagen. Es más abstracto, pero aún conserva un poco de la forma de las calles.</string>
+    <string name="choose_art_style_description">Los estilos definirán si tu arte se asemejará más a un mapa tradicional o a algo más abstracto. Puedes elegir utilizar una corriente artística como el puntillismo o incluso seleccionar estilos para resaltar lugares atravesados por ríos.</string>
 </resources>

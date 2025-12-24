@@ -16,6 +16,7 @@ import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
+import manoellribeiro.dev.martp.core.sketches.PointillismMartpSketch
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import processing.android.PFragment
 
@@ -143,7 +144,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         }
         mapArtsContainer.visible()
         titleTV.visible()
-        sketch = DefaultMartpSketch(
+        sketch = PointillismMartpSketch(
             horizontalTilesCount = 0,
             verticalTilesCount = 0,
             padding = 0,

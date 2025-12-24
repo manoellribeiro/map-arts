@@ -34,23 +34,22 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".scenes.locationAcessDetails.LocationAccessDetailsActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true"/>
+        <activity
+            android:name=".scenes.chooseArtStyle.ChooseArtStyleActivity"
+            android:exported="false"/>
         <activity
             android:name=".scenes.martpProjectInfo.MartpProjectInfoActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true"/>
         <activity
             android:name=".scenes.createNewMapArt.CreateNewMapArtActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="true">
-        </activity>
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize"/>
     </application>
 
 </manifest>

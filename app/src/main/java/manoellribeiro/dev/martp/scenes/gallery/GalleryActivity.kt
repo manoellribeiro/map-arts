@@ -20,6 +20,7 @@ import manoellribeiro.dev.martp.core.extensions.gone
 import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.databinding.ActivityGalleryBinding
+import manoellribeiro.dev.martp.scenes.chooseArtStyle.ChooseArtStyleActivity
 import manoellribeiro.dev.martp.scenes.createNewMapArt.CreateNewMapArtActivity
 import manoellribeiro.dev.martp.scenes.locationAcessDetails.LocationAccessDetailsActivity
 import manoellribeiro.dev.martp.scenes.martpProjectInfo.MartpProjectInfoActivity
@@ -54,7 +55,6 @@ class GalleryActivity : AppCompatActivity() {
                 GalleryUiState.Loading -> setupLoadingState()
                 is GalleryUiState.NotEmptyList -> setupNotEmptyListState(state.mapArts)
             }
-
         }
     }
 
@@ -152,7 +152,7 @@ class GalleryActivity : AppCompatActivity() {
     }
 
     private fun openCreateNewMapArtScene() {
-        val intent = Intent(this, CreateNewMapArtActivity::class.java)
+        val intent = Intent(this, ChooseArtStyleActivity::class.java)
         startActivity(intent)
     }
 
@@ -182,8 +182,6 @@ class GalleryActivity : AppCompatActivity() {
                     Manifest.permission.ACCESS_FINE_LOCATION
                 )
             }
-
-
         }
     }
 }

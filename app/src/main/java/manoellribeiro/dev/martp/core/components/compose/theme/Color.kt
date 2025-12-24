@@ -1,4 +1,4 @@
-package manoellribeiro.dev.martp.scenes.ui.theme
+package manoellribeiro.dev.martp.core.components.compose.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.colorResource

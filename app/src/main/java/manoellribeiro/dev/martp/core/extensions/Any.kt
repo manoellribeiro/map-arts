@@ -1,9 +1,11 @@
 package manoellribeiro.dev.martp.core.extensions
 
-fun<T> Any?.executeIfNotNull(executable: () -> T){
+fun<T> T?.executeIfNotNull(executable: () -> T){
     if(this != null) executable()
 }
 
-fun<T> Any?.executeIfNull(executable: () -> T){
+fun<T> T?.executeIfNull(executable: () -> T){
     if(this == null) executable()
 }
+
+inline fun <T> T?.orNull(result: () -> T): T = this ?: result.invoke()

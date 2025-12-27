@@ -1,5 +1,6 @@
 package manoellribeiro.dev.martp.core.sketches
 
+import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import processing.core.PApplet
 
 abstract class MartpSketch(
@@ -16,6 +17,8 @@ abstract class MartpSketch(
         const val frameThickness = 30.0F
         const val framePadding = 30.0F
     }
+
+    abstract val type: SketchArtType
 
     override fun settings() {
         size(canvasWidth.toInt(), canvasHeight.toInt())

@@ -1,5 +1,6 @@
 package manoellribeiro.dev.martp.core.sketches
 
+import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import processing.core.PApplet
 import processing.core.PImage
 
@@ -20,6 +21,7 @@ class DefaultMartpSketch(
     imagePath,
     drawingFinishedCallback
 ) {
+
 
     override fun draw() {
         val mapImage = loadImage(imagePath)
@@ -62,4 +64,7 @@ class DefaultMartpSketch(
         }
         mapImage.updatePixels()
     }
+
+    override val type: SketchArtType
+        get() = SketchArtType.DEFAULT
 }

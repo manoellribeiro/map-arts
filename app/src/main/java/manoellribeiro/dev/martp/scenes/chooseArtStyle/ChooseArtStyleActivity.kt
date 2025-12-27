@@ -1,7 +1,10 @@
 package manoellribeiro.dev.martp.scenes.chooseArtStyle
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
@@ -28,22 +31,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
+import androidx.navigation.compose.rememberNavController
 import manoellribeiro.dev.martp.R
+import manoellribeiro.dev.martp.core.components.compose.theme.LightL5
 import manoellribeiro.dev.martp.core.components.compose.theme.TextGraySubTitle
 import manoellribeiro.dev.martp.core.components.compose.theme.TextMiddleScreenInfoText
 import manoellribeiro.dev.martp.core.components.compose.theme.TextScreenTitle
 import manoellribeiro.dev.martp.core.components.compose.theme.TextTitle
+import manoellribeiro.dev.martp.core.extensions.putExtra
+import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.scenes.createNewMapArt.CreateNewMapArtActivity
 
 class ChooseArtStyleActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Scaffold(contentWindowInsets = WindowInsets.safeDrawing) { contentPadding ->
+            Scaffold(
+                contentWindowInsets = WindowInsets.safeDrawing,
+                modifier = Modifier.background(LightL5)
+            ) { contentPadding ->
                 Column(modifier = Modifier.padding(contentPadding)) {
                     Header()
                     StyleDescription()
@@ -54,11 +67,22 @@ class ChooseArtStyleActivity : ComponentActivity() {
     }
 }
 
+private fun navigateToCreateNewArtScreen(context: Context, type: SketchArtType) {
+    val intent = Intent(context, CreateNewMapArtActivity::class.java)
+    intent.putExtra(type)
+    context.startActivity(intent)
+    (context as ComponentActivity).finish()
+}
+
 @Composable
 private fun ListOfStyles() {
+    val context = LocalContext.current
     LazyColumn {
         item {
             ArtStyleCard(
+                modifier = Modifier.clickable {
+                    navigateToCreateNewArtScreen(context, SketchArtType.DEFAULT)
+                },
                 mapStyleModel = MapArtStyleModel(
                     title = stringResource(R.string.martp_default),
                     description = stringResource(R.string.martp_default_description),
@@ -68,6 +92,9 @@ private fun ListOfStyles() {
         }
         item {
             ArtStyleCard(
+                modifier = Modifier.clickable {
+                    navigateToCreateNewArtScreen(context, SketchArtType.POINTILLISM)
+                },
                 mapStyleModel = MapArtStyleModel(
                     title = stringResource(R.string.pointillism),
                     description = stringResource(R.string.pointillism_description),
@@ -89,12 +116,15 @@ private fun StyleDescription() {
 
 @Composable
 private fun Header() {
+    val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     Box(
         modifier = Modifier
             .fillMaxWidth()
     ) {
         IconButton(
-            onClick = {}
+            onClick = {
+                onBackPressedDispatcher?.onBackPressed()
+            }
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_back),
@@ -118,9 +148,7 @@ fun ArtStyleCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(12.dp)
-            .clickable {  }
     ) {
-
         Text(
             text = mapStyleModel.title,
             style = TextTitle

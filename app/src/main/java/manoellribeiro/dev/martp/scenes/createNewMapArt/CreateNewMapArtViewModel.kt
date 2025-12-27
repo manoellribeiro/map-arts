@@ -13,7 +13,7 @@ import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.services.LocationService
-import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
+import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import java.io.File
 import java.util.Calendar
 import java.util.UUID
@@ -46,8 +46,8 @@ class CreateNewMapArtViewModel @Inject constructor(
             val staticImagePath = repository.fetchStaticMapImageAsync(
                 longitude = location.longitude,
                 latitude = location.latitude,
-                mapWidth = canvasToDrawArtWidth - (2 * DefaultMartpSketch.frameThickness).toInt() - (2 * DefaultMartpSketch.framePadding).toInt(),
-                mapHeight = canvasToDrawArtHeight - (2 * DefaultMartpSketch.frameThickness).toInt() - (2 * DefaultMartpSketch.framePadding).toInt(),
+                mapWidth = canvasToDrawArtWidth - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
+                mapHeight = canvasToDrawArtHeight - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
                 dir = directory
             ).await()
             emitNewState(CreateNewMapArtUiState.ImageDownloaded(staticImagePath))
@@ -64,11 +64,6 @@ class CreateNewMapArtViewModel @Inject constructor(
     ) {
         try {
             emitNewState(CreateNewMapArtUiState.ActionButtonLoading)
-
-            if(title.isEmpty()) {
-
-            }
-
             val artId = UUID.randomUUID().toString()
             val newMartp = MapArtEntity(
                 id = artId,

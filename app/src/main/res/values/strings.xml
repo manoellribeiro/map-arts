@@ -29,4 +29,10 @@
     <string name="review_on_play_store">Review on Play Store</string>
     <string name="back">Back</string>
     <string name="share_without_saving">Share without saving</string>
+    <string name="choose_art_style_title">Choose your art style</string>
+    <string name="martp_default">Martp Default</string>
+    <string name="martp_default_description">The first art style ever created; it existed even before the app. It keeps the map’s shape and only applies colors. It’s great for seeing street patterns in different places.</string>
+    <string name="pointillism">Pointillism</string>
+    <string name="pointillism_description">Pointillism is a painting technique where small, distinct dots of pure color are applied in patterns to form an image. It is more abstract but still preserves a little of the shape of the streets.</string>
+    <string name="choose_art_style_description">Styles will define whether your art will look closer to a regular map or something more abstract. You can choose to use an artistic movement such as pointillism or even select styles to highlight places crossed by rivers.</string>
 </resources>

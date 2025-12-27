@@ -10,26 +10,39 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
+import manoellribeiro.dev.martp.core.extensions.getEnumExtra
 import manoellribeiro.dev.martp.core.extensions.gone
+import manoellribeiro.dev.martp.core.extensions.orNull
 import manoellribeiro.dev.martp.core.extensions.toBitmap
 import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
+import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
+import manoellribeiro.dev.martp.core.sketches.MartpSketch
+import manoellribeiro.dev.martp.core.sketches.PointillismMartpSketch
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import processing.android.PFragment
+import kotlin.properties.Delegates
 
 @AndroidEntryPoint
 class CreateNewMapArtActivity: AppCompatActivity() {
 
     private lateinit var binding: ActivityCreateNewMapArtBinding
     private val viewModel: CreateNewMapArtViewModel by viewModels()
-    private var sketch: DefaultMartpSketch? = null
+    private var sketch: MartpSketch? = null
+    private lateinit var type: SketchArtType
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCreateNewMapArtBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        getExtras(savedInstanceState)
         setupObservables()
+    }
+
+    private fun getExtras(savedInstanceState: Bundle?) {
+        type = intent.getEnumExtra<SketchArtType>().orNull { SketchArtType.DEFAULT }
     }
 
     override fun onResume() {
@@ -142,19 +155,34 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         }
         mapArtsContainer.visible()
         titleTV.visible()
-        sketch = DefaultMartpSketch(
-            horizontalTilesCount = 0,
-            verticalTilesCount = 0,
-            padding = 0,
-            canvasWidth = mapArtsContainer.width.toFloat(),
-            canvasHeight = mapArtsContainer.height.toFloat(),
-            imagePath = imagePath,
-            drawingFinishedCallback = {
-                runOnUiThread {
-                    titleMTI.showKeyboard()
+        sketch = when(type) {
+            SketchArtType.DEFAULT -> DefaultMartpSketch(
+                horizontalTilesCount = 0,
+                verticalTilesCount = 0,
+                padding = 0,
+                canvasWidth = mapArtsContainer.width.toFloat(),
+                canvasHeight = mapArtsContainer.height.toFloat(),
+                imagePath = imagePath,
+                drawingFinishedCallback = {
+                    runOnUiThread {
+                        titleMTI.showKeyboard()
+                    }
                 }
-            }
-        )
+            )
+            SketchArtType.POINTILLISM -> PointillismMartpSketch(
+                horizontalTilesCount = 0,
+                verticalTilesCount = 0,
+                padding = 0,
+                canvasWidth = mapArtsContainer.width.toFloat(),
+                canvasHeight = mapArtsContainer.height.toFloat(),
+                imagePath = imagePath,
+                drawingFinishedCallback = {
+                    runOnUiThread {
+                        titleMTI.showKeyboard()
+                    }
+                }
+            )
+        }
         val processingFragment = PFragment(sketch)
         processingFragment.setView(mapArtsContainer, this@CreateNewMapArtActivity)
         titleMTI.visible()

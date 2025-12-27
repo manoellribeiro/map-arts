@@ -42,7 +42,7 @@
         <item name="fontAndIconColor">@color/dark_d1</item>
         <item name="cornerRadius">8dp</item>
     </style>
-<!--    <style name="ZigButton.Destructive">-->
+<!--    <style name="MartpButton.Destructive">-->
 <!--        <item name="type">filled</item>-->
 <!--        <item name="buttonBackgroundColor">@color/error_medium</item>-->
 <!--        <item name="strokeColor">@color/error_medium</item>-->

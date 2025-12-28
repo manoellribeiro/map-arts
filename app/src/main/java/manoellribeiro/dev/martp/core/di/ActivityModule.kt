@@ -20,7 +20,6 @@ object ActivityModule {
     ): GalleryViewModel {
         return GalleryViewModel(
             repository = repository,
-            locationService = locationService
         )
     }
 

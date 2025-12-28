@@ -16,7 +16,6 @@ import javax.inject.Inject
 @HiltViewModel
 class GalleryViewModel @Inject constructor(
     private val repository: MartpRepository,
-    private val locationService: LocationService,
 ): ViewModel() {
 
     private val _state: MutableLiveData<GalleryUiState> = MutableLiveData<GalleryUiState>()
@@ -24,11 +23,6 @@ class GalleryViewModel @Inject constructor(
 
     private fun emitNewState(newState: GalleryUiState) {
         _state.value = newState
-    }
-
-    suspend fun printLocationData() {
-        val location = locationService.getCurrentLocation().await()
-        Log.i("GalleryViewModel", "latitude: ${location.latitude} \n longitude: ${location.longitude}")
     }
 
     fun getUserMapArts() = viewModelScope.launch {

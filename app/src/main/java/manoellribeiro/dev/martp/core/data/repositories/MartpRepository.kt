@@ -26,6 +26,7 @@ class MartpRepository @Inject constructor(
     private val mapArtDao: MapArtsDao
 ) {
 
+    //TODO: Refactor this way of using ioScope
     private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     fun fetchUserMapArts(): Deferred<List<MapArtEntity>> = ioScope.async {

@@ -22,3 +22,7 @@ jobs:
 
       - name: Run unit tests
         run: ./gradlew clean testDebug
+
+      - name: Post Test Report
+        uses: asadmansr/android-test-report-action@v1.2.0
+        if: ${{ always() }}

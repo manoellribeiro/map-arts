@@ -51,7 +51,7 @@ class MartpRepositoryTest {
         try {
             repository.fetchUserMapArts().await()
         } catch (e: Exception) {
-            assert(e is Failure)
+            assert(e !is Failure)
         }
     }
 

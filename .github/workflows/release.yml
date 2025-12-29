@@ -2,7 +2,7 @@ name: Deploy To Google Play
 
 on:
   push:
-    branches: [main]
+    tags: '*'
 
 jobs:
   test:
@@ -41,11 +41,20 @@ jobs:
           java-version: 17
           cache: 'gradle'
 
+      - name: Calculate Version Code
+        id: version
+        run: |
+          VERSION=${{ github.ref_name }}
+          IFS='.' read -r a b c <<< "$VERSION"
+          VERSION_CODE=$((a * 1000 + b * 100 + c))
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT
+
       - name: Handle Version Code/Name
         uses: chkfung/android-version-actions@v1.2.3
         with:
           gradlePath: app/build.gradle
-          version: ${{ github.run_number }}
+          versionName: ${{ github.ref_name }}
+          versionCode: ${{ steps.version.outputs.VERSION_CODE }}
 
       - name: Grant execute permissions for gradlew
         run: chmod +x gradlew

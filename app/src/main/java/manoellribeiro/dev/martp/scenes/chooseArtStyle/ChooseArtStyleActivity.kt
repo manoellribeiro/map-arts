@@ -54,8 +54,8 @@ class ChooseArtStyleActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Scaffold(
+                containerColor = LightL5,
                 contentWindowInsets = WindowInsets.safeDrawing,
-                modifier = Modifier.background(LightL5)
             ) { contentPadding ->
                 Column(modifier = Modifier.padding(contentPadding)) {
                     Header()

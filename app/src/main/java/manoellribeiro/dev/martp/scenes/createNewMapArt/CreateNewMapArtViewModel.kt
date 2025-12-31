@@ -12,6 +12,7 @@ import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.Failure
+import manoellribeiro.dev.martp.core.services.ImageDescriptionService
 import manoellribeiro.dev.martp.core.services.LocationService
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import java.io.File
@@ -19,10 +20,12 @@ import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
 
+
 @HiltViewModel
 class CreateNewMapArtViewModel @Inject constructor(
     private val repository: MartpRepository,
     private val locationService: LocationService,
+    private val imageDescriptionService: ImageDescriptionService
 ): ViewModel() {
 
     private val _state: MutableLiveData<CreateNewMapArtUiState> = MutableLiveData()

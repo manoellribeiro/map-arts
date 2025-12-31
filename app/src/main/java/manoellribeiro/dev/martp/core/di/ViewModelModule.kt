@@ -3,6 +3,8 @@ package manoellribeiro.dev.martp.core.di
 import android.content.Context
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.mlkit.genai.imagedescription.ImageDescriber
+import com.google.mlkit.genai.imagedescription.ImageDescriberOptions
 import dagger.Binds
 import dagger.Component.Factory
 import dagger.Module
@@ -14,6 +16,7 @@ import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.services.ConnectivityService
+import manoellribeiro.dev.martp.core.services.ImageDescriptionService
 import manoellribeiro.dev.martp.core.services.LocationService
 
 @Module
@@ -36,6 +39,16 @@ object ViewModelModule {
     @Provides
     fun providesLocationService(fusedLocationProviderClient: FusedLocationProviderClient): LocationService {
         return LocationService(fusedLocationProviderClient)
+    }
+
+    @Provides
+    fun provideImageDescriptionService(
+        imageDescriberOptions: ImageDescriberOptions,
+        imageDescriber: ImageDescriber
+    ): ImageDescriptionService {
+        return ImageDescriptionService(
+            imageDescriber = imageDescriber,
+        )
     }
 
 }

@@ -35,4 +35,5 @@
     <string name="pointillism">Puntillismo</string>
     <string name="pointillism_description">El puntillismo es una técnica de pintura en la que pequeños puntos distintos de color puro se aplican en patrones para formar una imagen. Es más abstracto, pero aún conserva un poco de la forma de las calles.</string>
     <string name="choose_art_style_description">Los estilos definirán si tu arte se asemejará más a un mapa tradicional o a algo más abstracto. Puedes elegir utilizar una corriente artística como el puntillismo o incluso seleccionar estilos para resaltar lugares atravesados por ríos.</string>
+    <string name="location_not_enabled_error">Para crear un arte de mapa, necesitas habilitar la ubicación en la configuración.</string>
 </resources>

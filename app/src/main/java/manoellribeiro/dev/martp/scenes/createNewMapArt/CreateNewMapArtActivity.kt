@@ -120,6 +120,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         mapArtsContainer.gone()
         titleTV.gone()
         actionMB.visible()
+        actionMB.isEnabled = true
+        actionMB.isClickable = true
         actionMB.title = getString(R.string.try_again)
         actionMB.setOnClickListener {
             lifecycleScope.launch {

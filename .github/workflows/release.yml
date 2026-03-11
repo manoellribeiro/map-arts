@@ -60,7 +60,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Assemble Release Bundle
-        run: ./gradlew bundleRelease
+        run: ./gradlew bundleRelease -MAPBOX_API_KEY=${{ secrets.MAPBOX_API_KEY }}
 
       - name: Sign Release Bulde
         uses: r0adkll/sign-android-release@v1

@@ -35,4 +35,5 @@
     <string name="pointillism">Pontilhismo</string>
     <string name="pointillism_description">O pontilhismo é uma técnica de pintura em que pequenos pontos distintos de cor pura são aplicados em padrões para formar uma imagem. É mais abstrato, mas ainda preserva um pouco da forma das ruas.</string>
     <string name="choose_art_style_description">Os estilos vão definir se a sua arte vai se aproximar mais de um mapa normal ou ser algo mais abstrato. Você pode escolher utilizar alguma corrente artística como o pontilhismo ou até mesmo escolher estilos para destacar lugares cortados por rios.</string>
+    <string name="location_not_enabled_error">Para criar uma arte de mapa você precisa habilitar a localização nas configurações.</string>
 </resources>

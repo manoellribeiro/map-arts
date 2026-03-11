@@ -42,6 +42,7 @@ class CreateNewMapArtViewModel @Inject constructor(
         try {
             emitNewState(CreateNewMapArtUiState.Loading)
             val location = locationService.getCurrentLocation().await()
+            Log.i("LocationService", "result: " + location.toString())
             currentArtLocation = location
             val staticImagePath = repository.fetchStaticMapImageAsync(
                 longitude = location.longitude,

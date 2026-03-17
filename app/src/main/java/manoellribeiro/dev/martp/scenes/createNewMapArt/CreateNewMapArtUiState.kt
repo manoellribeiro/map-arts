@@ -10,7 +10,8 @@ sealed interface CreateNewMapArtUiState {
     class Error(val failure: Failure): CreateNewMapArtUiState
     class ImageDownloaded(
         val staticMapImagePath: String,
-        val address: Address?
+        val title: String,
+        val aiDescription: String
     ): CreateNewMapArtUiState
     class ArtCreatedSuccessfully(val pathToStoreArtImage: String): CreateNewMapArtUiState
     object EnableActionButton: CreateNewMapArtUiState

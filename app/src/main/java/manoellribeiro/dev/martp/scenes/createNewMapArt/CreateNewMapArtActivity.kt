@@ -1,8 +1,11 @@
 package manoellribeiro.dev.martp.scenes.createNewMapArt
 
-import android.location.Address
+import android.content.Context
 import android.os.Bundle
-import android.text.InputType
+import android.os.Handler
+import android.util.AttributeSet
+import android.util.Log
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -23,7 +26,7 @@ import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.sketches.PointillismMartpSketch
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import processing.android.PFragment
-import kotlin.properties.Delegates
+
 
 @AndroidEntryPoint
 class CreateNewMapArtActivity: AppCompatActivity() {
@@ -63,7 +66,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         viewModel.state.observe(this@CreateNewMapArtActivity) { state ->
             when(state) {
                 is CreateNewMapArtUiState.Error -> handleStateError(state.failure)
-                is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state.staticMapImagePath, state.address)
+                is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state.staticMapImagePath, state.title, aiDescription = state.aiDescription)
                 CreateNewMapArtUiState.Loading -> handleLoadingState()
                 CreateNewMapArtUiState.ActionButtonLoading -> handleActionButtonLoadingState()
                 is CreateNewMapArtUiState.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState(state.pathToStoreArtImage)
@@ -126,6 +129,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         }
         cityCountryTV.gone()
         descriptionTV.gone()
+        aiPoweredLL.gone()
     }
 
     private fun handleLoadingState() = with(binding) {
@@ -142,11 +146,13 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         titleTV.visible()
         cityCountryTV.gone()
         descriptionTV.gone()
+        aiPoweredLL.gone()
     }
 
     private fun handleImageDownloadedState(
         imagePath: String,
-        address: Address?
+        title: String,
+        aiDescription: String
     ) = with(binding) {
         backIB.visible()
         backIB.setOnClickListener {
@@ -174,15 +180,10 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         }
         val processingFragment = PFragment(sketch)
         processingFragment.setView(mapArtsContainer, this@CreateNewMapArtActivity)
-        if(address != null) {
-            cityCountryTV.visible()
-            descriptionTV.visible()
-            cityCountryTV.text = address.countryName + ", " + address.locality
-            descriptionTV.text = address.thoroughfare
-        } else {
-            cityCountryTV.gone()
-            descriptionTV.gone()
-        }
+        cityCountryTV.visible()
+        descriptionTV.visible()
+        cityCountryTV.text = title
+        typingAnimation(descriptionTV, aiDescription, 1) { aiPoweredLL.visible() }
         stateErrorS.gone()
         errorImageIV.gone()
         errorTextTV.gone()
@@ -200,6 +201,28 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 directory = this@CreateNewMapArtActivity.filesDir,
                 newArtBitMap = mapArtsContainer.toBitmap()
             )
+        }
+    }
+
+    private fun typingAnimation(
+        view: TextView,
+        text: String,
+        length: Int,
+        onComplete: () -> Unit
+    ) {
+        var delay = 25L
+        if(Character.isWhitespace(text.elementAt(length-1))){
+            delay = 50L
+        }
+        view.text = text.substring(0,length)
+        when (length) {
+            text.length -> {
+                onComplete.invoke()
+                return
+            }
+            else -> Handler().postDelayed({
+                typingAnimation(view, text, length + 1, onComplete)
+            }, delay)
         }
     }
 }

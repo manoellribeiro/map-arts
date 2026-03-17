@@ -14,11 +14,14 @@ import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.Failure
+import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
+import manoellribeiro.dev.martp.core.utils.PromptGenerator
 import java.io.File
 import java.util.Calendar
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 
@@ -26,7 +29,9 @@ import javax.inject.Inject
 class CreateNewMapArtViewModel @Inject constructor(
     private val repository: MartpRepository,
     private val locationService: LocationService,
-    private val getAddressService: GetAddressService
+    private val getAddressService: GetAddressService,
+    private val generateAIContentService: GenerateAIContentService,
+    private val promptGenerator: PromptGenerator
 ): ViewModel() {
 
     private val _state: MutableLiveData<CreateNewMapArtUiState> = MutableLiveData()
@@ -50,6 +55,12 @@ class CreateNewMapArtViewModel @Inject constructor(
                 location.latitude,
                 location.longitude
             ).await()
+            val text = generateAIContentService.generateTextContent(promptGenerator.generateArtDescriptionPrompt(
+                countryName = address?.countryName.orEmpty(),
+                cityName = address?.locality.orEmpty(),
+                streetName = address?.thoroughfare.orEmpty(),
+                languageToReturn = Locale.getDefault().displayName
+            )).await()
             currentArtLocation = location
             val staticImagePath = repository.fetchStaticMapImageAsync(
                 longitude = location.longitude,
@@ -61,7 +72,8 @@ class CreateNewMapArtViewModel @Inject constructor(
             emitNewState(
         CreateNewMapArtUiState.ImageDownloaded(
                         staticMapImagePath = staticImagePath,
-                        address = address
+                        title = address?.locality + ", " + address?.countryName + ", " + address?.thoroughfare,
+                        aiDescription = text.orEmpty()
                     )
             )
         } catch (failure: Failure) {

@@ -5,6 +5,10 @@ import android.location.Geocoder
 import android.net.ConnectivityManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.Firebase
+import com.google.firebase.ai.GenerativeModel
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,6 +39,13 @@ object AndroidServicesModule {
         @ApplicationContext context: Context
     ): ConnectivityManager {
         return context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    }
+
+    @Provides
+    fun provideFirebaseGenerativeModel(
+        @ApplicationContext context: Context
+    ): GenerativeModel {
+        return Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel("gemini-3-flash-preview")
     }
 
 }

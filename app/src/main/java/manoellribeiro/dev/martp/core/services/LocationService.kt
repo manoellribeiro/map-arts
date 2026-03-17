@@ -1,7 +1,6 @@
 package manoellribeiro.dev.martp.core.services
 
 import android.location.Location
-import android.util.Log
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
@@ -12,7 +11,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.suspendCancellableCoroutine
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.failures.LocationDisabledFailure
-import manoellribeiro.dev.martp.core.models.failures.LocationPermissionNotGrantedFailure
+import manoellribeiro.dev.martp.core.models.failures.GeneratingAIContentFailure
 import manoellribeiro.dev.martp.core.models.failures.UnknownErrorFailure
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -42,7 +41,7 @@ class LocationService @Inject constructor(
                             }
                         } else {
                             continuation.resumeWithException(
-                                LocationPermissionNotGrantedFailure(
+                                GeneratingAIContentFailure(
                                     originalExceptionMessage = it.exception?.message
                                 )
                             )
@@ -56,7 +55,7 @@ class LocationService @Inject constructor(
                 originalExceptionMessage = e.message
             )
         } catch (e: SecurityException) {
-            throw LocationPermissionNotGrantedFailure(
+            throw GeneratingAIContentFailure(
                 originalExceptionMessage = e.message
             )
         } catch (failure: Failure) {

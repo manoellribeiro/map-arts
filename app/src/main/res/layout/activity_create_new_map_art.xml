@@ -108,10 +108,38 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             style="@style/Text.GraySubTitle"
-            android:layout_marginStart="16dp"
-            android:maxLines="2"
-            android:ellipsize="end"
-            tools:text="Uma arte criada a partir da minha casa em salvador no politeama" />
+            android:layout_marginHorizontal="16dp"
+            tools:text="Uma arte criada a partir da minha casa easdasdasdasdasdadadadsadam salvador no politeama" />
+
+        <LinearLayout
+            android:id="@+id/aiPoweredLL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="16dp"
+            android:background="@drawable/background_ai_powerade_label"
+            android:paddingVertical="4dp"
+            android:paddingHorizontal="8dp"
+            android:visibility="gone"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/green_darker"
+                android:textSize="10sp"
+                android:fontFamily="@font/nunito_extra_bold"
+                android:layout_gravity="center_vertical"
+                android:text="@string/ai_powered"/>
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_ai_powerade"
+                />
+
+        </LinearLayout>
 
         <Space
             android:layout_width="match_parent"

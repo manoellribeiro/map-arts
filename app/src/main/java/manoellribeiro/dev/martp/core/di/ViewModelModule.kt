@@ -4,6 +4,7 @@ import android.content.Context
 import android.location.Geocoder
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.ai.GenerativeModel
 import dagger.Binds
 import dagger.Component.Factory
 import dagger.Module
@@ -15,8 +16,10 @@ import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.services.ConnectivityService
+import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
+import manoellribeiro.dev.martp.core.utils.PromptGenerator
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -43,6 +46,16 @@ object ViewModelModule {
     @Provides
     fun providesGetAddressService(geocoder: Geocoder): GetAddressService {
         return GetAddressService(geocoder)
+    }
+
+    @Provides
+    fun providesGenerateAIContentService(generativeModel: GenerativeModel): GenerateAIContentService {
+        return GenerateAIContentService(generativeModel)
+    }
+
+    @Provides
+    fun providesPromptGenerator(): PromptGenerator {
+        return PromptGenerator()
     }
 
 }

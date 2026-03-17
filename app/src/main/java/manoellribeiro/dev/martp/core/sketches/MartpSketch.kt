@@ -10,7 +10,6 @@ abstract class MartpSketch(
     private val canvasWidth: Float = 640.0F,
     private val canvasHeight: Float = 640.0F,
     private val imagePath: String,
-    private val drawingFinishedCallback: () -> Unit
 ): PApplet() {
 
     companion object {

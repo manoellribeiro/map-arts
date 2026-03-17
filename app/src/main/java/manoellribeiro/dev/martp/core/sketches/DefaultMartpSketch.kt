@@ -11,7 +11,6 @@ class DefaultMartpSketch(
     private val canvasWidth: Float = 640.0F,
     private val canvasHeight: Float = 640.0F,
     private val imagePath: String,
-    private val drawingFinishedCallback: () -> Unit
 ) : MartpSketch(
     horizontalTilesCount,
     verticalTilesCount,
@@ -19,7 +18,6 @@ class DefaultMartpSketch(
     canvasWidth,
     canvasHeight,
     imagePath,
-    drawingFinishedCallback
 ) {
 
 
@@ -30,7 +28,6 @@ class DefaultMartpSketch(
         image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
         filter(ERODE)
         noLoop()
-        drawingFinishedCallback.invoke()
     }
 
     private fun changePixelColors(mapImage: PImage) {

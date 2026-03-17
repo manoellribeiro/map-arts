@@ -10,7 +10,6 @@ class PointillismMartpSketch(
     private val canvasWidth: Float = 640.0F,
     private val canvasHeight: Float = 640.0F,
     private val imagePath: String,
-    private val drawingFinishedCallback: () -> Unit
 ) : MartpSketch(
     horizontalTilesCount,
     verticalTilesCount,
@@ -18,7 +17,6 @@ class PointillismMartpSketch(
     canvasWidth,
     canvasHeight,
     imagePath,
-    drawingFinishedCallback
 )  {
     override fun draw() {
         val mapImage = loadImage(imagePath)
@@ -33,7 +31,6 @@ class PointillismMartpSketch(
         }
 
         noLoop()
-        drawingFinishedCallback.invoke()
     }
 
     private val pixelsToAddCircles = arrayListOf<Pair<Int, Int>>()

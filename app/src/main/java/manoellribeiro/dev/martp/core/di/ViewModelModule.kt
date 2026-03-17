@@ -1,6 +1,7 @@
 package manoellribeiro.dev.martp.core.di
 
 import android.content.Context
+import android.location.Geocoder
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.Binds
@@ -14,6 +15,7 @@ import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.services.ConnectivityService
+import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
 
 @Module
@@ -36,6 +38,11 @@ object ViewModelModule {
     @Provides
     fun providesLocationService(fusedLocationProviderClient: FusedLocationProviderClient): LocationService {
         return LocationService(fusedLocationProviderClient)
+    }
+
+    @Provides
+    fun providesGetAddressService(geocoder: Geocoder): GetAddressService {
+        return GetAddressService(geocoder)
     }
 
 }

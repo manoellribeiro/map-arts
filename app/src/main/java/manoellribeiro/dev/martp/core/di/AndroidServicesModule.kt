@@ -1,6 +1,7 @@
 package manoellribeiro.dev.martp.core.di
 
 import android.content.Context
+import android.location.Geocoder
 import android.net.ConnectivityManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -14,6 +15,13 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object AndroidServicesModule {
+
+    @Provides
+    fun provideGeoCoder(
+        @ApplicationContext context: Context
+    ): Geocoder {
+        return Geocoder(context)
+    }
 
     @Provides
     fun provideFusedLocationProviderClient(

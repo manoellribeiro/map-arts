@@ -1,6 +1,8 @@
 package manoellribeiro.dev.martp.scenes.createNewMapArt
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.location.Geocoder
 import android.location.Location
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -12,6 +14,7 @@ import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.Failure
+import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import java.io.File
@@ -23,6 +26,7 @@ import javax.inject.Inject
 class CreateNewMapArtViewModel @Inject constructor(
     private val repository: MartpRepository,
     private val locationService: LocationService,
+    private val getAddressService: GetAddressService
 ): ViewModel() {
 
     private val _state: MutableLiveData<CreateNewMapArtUiState> = MutableLiveData()
@@ -37,12 +41,15 @@ class CreateNewMapArtViewModel @Inject constructor(
     suspend fun startToGenerateMapArt(
         directory: File,
         canvasToDrawArtWidth: Int,
-        canvasToDrawArtHeight: Int
+        canvasToDrawArtHeight: Int,
     ) {
         try {
             emitNewState(CreateNewMapArtUiState.Loading)
             val location = locationService.getCurrentLocation().await()
-            Log.i("LocationService", "result: " + location.toString())
+            val address = getAddressService.getAddress(
+                location.latitude,
+                location.longitude
+            ).await()
             currentArtLocation = location
             val staticImagePath = repository.fetchStaticMapImageAsync(
                 longitude = location.longitude,
@@ -51,7 +58,12 @@ class CreateNewMapArtViewModel @Inject constructor(
                 mapHeight = canvasToDrawArtHeight - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
                 dir = directory
             ).await()
-            emitNewState(CreateNewMapArtUiState.ImageDownloaded(staticImagePath))
+            emitNewState(
+        CreateNewMapArtUiState.ImageDownloaded(
+                        staticMapImagePath = staticImagePath,
+                        address = address
+                    )
+            )
         } catch (failure: Failure) {
             emitNewState(CreateNewMapArtUiState.Error(failure))
         }
@@ -88,29 +100,5 @@ class CreateNewMapArtViewModel @Inject constructor(
         } catch (e: Exception) {
             Log.i("CreateNewMapArtViewMode", e.message ?: "")
         }
-    }
-
-    fun handleActionButtonState(
-        titleCurrentText: String
-    ) {
-        if(titleCurrentText.length > 2) {
-            emitNewState(CreateNewMapArtUiState.EnableActionButton)
-        } else {
-            emitNewState(CreateNewMapArtUiState.DisableActionButton)
-        }
-    }
-
-    fun getRandomInputHintsIds(): CreateNewMapArtInputsHint {
-        val titleHints = arrayListOf(
-            R.string.art_title_hint_city_center, R.string.art_title_hint_grandma_house, R.string.art_title_hint_botanical_garden
-        )
-        val descriptionHints = arrayListOf(
-            R.string.art_description_hint_beautiful_place, R.string.art_description_hint_special_place, R.string.art_description_hint_crazy_streets
-        )
-
-        return CreateNewMapArtInputsHint(
-            titleInputId = titleHints.random(),
-            descriptionInputId = descriptionHints.random()
-        )
     }
 }

@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.runTest
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.infra.InstantTaskExecutorRuleForJUnit5
+import manoellribeiro.dev.martp.scenes.main.MainViewModel
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -18,7 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(InstantTaskExecutorRuleForJUnit5::class)
 class GalleryViewModelTest {
 
-    private lateinit var viewModel: GalleryViewModel
+    private lateinit var viewModel: MainViewModel
     private lateinit var repository: MartpRepository
 
     private lateinit var observer: Observer<GalleryUiState>
@@ -27,7 +28,7 @@ class GalleryViewModelTest {
     @BeforeEach
     fun setup() {
         repository = mockk(relaxed = true)
-        viewModel = GalleryViewModel(repository = repository)
+        viewModel = MainViewModel(repository = repository)
         observer =  mockk<Observer<GalleryUiState>>(relaxed = true)
         viewModel.state.observeForever(observer)
     }

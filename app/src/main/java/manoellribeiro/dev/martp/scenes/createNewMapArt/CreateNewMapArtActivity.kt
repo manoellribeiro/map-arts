@@ -1,10 +1,7 @@
 package manoellribeiro.dev.martp.scenes.createNewMapArt
 
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
-import android.util.AttributeSet
-import android.util.Log
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -43,23 +40,17 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         setContentView(binding.root)
         getExtras(savedInstanceState)
         setupObservables()
+        lifecycleScope.launch {
+            viewModel.startToGenerateMapArt(
+                directory = this@CreateNewMapArtActivity.filesDir,
+                canvasToDrawArtWidth = binding.mapArtsContainer.width,
+                canvasToDrawArtHeight = binding.mapArtsContainer.height
+            )
+        }
     }
 
     private fun getExtras(savedInstanceState: Bundle?) {
         type = intent.getEnumExtra<SketchArtType>().orNull { SketchArtType.DEFAULT }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        binding.mapArtsContainer.doOnLayout {
-            lifecycleScope.launch {
-                viewModel.startToGenerateMapArt(
-                    directory = this@CreateNewMapArtActivity.filesDir,
-                    canvasToDrawArtWidth = binding.mapArtsContainer.width,
-                    canvasToDrawArtHeight = binding.mapArtsContainer.height
-                )
-            }
-        }
     }
 
     private fun setupObservables() {
@@ -196,8 +187,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     private fun saveArtToLocalDatabase() = with(binding) {
         lifecycleScope.launch {
             viewModel.saveArtToLocalDatabase(
-                title = "asdasda", //handle this
-                description = "asdsada", // todo: handle this
+                title = "asdasda",
+                description = "asdsada",
                 directory = this@CreateNewMapArtActivity.filesDir,
                 newArtBitMap = mapArtsContainer.toBitmap()
             )

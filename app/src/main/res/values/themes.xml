@@ -56,7 +56,8 @@
     </style>
 
     <style name="Theme.GenerateMapArts.FloatingActionButton">
-        <item name="colorAccent">@color/white</item>
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
     </style>
 
     <!--Text-->

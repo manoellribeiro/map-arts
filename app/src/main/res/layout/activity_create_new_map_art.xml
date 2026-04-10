@@ -155,8 +155,6 @@
             android:layout_marginHorizontal="16dp"
             android:layout_marginVertical="8dp"
             app:cornerRadius="50dp"
-            app:isEnabled="false"
-            android:clickable="false"
             style="@style/MartpButton.Primary"/>
 
     </LinearLayout>

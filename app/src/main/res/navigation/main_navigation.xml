@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/galleryFragment">
+
+    <fragment
+        android:id="@+id/galleryFragment"
+        android:name="manoellribeiro.dev.martp.scenes.gallery.GalleryFragment"
+        android:label="fragment_gallery"
+        tools:layout="@layout/fragment_gallery" />
+    <fragment
+        android:id="@+id/martpProjectInfoFragment"
+        android:name="manoellribeiro.dev.martp.scenes.martpProjectInfo.MartpProjectInfoFragment"
+        android:label="MartpProjectInfoFragment" />
+    <fragment
+        android:id="@+id/chooseArtStyleFragment"
+        android:name="manoellribeiro.dev.martp.scenes.chooseArtStyle.ChooseArtStyleFragment"
+        android:label="ChooseArtStyleFragment" />
+</navigation>

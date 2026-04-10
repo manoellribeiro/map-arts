@@ -10,7 +10,7 @@ import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
 import manoellribeiro.dev.martp.core.utils.PromptGenerator
 import manoellribeiro.dev.martp.scenes.createNewMapArt.CreateNewMapArtViewModel
-import manoellribeiro.dev.martp.scenes.gallery.GalleryViewModel
+import manoellribeiro.dev.martp.scenes.main.MainViewModel
 
 @Module
 @InstallIn(ActivityComponent::class)
@@ -19,8 +19,8 @@ object ActivityModule {
     @Provides
     fun providesGalleryViewModel(
         repository: MartpRepository,
-    ): GalleryViewModel {
-        return GalleryViewModel(
+    ): MainViewModel {
+        return MainViewModel(
             repository = repository,
         )
     }

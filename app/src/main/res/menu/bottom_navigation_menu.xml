@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/galleryMenu"
+    <item android:id="@+id/galleryFragment"
         android:icon="@drawable/ic_gallery_menu"
         android:title="@string/gallery"/>
 
-    <item android:id="@+id/artConfigMenu"
+    <item android:id="@+id/chooseArtStyleFragment"
         android:icon="@drawable/ic_art_config"
         android:title="Arte"/>
 
@@ -13,7 +13,7 @@
         android:icon="@drawable/ic_user_data"
         android:title="Artista"/>
 
-    <item android:id="@+id/infoMenu"
+    <item android:id="@+id/martpProjectInfoFragment"
         android:icon="@drawable/ic_info"
         android:title="Info"/>
 

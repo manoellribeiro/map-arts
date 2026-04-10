@@ -7,12 +7,7 @@ import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.databinding.ActivityLocationAccessDetailsBinding
-import manoellribeiro.dev.martp.scenes.chooseArtStyle.ChooseArtStyleActivity
 import manoellribeiro.dev.martp.scenes.createNewMapArt.CreateNewMapArtActivity
 
 class LocationAccessDetailsActivity: AppCompatActivity() {
@@ -39,7 +34,7 @@ class LocationAccessDetailsActivity: AppCompatActivity() {
     private fun setupRequireLocationPermissionLauncher() {
         requireLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { wasGranted ->
             if(wasGranted) {
-                val intent = Intent(this, ChooseArtStyleActivity::class.java)
+                val intent = Intent(this, CreateNewMapArtActivity::class.java)
                 finish()
                 startActivity(intent)
             }

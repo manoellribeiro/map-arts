@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    tools:context=".scenes.gallery.GalleryFragment"
     android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -11,7 +12,7 @@
         android:layout_height="match_parent"
         android:background="@color/light_cream"
         android:paddingTop="16dp"
-        tools:context=".scenes.gallery.GalleryActivity">
+        tools:context=".scenes.gallery.GalleryFragment">
 
         <ImageView
             android:id="@+id/logoIV"

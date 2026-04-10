@@ -29,7 +29,7 @@
                 android:resource="@xml/provider_paths" />
         </provider>
         <activity
-            android:name=".scenes.gallery.GalleryActivity"
+            android:name=".scenes.main.MainActivity"
             android:theme="@style/Theme.App.Starting"
             android:exported="true">
             <intent-filter>
@@ -39,12 +39,6 @@
         </activity>
         <activity
             android:name=".scenes.locationAcessDetails.LocationAccessDetailsActivity"
-            android:exported="true"/>
-        <activity
-            android:name=".scenes.chooseArtStyle.ChooseArtStyleActivity"
-            android:exported="false"/>
-        <activity
-            android:name=".scenes.martpProjectInfo.MartpProjectInfoActivity"
             android:exported="true"/>
         <activity
             android:name=".scenes.createNewMapArt.CreateNewMapArtActivity"

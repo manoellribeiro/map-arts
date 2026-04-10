@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/galleryMenu"
+        android:icon="@drawable/ic_gallery_menu"
+        android:title="@string/gallery"/>
+
+    <item android:id="@+id/artConfigMenu"
+        android:icon="@drawable/ic_art_config"
+        android:title="Arte"/>
+
+    <item android:id="@+id/userDataMenu"
+        android:icon="@drawable/ic_user_data"
+        android:title="Artista"/>
+
+    <item android:id="@+id/infoMenu"
+        android:icon="@drawable/ic_info"
+        android:title="Info"/>
+
+</menu>

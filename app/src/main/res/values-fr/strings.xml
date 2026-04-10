@@ -38,4 +38,5 @@
     <string name="location_not_enabled_error">Pour créer une œuvre cartographique, vous devez activer la localisation dans les paramètres</string>
     <string name="ai_powered">Généré par IA</string>
     <string name="generate_ai_content_failure_message">Une erreur s’est produite lors de la génération de la description de votre œuvre avec l’intelligence artificielle.</string>
+    <string name="your_gallery">Votre galerie</string>
 </resources>

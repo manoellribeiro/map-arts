@@ -3,11 +3,11 @@ package manoellribeiro.dev.martp.scenes.gallery
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -21,10 +21,10 @@ import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.databinding.ActivityGalleryBinding
 import manoellribeiro.dev.martp.scenes.chooseArtStyle.ChooseArtStyleActivity
-import manoellribeiro.dev.martp.scenes.createNewMapArt.CreateNewMapArtActivity
 import manoellribeiro.dev.martp.scenes.locationAcessDetails.LocationAccessDetailsActivity
 import manoellribeiro.dev.martp.scenes.martpProjectInfo.MartpProjectInfoActivity
 import java.io.File
+
 
 @AndroidEntryPoint
 class GalleryActivity : AppCompatActivity() {
@@ -73,8 +73,7 @@ class GalleryActivity : AppCompatActivity() {
     }
 
     private fun setupNotEmptyListState(mapArts: List<MapArtEntity>) = with(binding) {
-        infoIB.visible()
-        infoIB.setOnClickListener { openMartpProjectInfoActivity() }
+        //infoIB.visible()
         emptyListTV.gone()
         errorTV.gone()
         emptyGalleryImageIV.gone()
@@ -86,52 +85,52 @@ class GalleryActivity : AppCompatActivity() {
             onClickListener = { mapArt ->  },
             onShareButtonClickListener = { imagePath -> shareArtImage(imagePath)}
         )
-        newArtMB.visible()
-        newArtMB.title = getString(R.string.create_new_art)
-        newArtMB.setOnClickListener {
-            verifyPermissionToAccessLocation()
-        }
+        //newArtMB.visible()
+        //newArtMB.title = getString(R.string.create_new_art)
+        //newArtMB.setOnClickListener {
+        //    verifyPermissionToAccessLocation()
+        //}
     }
 
     private fun setupLoadingState() = with(binding) {
-        infoIB.gone()
+        //infoIB.gone()
         mapArtsRV.gone()
         emptyListTV.gone()
         errorTV.gone()
         emptyGalleryImageIV.gone()
         loadingIndicatorPB.visible()
-        newArtMB.gone()
+        //newArtMB.gone()
     }
 
     private fun setupErrorState(failure: Failure) = with(binding) {
-        infoIB.visible()
-        infoIB.setOnClickListener { openMartpProjectInfoActivity() }
+        //infoIB.visible()
+        //infoIB.setOnClickListener { openMartpProjectInfoActivity() }
         mapArtsRV.gone()
         emptyListTV.gone()
         errorTV.visible()
         emptyGalleryImageIV.gone()
         errorTV.text = getString(failure.messageToBeDisplayedToUserId)
         loadingIndicatorPB.gone()
-        newArtMB.visible()
-        newArtMB.title = getString(R.string.try_again)
-        newArtMB.setOnClickListener {
-            viewModel.getUserMapArts()
-        }
+        //newArtMB.visible()
+        //newArtMB.title = getString(R.string.try_again)
+        //newArtMB.setOnClickListener {
+        //    viewModel.getUserMapArts()
+        //}
     }
 
     private fun setupEmptyListState() = with(binding) {
-        infoIB.visible()
-        infoIB.setOnClickListener { openMartpProjectInfoActivity() }
+        //infoIB.visible()
+        //infoIB.setOnClickListener { openMartpProjectInfoActivity() }
         mapArtsRV.gone()
         emptyListTV.visible()
         emptyGalleryImageIV.visible()
         errorTV.gone()
         loadingIndicatorPB.gone()
-        newArtMB.visible()
-        newArtMB.title = getString(R.string.create_new_art)
-        newArtMB.setOnClickListener {
-            verifyPermissionToAccessLocation()
-        }
+        //newArtMB.visible()
+        //newArtMB.title = getString(R.string.create_new_art)
+        //newArtMB.setOnClickListener {
+        //    verifyPermissionToAccessLocation()
+        //}
     }
 
     private fun openMartpProjectInfoActivity() {

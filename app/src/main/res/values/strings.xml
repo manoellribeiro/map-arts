@@ -38,4 +38,5 @@
     <string name="location_not_enabled_error">To create a map art, you need to enable location in the settings.</string>
     <string name="ai_powered">AI Powered</string>
     <string name="generate_ai_content_failure_message">An error occurred while generating the description of your art with Artificial Intelligence.</string>
+    <string name="your_gallery">Your Gallery</string>
 </resources>

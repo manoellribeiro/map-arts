@@ -39,6 +39,8 @@
     <string name="ai_powered">AI Powered</string>
     <string name="generate_ai_content_failure_message">An error occurred while generating the description of your art with Artificial Intelligence.</string>
     <string name="your_gallery">Your Gallery</string>
+    <string name="create_description_with_ai">Create description with AI</string>
+    <string name="thinking">Thinking…</string>
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

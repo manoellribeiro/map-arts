@@ -113,6 +113,8 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-ai")
 
+    implementation 'com.airbnb.android:lottie:6.7.1'
+
     //Tests
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
     testImplementation "io.mockk:mockk:1.14.7"

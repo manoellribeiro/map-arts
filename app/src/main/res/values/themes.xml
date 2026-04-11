@@ -52,7 +52,7 @@
 
 
     <style name="Theme.GenerateMapArts.ProgressBarTheme">
-        <item name="colorAccent">@color/blue</item>
+        <item name="colorAccent">@color/green_darker</item>
     </style>
 
     <style name="Theme.GenerateMapArts.FloatingActionButton">

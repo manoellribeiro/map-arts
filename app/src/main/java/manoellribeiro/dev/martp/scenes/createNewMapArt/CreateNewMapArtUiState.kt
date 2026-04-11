@@ -5,6 +5,10 @@ import manoellribeiro.dev.martp.core.models.failures.Failure
 
 sealed interface CreateNewMapArtUiState {
 
+    object LoadingAIText: CreateNewMapArtUiState
+    class GeneratedAIText(val text: String): CreateNewMapArtUiState
+    object ErrorGeneratingAIText: CreateNewMapArtUiState
+
     object Loading: CreateNewMapArtUiState
     object ActionButtonLoading: CreateNewMapArtUiState
     class Error(val failure: Failure): CreateNewMapArtUiState
@@ -14,6 +18,4 @@ sealed interface CreateNewMapArtUiState {
         val aiDescription: String
     ): CreateNewMapArtUiState
     class ArtCreatedSuccessfully(val pathToStoreArtImage: String): CreateNewMapArtUiState
-    object EnableActionButton: CreateNewMapArtUiState
-    object DisableActionButton: CreateNewMapArtUiState
 }

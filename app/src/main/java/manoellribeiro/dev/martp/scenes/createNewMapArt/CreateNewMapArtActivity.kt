@@ -40,12 +40,14 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         setContentView(binding.root)
         getExtras(savedInstanceState)
         setupObservables()
-        lifecycleScope.launch {
-            viewModel.startToGenerateMapArt(
-                directory = this@CreateNewMapArtActivity.filesDir,
-                canvasToDrawArtWidth = binding.mapArtsContainer.width,
-                canvasToDrawArtHeight = binding.mapArtsContainer.height
-            )
+        binding.mapArtsContainer.doOnLayout {
+            lifecycleScope.launch {
+                viewModel.startToGenerateMapArt(
+                    directory = this@CreateNewMapArtActivity.filesDir,
+                    canvasToDrawArtWidth = binding.mapArtsContainer.width,
+                    canvasToDrawArtHeight = binding.mapArtsContainer.height
+                )
+            }
         }
     }
 
@@ -61,22 +63,41 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 CreateNewMapArtUiState.Loading -> handleLoadingState()
                 CreateNewMapArtUiState.ActionButtonLoading -> handleActionButtonLoadingState()
                 is CreateNewMapArtUiState.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState(state.pathToStoreArtImage)
-                CreateNewMapArtUiState.DisableActionButton -> disableActionButton()
-                CreateNewMapArtUiState.EnableActionButton -> enableActionButton()
+                CreateNewMapArtUiState.ErrorGeneratingAIText -> handleErrorGeneratingAIText()
+                is CreateNewMapArtUiState.GeneratedAIText -> handleGeneratedAIText(state.text)
+                CreateNewMapArtUiState.LoadingAIText -> handleLoadingAIText()
             }
         }
     }
 
-    private fun disableActionButton() = with(binding) {
-        actionMB.isEnabled = false
-        actionMB.isClickable = false
+    private fun handleErrorGeneratingAIText() = with(binding) {
+        aiTextTV.text = getString(R.string.create_description_with_ai)
+        aiPoweradeIV.visible()
+        loadingAIIndicatorPB.gone()
+        aiPoweredLL.isClickable = true
+        aiPoweredLL.setOnClickListener {
+            lifecycleScope.launch {
+                viewModel.generateAiText()
+            }
+        }
     }
 
-    private fun enableActionButton()  = with(binding) {
-        actionMB.isEnabled = true
-        actionMB.isClickable = true
-        actionMB.setOnClickListener {
-            saveArtToLocalDatabase()
+    private fun handleLoadingAIText() = with(binding) {
+        aiTextTV.text = getString(R.string.thinking)
+        aiPoweradeIV.gone()
+        loadingAIIndicatorPB.visible()
+        aiPoweredLL.setOnClickListener(null)
+        aiPoweredLL.isClickable = false
+    }
+
+    private fun handleGeneratedAIText(text: String) = with(binding) {
+        descriptionTV.visible()
+        typingAnimation(descriptionTV, text, 1) {
+            aiTextTV.text = getString(R.string.ai_powered)
+            aiPoweradeIV.visible()
+            loadingAIIndicatorPB.gone()
+            aiPoweredLL.setOnClickListener(null)
+            aiPoweredLL.isClickable = false
         }
     }
 
@@ -95,16 +116,13 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     }
 
     private fun handleStateError(failure: Failure) = with(binding) {
-        backIB.visible()
-        backIB.setOnClickListener {
-            finish()
-        }
         stateErrorS.visible()
         errorImageIV.visible()
         errorTextTV.visible()
         errorTextTV.text = getString(failure.messageToBeDisplayedToUserId)
         mapArtsContainer.gone()
         titleTV.gone()
+        loadingIndicatorLAV.gone()
         actionMB.visible()
         actionMB.isEnabled = true
         actionMB.isClickable = true
@@ -124,16 +142,13 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     }
 
     private fun handleLoadingState() = with(binding) {
-        backIB.visible()
-        backIB.setOnClickListener {
-            finish()
-        }
         titleTV.text = getString(R.string.we_are_generating_your_art)
         stateErrorS.gone()
         errorImageIV.gone()
         errorTextTV.gone()
         actionMB.gone()
-        mapArtsContainer.visible()
+        mapArtsContainer.gone()
+        loadingIndicatorLAV.visible()
         titleTV.visible()
         cityCountryTV.gone()
         descriptionTV.gone()
@@ -145,11 +160,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         title: String,
         aiDescription: String
     ) = with(binding) {
-        backIB.visible()
-        backIB.setOnClickListener {
-            finish()
-        }
         mapArtsContainer.visible()
+        loadingIndicatorLAV.gone()
         titleTV.visible()
         sketch = when(type) {
             SketchArtType.DEFAULT -> DefaultMartpSketch(
@@ -172,23 +184,32 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         val processingFragment = PFragment(sketch)
         processingFragment.setView(mapArtsContainer, this@CreateNewMapArtActivity)
         cityCountryTV.visible()
-        descriptionTV.visible()
+        descriptionTV.gone()
+        aiPoweredLL.visible()
+        aiPoweredLL.isClickable = true
+        aiPoweredLL.setOnClickListener {
+            lifecycleScope.launch {
+                viewModel.generateAiText()
+            }
+        }
         cityCountryTV.text = title
-        typingAnimation(descriptionTV, aiDescription, 1) { aiPoweredLL.visible() }
         stateErrorS.gone()
         errorImageIV.gone()
         errorTextTV.gone()
         titleTV.text = getString(R.string.this_is_your_new_art)
         actionMB.visible()
-        actionMB.isClickable = false
+        actionMB.isClickable = true
         actionMB.title = getString(R.string.save_art)
+        actionMB.setOnClickListener {
+            saveArtToLocalDatabase()
+        }
     }
 
     private fun saveArtToLocalDatabase() = with(binding) {
         lifecycleScope.launch {
             viewModel.saveArtToLocalDatabase(
-                title = "asdasda",
-                description = "asdsada",
+                title = cityCountryTV.text.toString(),
+                description = descriptionTV.text.toString(), //todo: entender o que acontece se esse não estiver preenchido
                 directory = this@CreateNewMapArtActivity.filesDir,
                 newArtBitMap = mapArtsContainer.toBitmap()
             )
@@ -201,6 +222,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         length: Int,
         onComplete: () -> Unit
     ) {
+        //todo: add a check to see if the text is empty to prevent crashes
         var delay = 25L
         if(Character.isWhitespace(text.elementAt(length-1))){
             delay = 50L

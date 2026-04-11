@@ -39,4 +39,6 @@
     <string name="ai_powered">Gerado por IA</string>
     <string name="generate_ai_content_failure_message">Um erro aconteceu gerando a descrição da sua arte com Inteligência Artificial.</string>
     <string name="your_gallery">Sua galeria</string>
+    <string name="create_description_with_ai">Criar descrição com IA</string>
+    <string name="thinking">Pensando…</string>
 </resources>

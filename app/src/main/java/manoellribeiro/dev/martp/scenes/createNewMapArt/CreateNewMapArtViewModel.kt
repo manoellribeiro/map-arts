@@ -2,6 +2,7 @@ package manoellribeiro.dev.martp.scenes.createNewMapArt
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.util.Log
@@ -42,6 +43,7 @@ class CreateNewMapArtViewModel @Inject constructor(
     }
 
     private var currentArtLocation: Location? = null
+    private var currentArtAddress: Address? = null
 
     suspend fun startToGenerateMapArt(
         directory: File,
@@ -55,12 +57,7 @@ class CreateNewMapArtViewModel @Inject constructor(
                 location.latitude,
                 location.longitude
             ).await()
-            val text = generateAIContentService.generateTextContent(promptGenerator.generateArtDescriptionPrompt(
-                countryName = address?.countryName.orEmpty(),
-                cityName = address?.locality.orEmpty(),
-                streetName = address?.thoroughfare.orEmpty(),
-                languageToReturn = Locale.getDefault().displayName
-            )).await()
+            currentArtAddress = address
             currentArtLocation = location
             val staticImagePath = repository.fetchStaticMapImageAsync(
                 longitude = location.longitude,
@@ -73,11 +70,30 @@ class CreateNewMapArtViewModel @Inject constructor(
         CreateNewMapArtUiState.ImageDownloaded(
                         staticMapImagePath = staticImagePath,
                         title = address?.locality + ", " + address?.countryName + ", " + address?.thoroughfare,
-                        aiDescription = text.orEmpty()
+                        aiDescription = null.orEmpty()
                     )
             )
         } catch (failure: Failure) {
             emitNewState(CreateNewMapArtUiState.Error(failure))
+        }
+    }
+
+    suspend fun generateAiText() {
+        try {
+            emitNewState(CreateNewMapArtUiState.LoadingAIText)
+            val text = generateAIContentService.generateTextContent(promptGenerator.generateArtDescriptionPrompt(
+                countryName = currentArtAddress?.countryName.orEmpty(),
+                cityName = currentArtAddress?.locality.orEmpty(),
+                streetName = currentArtAddress?.thoroughfare.orEmpty(),
+                languageToReturn = Locale.getDefault().displayName
+            )).await()
+            if(text.isNullOrBlank()) {
+                emitNewState(CreateNewMapArtUiState.ErrorGeneratingAIText)
+            } else {
+                emitNewState(CreateNewMapArtUiState.GeneratedAIText(text))
+            }
+        } catch (failure: Failure) {
+            emitNewState(CreateNewMapArtUiState.ErrorGeneratingAIText)
         }
     }
 

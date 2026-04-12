@@ -9,6 +9,9 @@
         android:icon="@drawable/ic_art_config"
         android:title="Arte"/>
 
+    <item android:id="@+id/none"
+        android:title="None"/>
+
     <item android:id="@+id/userDataMenu"
         android:icon="@drawable/ic_user_data"
         android:title="Artista"/>

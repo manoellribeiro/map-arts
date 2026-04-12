@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/light_cream"
@@ -13,43 +13,34 @@
         app:defaultNavHost="true"
         android:name="androidx.navigation.fragment.NavHostFragment"/>
 
-    <com.google.android.material.bottomappbar.BottomAppBar
-        android:id="@+id/bottomAppBarBAB"
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
         android:layout_width="match_parent"
-        android:layout_gravity="bottom"
-        app:fabAlignmentMode="center"
-        app:fabAnchorMode="cradle"
-        app:fabCradleMargin="10dp"
-        app:fabCradleVerticalOffset="10dp"
-        android:backgroundTint="@android:color/transparent"
-        android:layout_height="wrap_content">
-
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:layout_width="match_parent"
-            android:id="@+id/bottomNavigationBarBNV"
-            android:layout_height="?attr/actionBarSize"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:menu="@menu/bottom_navigation_menu"
-            app:labelVisibilityMode="unlabeled"
-            app:itemIconSize="20dp"
-            app:itemActiveIndicatorStyle="@style/Theme.BottomNavigationView.ActiveIndicator"
-            app:itemTextAppearanceActiveBoldEnabled="true"
-            app:itemIconTint="@drawable/selector_bottom_navigation_menus"
-            android:background="@drawable/background_home_bottom_navigation_bar"/>
-
-    </com.google.android.material.bottomappbar.BottomAppBar>
+        android:id="@+id/bottomNavigationBarBNV"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:menu="@menu/bottom_navigation_menu"
+        app:labelVisibilityMode="unlabeled"
+        app:itemIconSize="20dp"
+        app:itemActiveIndicatorStyle="@style/Theme.BottomNavigationView.ActiveIndicator"
+        app:itemIconTint="@drawable/selector_bottom_navigation_menus"
+        android:background="@drawable/background_home_bottom_navigation_bar"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="Button with a plus icon inside a location to create a new art"
-        app:layout_anchor="@id/bottomAppBarBAB"
         android:backgroundTint="@color/yellow"
-        app:maxImageSize="36dp"
+        app:maxImageSize="32dp"
         android:id="@+id/createNewArtFAB"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/bottomNavigationBarBNV"
+        app:layout_constraintTop_toTopOf="@id/bottomNavigationBarBNV"
+        app:fabSize="normal"
         app:shapeAppearanceOverlay="@style/Theme.GenerateMapArts.FloatingActionButton"
         android:src="@drawable/ic_new_map_art"/>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
+import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
 import javax.inject.Singleton
 
 @Module
@@ -21,6 +22,11 @@ object DatabaseModule {
     }
 
     @Provides
+    fun providesUserInfoEntity(martpDatabase: MartpDatabase): UserInfoDao {
+        return martpDatabase.userEntityDao()
+    }
+
+    @Provides
     @Singleton
     fun providesMartpRoomDatabase(
         @ApplicationContext applicationContext: Context
@@ -28,7 +34,7 @@ object DatabaseModule {
         return Room.databaseBuilder(
             applicationContext,
             MartpDatabase::class.java, MartpDatabase.databaseName
-        ).build()
+        ).addMigrations(MartpDatabase.MIGRATION_1_2).build()
     }
 
 }

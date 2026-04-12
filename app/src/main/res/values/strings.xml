@@ -41,6 +41,12 @@
     <string name="your_gallery">Your Gallery</string>
     <string name="create_description_with_ai">Create description with AI</string>
     <string name="thinking">Thinking…</string>
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="digital_exposition">Digital Exposition</string>
+    <string name="digital_exposition_description">Every art created on Martp is sent to our digital exposition — a shared gallery where everyone can explore the creativity of our community. If you want your name alongside your art, fill in the fields below.</string>
+    <string name="email_not_mandatory_hint">Not mandatory! The only downside is that I won\'t be able to contact you if I really like your art :)</string>
+    <string name="save_my_info">Save my info</string>
+    <string name="username" translatable="false">Username</string>
+    <string name="email_optional_hint">Email (optional)</string>
+    <string name="name_or_nickname_hint">Your name or nickname</string>
+    <string name="name_suggestion_hint">Give yourself an artistic name or even use your social media username</string>
 </resources>

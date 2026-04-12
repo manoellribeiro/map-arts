@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.scenes.gallery.GalleryUiState
+import manoellribeiro.dev.martp.scenes.userInfo.UserInfoUiState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,6 +24,20 @@ class MainViewModel @Inject constructor(
         _galleryState.value = newState
     }
 
+    private val _userInfoState: MutableLiveData<UserInfoUiState> = MutableLiveData<UserInfoUiState>()
+    val userInfoState: LiveData<UserInfoUiState> = _userInfoState
+
+    private fun emitNewUserInfoState(newState: UserInfoUiState) {
+        _userInfoState.value = newState
+    }
+
+    private val _mainState: MutableLiveData<MainUiState> = MutableLiveData<MainUiState>()
+    val mainState: LiveData<MainUiState> = _mainState
+
+    private fun emitNewMainState(newState: MainUiState) {
+        _mainState.value = newState
+    }
+
     fun getUserMapArts() = viewModelScope.launch {
         try {
             emitNewGalleryState(GalleryUiState.Loading)
@@ -35,5 +50,33 @@ class MainViewModel @Inject constructor(
         } catch (failure: Failure) {
             emitNewGalleryState(GalleryUiState.Error(failure))
         }
+    }
+
+    fun tryToGetUserInfo() = viewModelScope.launch {
+        emitNewMainState(
+            MainUiState.SetUserInfoBadgeVisibility(
+                visible = false
+            )
+        )
+        emitNewUserInfoState(UserInfoUiState.Loading)
+        val userInfo = repository.fetchCurrentUserInfo().await()
+        emitNewUserInfoState(UserInfoUiState.UserFound(userInfo))
+    }
+
+    fun setUserName(username: String, userId: String) = viewModelScope.launch {
+        repository.setUserName(username, userId)
+    }
+
+    fun setUserEmail(email: String, userId: String) = viewModelScope.launch {
+        repository.setUserEmail(email, userId)
+    }
+
+    fun handleBadgesVisibilities() = viewModelScope.launch {
+        val user = repository.fetchCurrentUserInfo().await()
+        emitNewMainState(
+            MainUiState.SetUserInfoBadgeVisibility(
+                visible = user.username.isNullOrEmpty() && user.email.isNullOrEmpty()
+            )
+        )
     }
 }

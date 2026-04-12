@@ -10,24 +10,68 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
+import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
+import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import manoellribeiro.dev.martp.core.services.ConnectivityService
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
+import java.util.UUID
 import javax.inject.Inject
 
 class MartpRepository @Inject constructor(
     private val mapboxApiService: MapboxApiService,
     private val connectivityService: ConnectivityService,
-    private val mapArtDao: MapArtsDao
+    private val mapArtDao: MapArtsDao,
+    private val userInfoDao: UserInfoDao,
 ) {
 
     //TODO: Refactor this way of using ioScope
     private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    fun setUserName(username: String, userId: String) = ioScope.launch {
+        try {
+            userInfoDao.setUserName(username = username, id = userId)
+        } catch (e: Exception) {
+            //Log, but don't do nothing
+        }
+    }
+
+    fun setUserEmail(email: String, userId: String) = ioScope.launch {
+        try {
+            userInfoDao.setUserEmail(email = email, id = userId)
+        } catch (e: Exception) {
+            //Log, but don't do nothing
+        }
+    }
+
+    fun fetchCurrentUserInfo() :Deferred<UserInfoEntity> = ioScope.async {
+        try {
+            var user = userInfoDao.getUser()
+            return@async if(user == null) {
+               user = UserInfoEntity(
+                   id = UUID.randomUUID().toString(),
+                   username = null,
+                   email = null
+               )
+                userInfoDao.insert(
+                    userInfoEntity = user
+                )
+                user
+            } else user
+        } catch (e: Exception) {
+            return@async UserInfoEntity(
+                id = UUID.randomUUID().toString(),
+                username = null,
+                email = null
+            ) //todo: think how to handle this error
+        }
+    }
 
     fun fetchUserMapArts(): Deferred<List<MapArtEntity>> = ioScope.async {
         try {

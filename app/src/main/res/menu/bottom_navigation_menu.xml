@@ -12,7 +12,7 @@
     <item android:id="@+id/none"
         android:title="None"/>
 
-    <item android:id="@+id/userDataMenu"
+    <item android:id="@+id/userInfoFragment"
         android:icon="@drawable/ic_user_data"
         android:title="Artista"/>
 

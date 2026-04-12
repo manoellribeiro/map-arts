@@ -41,4 +41,11 @@
     <string name="your_gallery">Tu galería</string>
     <string name="create_description_with_ai">Crear descripción con IA</string>
     <string name="thinking">Pensando…</string>
+    <string name="digital_exposition">Exposición Digital</string>
+    <string name="digital_exposition_description">Cada arte creada en Martp se envía a nuestra exposición digital — una galería compartida donde todos pueden explorar la creatividad de nuestra comunidad. Si quieres que tu nombre aparezca junto a tu arte, completa los campos a continuación.</string>
+    <string name="email_not_mandatory_hint">¡No es obligatorio! La única desventaja es que no podré contactarte si realmente me gusta tu arte :)</string>
+    <string name="save_my_info">Guardar mi información</string>
+    <string name="email_optional_hint">Email (opcional)</string>
+    <string name="name_or_nickname_hint">Tu nombre o apodo</string>
+    <string name="name_suggestion_hint">Date un nombre artístico o incluso usa tu nombre de usuario de redes sociales</string>
 </resources>

@@ -6,10 +6,12 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.fragment.app.activityViewModels
 import dagger.hilt.android.AndroidEntryPoint
 import manoellribeiro.dev.martp.databinding.ActivityMainBinding
 import manoellribeiro.dev.martp.scenes.createNewMapArt.CreateNewMapArtActivity
@@ -17,11 +19,14 @@ import manoellribeiro.dev.martp.scenes.locationAcessDetails.LocationAccessDetail
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
+import manoellribeiro.dev.martp.R
+import kotlin.getValue
 
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    private val viewModel: MainViewModel by viewModels()
     private lateinit var requireLocationPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var binding: ActivityMainBinding
 
@@ -33,6 +38,20 @@ class MainActivity : AppCompatActivity() {
         setupRequireLocationPermissionLauncher()
         setupBottomNavigationBar()
         setupViews()
+        setupObservables()
+        viewModel.handleBadgesVisibilities()
+    }
+
+    private fun setupObservables() {
+        viewModel.mainState.observe(this) { state ->
+            when(state) {
+                is MainUiState.SetUserInfoBadgeVisibility -> setupUserInfoBadgeVisibility(state.visible)
+            }
+        }
+    }
+
+    private fun setupUserInfoBadgeVisibility(visible: Boolean) {
+        binding.bottomNavigationBarBNV.getOrCreateBadge(R.id.userInfoFragment).isVisible = visible
     }
 
     private fun setupBottomNavigationBar() {

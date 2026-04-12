@@ -10,6 +10,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
@@ -52,6 +53,7 @@ class CreateNewMapArtViewModel @Inject constructor(
     ) {
         try {
             emitNewState(CreateNewMapArtUiState.Loading)
+            delay(4000)
             val location = locationService.getCurrentLocation().await()
             val address = getAddressService.getAddress(
                 location.latitude,

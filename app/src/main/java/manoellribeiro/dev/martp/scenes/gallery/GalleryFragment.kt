@@ -48,7 +48,7 @@ class GalleryFragment : Fragment() {
     }
 
     private fun shareArtImage(imagePathLocation: String) {
-        activity?.applicationContext?.let {
+        activity?.let {
             val sharingIntent = Intent(Intent.ACTION_SEND)
             sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             sharingIntent.type = "image/*"

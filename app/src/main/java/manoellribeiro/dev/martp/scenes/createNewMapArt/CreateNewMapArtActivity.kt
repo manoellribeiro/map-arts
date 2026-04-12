@@ -143,7 +143,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
 
     private fun handleLoadingState() = with(binding) {
         titleTV.text = getString(R.string.we_are_generating_your_art)
-        stateErrorS.gone()
+        stateErrorS.visible()
         errorImageIV.gone()
         errorTextTV.gone()
         actionMB.gone()

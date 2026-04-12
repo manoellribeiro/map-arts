@@ -35,16 +35,9 @@ class MapArtsRecyclerViewAdapter(
             val artBitmap = BitmapFactory.decodeFile(mapArt.imagePathLocation)
             artMiniatureIV.setImageBitmap(artBitmap)
             artTitleTV.text = mapArt.title
-            if(mapArt.description.isNullOrEmpty()) {
-                artDescriptionTV.gone()
-            } else {
-                artDescriptionTV.visible()
-                artDescriptionTV.text = mapArt.description
-            }
             shareFAB.setOnClickListener {
                 onShareButtonClickListener.invoke(mapArt.imagePathLocation)
             }
-            artDescriptionTV.text = mapArt.description
             dateTV.text = Calendar.getInstance().apply { timeInMillis = mapArt.dateInMillis }.formatDateHour()
             root.setOnClickListener { onClickListener.invoke(mapArt) }
         }

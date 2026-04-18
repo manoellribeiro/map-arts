@@ -31,19 +31,6 @@ class DefaultMartpSketch(
     }
 
     private fun changePixelColors(mapImage: PImage) {
-        val colorsArray = arrayListOf(
-            color(204, 88, 3),
-            color(226, 113, 29),
-            color(255, 149, 5),
-        )
-        val colorsArray2 = arrayListOf(
-            color(2, 244, 208),
-            color(18, 13, 49),
-            color(250, 121, 33),
-        )
-
-        //val streetPixels = arrayListOf();
-
         mapImage.loadPixels()
 
         for (y in 0..mapImage.height) {
@@ -51,13 +38,11 @@ class DefaultMartpSketch(
             for (x in 0..mapImage.width) {
                 val currentPixelColor = mapImage.get(x, y)
                 if(isStreetPixel(currentPixelColor)) {
-                    val newPixelColor = colorsArray[(0 until colorsArray.size).random()]
                     mapImage.set(x, y, color(18, 13, 49))
                 } else {
                     mapImage.set(x, y, color(255, 201, 113))
                 }
             }
-            //streetPixels.add()
         }
         mapImage.updatePixels()
     }

@@ -27,7 +27,7 @@ class PointillismMartpSketch(
         fill(color(18, 13, 49))
         pixelsToAddCircles.forEach {
             ellipseMode(RADIUS)
-            ellipse(it.first.toFloat() + frameThickness + framePadding, it.second.toFloat() + frameThickness + framePadding, 5F, 5F)
+            ellipse(it.first.toFloat() + frameThickness + framePadding, it.second.toFloat() + frameThickness + framePadding, 4F, 4F)
         }
 
         noLoop()

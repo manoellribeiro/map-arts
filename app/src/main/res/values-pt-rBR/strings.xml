@@ -48,4 +48,15 @@
     <string name="email_optional_hint">Email (opcional)</string>
     <string name="name_or_nickname_hint">Seu nome ou apelido</string>
     <string name="name_suggestion_hint">Dê a si mesmo um nome artístico ou até use seu nome de usuário das redes sociais</string>
+    <string name="art_settings">Configurações da Arte</string>
+    <string name="customize_next_art">Personalize como sua próxima arte vai ficar</string>
+    <string name="reset">Redefinir</string>
+    <string name="close">Perto</string>
+    <string name="far">Longe</string>
+    <string name="art_style">Estilo de Arte</string>
+    <string name="choose_visual_style">Escolha o estilo visual para sua arte gerada</string>
+    <string name="color_palette">Paleta de Cores</string>
+    <string name="choose_complete_color_set">Escolha um conjunto completo de cores para sua arte</string>
+    <string name="map_zoom">Zoom do Mapa</string>
+    <string name="control_map_zoom">Controle o quão perto ou longe a visualização do mapa ficará</string>
 </resources>

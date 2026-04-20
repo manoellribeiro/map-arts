@@ -16,8 +16,8 @@
         android:label="MartpProjectInfoFragment" />
     <fragment
         android:id="@+id/chooseArtStyleFragment"
-        android:name="manoellribeiro.dev.martp.scenes.chooseArtStyle.ChooseArtStyleFragment"
-        android:label="ChooseArtStyleFragment" />
+        android:name="manoellribeiro.dev.martp.scenes.artStyleSettings.ArtStyleSettingsFragment"
+        android:label="ArtStyleSettingsFragment" />
     <fragment
         android:id="@+id/userInfoFragment"
         android:name="manoellribeiro.dev.martp.scenes.userInfo.UserInfoFragment"

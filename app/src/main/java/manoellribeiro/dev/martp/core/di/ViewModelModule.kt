@@ -2,6 +2,8 @@ package manoellribeiro.dev.martp.core.di
 
 import android.content.Context
 import android.location.Geocoder
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.ai.GenerativeModel
@@ -31,13 +33,15 @@ object ViewModelModule {
         mapArtsDao: MapArtsDao,
         userInfoDao: UserInfoDao,
         mapboxApiService: MapboxApiService,
-        connectivityService: ConnectivityService
+        connectivityService: ConnectivityService,
+        artSettingsDataStore: DataStore<Preferences>
     ): MartpRepository {
         return MartpRepository(
             mapArtDao = mapArtsDao,
             connectivityService = connectivityService,
             mapboxApiService = mapboxApiService,
-            userInfoDao = userInfoDao
+            userInfoDao = userInfoDao,
+            artSettingsDataSore = artSettingsDataStore
         )
     }
 

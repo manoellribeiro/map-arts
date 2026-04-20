@@ -1,6 +1,10 @@
 package manoellribeiro.dev.martp.core.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
@@ -15,6 +19,14 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
+
+    @Singleton
+    @Provides
+    fun providesArtSettingsDataStore(@ApplicationContext applicationContext: Context): DataStore<Preferences> {
+        return PreferenceDataStoreFactory.create {
+            applicationContext.preferencesDataStoreFile("artSettings")
+        }
+    }
 
     @Provides
     fun providesMapArtsDao(martpDatabase: MartpDatabase): MapArtsDao {

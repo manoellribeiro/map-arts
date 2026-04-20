@@ -49,4 +49,15 @@
     <string name="email_optional_hint">Email (optional)</string>
     <string name="name_or_nickname_hint">Your name or nickname</string>
     <string name="name_suggestion_hint">Give yourself an artistic name or even use your social media username</string>
+    <string name="art_settings">Art Settings</string>
+    <string name="customize_next_art">Customize how your next art will look</string>
+    <string name="reset">Reset</string>
+    <string name="close">Close</string>
+    <string name="far">Far</string>
+    <string name="art_style">Art Style</string>
+    <string name="choose_visual_style">Choose the visual style for your generated art</string>
+    <string name="color_palette">Color Palette</string>
+    <string name="choose_complete_color_set">Choose a complete color set for your art</string>
+    <string name="map_zoom">Map Zoom</string>
+    <string name="control_map_zoom">Control how close or far the map view will be</string>
 </resources>

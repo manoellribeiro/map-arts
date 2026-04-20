@@ -9,6 +9,7 @@ val White @Composable get() = colorResource(id = R.color.white)
 
 val Blue @Composable get() = colorResource(id = R.color.blue)
 val Yellow @Composable get() = colorResource(id = R.color.yellow)
+val LightCream @Composable get() = colorResource(id = R.color.light_cream)
 val LightYellow @Composable get() = colorResource(id = R.color.light_yellow)
 val Green @Composable get() = colorResource(id = R.color.green)
 val GreenDarker @Composable get() = colorResource(id = R.color.green_darker)

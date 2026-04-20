@@ -2,6 +2,10 @@ package manoellribeiro.dev.martp.core.data.repositories
 
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.lifecycle.LiveData
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
@@ -10,6 +14,8 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
@@ -29,10 +35,39 @@ class MartpRepository @Inject constructor(
     private val connectivityService: ConnectivityService,
     private val mapArtDao: MapArtsDao,
     private val userInfoDao: UserInfoDao,
+    private val artSettingsDataSore: DataStore<Preferences>
 ) {
 
     //TODO: Refactor this way of using ioScope
     private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    companion object {
+        private const val MAP_ZOOM_KEY = "MAP_ZOOM_KEY"
+    }
+
+    fun setMapZoomPreference(mapZoom: Float) = ioScope.launch {
+        try {
+            Log.i("MainViewModel", "setMapZoom" + mapZoom.toString())
+            val mapZoomKey = floatPreferencesKey(MAP_ZOOM_KEY)
+            artSettingsDataSore.edit { preferences ->
+                preferences[mapZoomKey] = mapZoom
+            }
+        } catch (e: Exception) {
+            throw LocalStorageErrorFailure(e.message)
+        }
+    }
+
+    fun getMapZoomPreference(): Deferred<Float> = ioScope.async {
+        val defaultZoom = 15F
+        try {
+            val mapZoomKey = floatPreferencesKey(MAP_ZOOM_KEY)
+            return@async artSettingsDataSore.data.map { preferences ->
+                preferences[mapZoomKey]
+            }.first() ?: defaultZoom
+        } catch (e: Exception) {
+            return@async defaultZoom
+        }
+    }
 
     fun setUserName(username: String, userId: String) = ioScope.launch {
         try {

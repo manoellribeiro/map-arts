@@ -1,4 +1,4 @@
-package manoellribeiro.dev.martp.scenes.chooseArtStyle
+package manoellribeiro.dev.martp.scenes.artStyleSettings
 
 data class MapArtStyleModel(
     val title: String,

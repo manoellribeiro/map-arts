@@ -1,5 +1,8 @@
 package manoellribeiro.dev.martp.scenes.main
 
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.Failure
+import manoellribeiro.dev.martp.scenes.artStyleSettings.ArtStyleSettingsUiState
 import manoellribeiro.dev.martp.scenes.gallery.GalleryUiState
 import manoellribeiro.dev.martp.scenes.userInfo.UserInfoUiState
 import javax.inject.Inject
@@ -29,6 +33,13 @@ class MainViewModel @Inject constructor(
 
     private fun emitNewUserInfoState(newState: UserInfoUiState) {
         _userInfoState.value = newState
+    }
+
+    private val _artStyleSettingsState: MutableLiveData<ArtStyleSettingsUiState> = MutableLiveData<ArtStyleSettingsUiState>()
+    val artStyleSettingsState: LiveData<ArtStyleSettingsUiState> = _artStyleSettingsState
+
+    private fun emitNewArtStyleSettingsState(newState: ArtStyleSettingsUiState) {
+        _artStyleSettingsState.value = newState
     }
 
     private val _mainState: MutableLiveData<MainUiState> = MutableLiveData<MainUiState>()
@@ -63,12 +74,35 @@ class MainViewModel @Inject constructor(
         emitNewUserInfoState(UserInfoUiState.UserFound(userInfo))
     }
 
+    fun getArtStyleSettings() = viewModelScope.launch {
+        emitNewArtStyleSettingsState(ArtStyleSettingsUiState.Loading)
+        val mapZoom = repository.getMapZoomPreference().await()
+        emitNewArtStyleSettingsState(
+            ArtStyleSettingsUiState.SettingsLoaded(
+                mapZoom = mapZoom
+            )
+        )
+    }
+
     fun setUserName(username: String, userId: String) = viewModelScope.launch {
         repository.setUserName(username, userId)
     }
 
     fun setUserEmail(email: String, userId: String) = viewModelScope.launch {
         repository.setUserEmail(email, userId)
+    }
+
+    val handler = Handler(Looper.getMainLooper())
+
+    private fun createRunnable(mapZoom: Float): Runnable {
+        return Runnable {
+            repository.setMapZoomPreference(mapZoom)
+        }
+    }
+
+    fun setMapZoom(mapZoom: Float) {
+        handler.removeCallbacksAndMessages(null)
+        handler.postDelayed(createRunnable(mapZoom), 2000)
     }
 
     fun handleBadgesVisibilities() = viewModelScope.launch {

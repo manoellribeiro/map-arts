@@ -1,7 +1,10 @@
 package manoellribeiro.dev.martp.scenes.artStyleSettings
 
+import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+
 data class MapArtStyleModel(
-    val title: String,
-    val description: String,
-    val drawableImage: Int
+    val titleId: Int,
+    val descriptionId: Int,
+    val drawableImageId: Int,
+    val sketchArtType: SketchArtType
 )

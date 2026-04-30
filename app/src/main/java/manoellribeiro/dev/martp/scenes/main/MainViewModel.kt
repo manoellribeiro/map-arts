@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.Failure
+import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.scenes.artStyleSettings.ArtStyleSettingsUiState
 import manoellribeiro.dev.martp.scenes.gallery.GalleryUiState
 import manoellribeiro.dev.martp.scenes.userInfo.UserInfoUiState
@@ -77,9 +78,11 @@ class MainViewModel @Inject constructor(
     fun getArtStyleSettings() = viewModelScope.launch {
         emitNewArtStyleSettingsState(ArtStyleSettingsUiState.Loading)
         val mapZoom = repository.getMapZoomPreference().await()
+        val artStyle = repository.getArtStylePreference().await()
         emitNewArtStyleSettingsState(
             ArtStyleSettingsUiState.SettingsLoaded(
-                mapZoom = mapZoom
+                mapZoom = mapZoom,
+                mapArtStyle = artStyle
             )
         )
     }
@@ -92,17 +95,30 @@ class MainViewModel @Inject constructor(
         repository.setUserEmail(email, userId)
     }
 
-    val handler = Handler(Looper.getMainLooper())
+    val setMapZoomHandle = Handler(Looper.getMainLooper())
 
-    private fun createRunnable(mapZoom: Float): Runnable {
+    private fun createSetMapZoomRunnable(mapZoom: Float): Runnable {
         return Runnable {
             repository.setMapZoomPreference(mapZoom)
         }
     }
 
     fun setMapZoom(mapZoom: Float) {
-        handler.removeCallbacksAndMessages(null)
-        handler.postDelayed(createRunnable(mapZoom), 2000)
+        setMapZoomHandle.removeCallbacksAndMessages(null)
+        setMapZoomHandle.postDelayed(createSetMapZoomRunnable(mapZoom), 1500)
+    }
+
+    val setMapStyleHandle = Handler(Looper.getMainLooper())
+
+    private fun createSetMapStyleRunnable(sketchArtType: SketchArtType): Runnable {
+        return Runnable {
+            repository.setMapArtStylePreference(sketchArtType)
+        }
+    }
+
+    fun setMapStyle(sketchArtType: SketchArtType) {
+        setMapStyleHandle.removeCallbacksAndMessages(null)
+        setMapStyleHandle.postDelayed(createSetMapStyleRunnable(sketchArtType), 1500)
     }
 
     fun handleBadgesVisibilities() = viewModelScope.launch {

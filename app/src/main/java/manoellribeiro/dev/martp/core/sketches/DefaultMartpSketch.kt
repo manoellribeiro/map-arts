@@ -1,5 +1,6 @@
 package manoellribeiro.dev.martp.core.sketches
 
+import android.util.Log
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import processing.core.PApplet
 import processing.core.PImage
@@ -25,12 +26,17 @@ class DefaultMartpSketch(
         val mapImage = loadImage(imagePath)
         changePixelColors(mapImage)
         drawArtFrame()
-        image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
+        if(horizontalTilesCount > 0) {
+            createTiles(mapImage)
+        } else {
+            image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
+        }
         filter(ERODE)
         noLoop()
     }
 
     private fun changePixelColors(mapImage: PImage) {
+        Log.i("DefaultMartpSketch", "changePixelColors begin")
         mapImage.loadPixels()
 
         for (y in 0..mapImage.height) {
@@ -45,6 +51,34 @@ class DefaultMartpSketch(
             }
         }
         mapImage.updatePixels()
+        Log.i("DefaultMartpSketch", "changePixelColors final")
+    }
+
+    private fun createTiles(mapImage: PImage) {
+        Log.i("DefaultMartpSketch", "createTiles Begin")
+        var mapTiles = arrayListOf<PImage>()
+        val tileWidth = mapImage.width / horizontalTilesCount
+        val tileHeight = mapImage.height / verticalTilesCount
+
+        for(y in 0 ..<mapImage.height step tileHeight) {
+            for(x in 0..<mapImage.width step tileWidth) {
+                mapTiles.add(mapImage.get(x, y, tileWidth, tileHeight))
+            }
+        }
+
+        //mapTiles.shuffle()
+
+        var tileX = padding + frameThickness + framePadding
+        var tileY = padding + frameThickness + framePadding
+        for(tile in mapTiles) {
+            image(tile, tileX, tileY)
+            tileX += tileWidth + padding
+            if(tileX >= width - (frameThickness + framePadding)) {
+                tileX = padding + frameThickness + framePadding
+                tileY += tileHeight + padding
+            }
+        }
+        Log.i("DefaultMartpSketch", "createTiles final")
     }
 
     override val type: SketchArtType

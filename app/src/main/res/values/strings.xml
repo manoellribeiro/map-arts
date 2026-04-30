@@ -60,4 +60,9 @@
     <string name="choose_complete_color_set">Choose a complete color set for your art</string>
     <string name="map_zoom">Map Zoom</string>
     <string name="control_map_zoom">Control how close or far the map view will be</string>
+    <string name="colorful_map">Colorful Map</string>
+    <string name="colorful_map_description">A colourful map rendered in the colours you chose</string>
+    <string name="pointillism_colorful_description">A colourful map, but with Dot-pattern artistic rendering</string>
+    <string name="geo_realistic">Geo Realistic</string>
+    <string name="geo_realistic_description">A quick way to get a satellite image of your current location</string>
 </resources>

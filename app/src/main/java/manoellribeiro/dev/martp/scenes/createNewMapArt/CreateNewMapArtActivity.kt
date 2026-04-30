@@ -19,6 +19,7 @@ import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
+import manoellribeiro.dev.martp.core.sketches.GeoRealisticMartpSketch
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.sketches.PointillismMartpSketch
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
@@ -31,14 +32,12 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     private lateinit var binding: ActivityCreateNewMapArtBinding
     private val viewModel: CreateNewMapArtViewModel by viewModels()
     private var sketch: MartpSketch? = null
-    private lateinit var type: SketchArtType
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCreateNewMapArtBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        getExtras(savedInstanceState)
         setupObservables()
         binding.mapArtsContainer.doOnLayout {
             lifecycleScope.launch {
@@ -51,15 +50,11 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         }
     }
 
-    private fun getExtras(savedInstanceState: Bundle?) {
-        type = intent.getEnumExtra<SketchArtType>().orNull { SketchArtType.DEFAULT }
-    }
-
     private fun setupObservables() {
         viewModel.state.observe(this@CreateNewMapArtActivity) { state ->
             when(state) {
                 is CreateNewMapArtUiState.Error -> handleStateError(state.failure)
-                is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state.staticMapImagePath, state.title, aiDescription = state.aiDescription)
+                is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state.staticMapImagePath, state.title, state.sketchArtType)
                 CreateNewMapArtUiState.Loading -> handleLoadingState()
                 CreateNewMapArtUiState.ActionButtonLoading -> handleActionButtonLoadingState()
                 is CreateNewMapArtUiState.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState(state.pathToStoreArtImage)
@@ -158,13 +153,21 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     private fun handleImageDownloadedState(
         imagePath: String,
         title: String,
-        aiDescription: String
+        artType: SketchArtType
     ) = with(binding) {
         mapArtsContainer.visible()
         loadingIndicatorLAV.gone()
         titleTV.visible()
-        sketch = when(type) {
+        sketch = when(artType) {
             SketchArtType.DEFAULT -> DefaultMartpSketch(
+                horizontalTilesCount = 4,
+                verticalTilesCount = 4,
+                padding = 20,
+                canvasWidth = mapArtsContainer.width.toFloat(),
+                canvasHeight = mapArtsContainer.height.toFloat(),
+                imagePath = imagePath,
+            )
+            SketchArtType.POINTILLISM -> PointillismMartpSketch(
                 horizontalTilesCount = 0,
                 verticalTilesCount = 0,
                 padding = 0,
@@ -172,7 +175,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 canvasHeight = mapArtsContainer.height.toFloat(),
                 imagePath = imagePath,
             )
-            SketchArtType.POINTILLISM -> PointillismMartpSketch(
+            SketchArtType.GEO_REALISTIC -> GeoRealisticMartpSketch(
                 horizontalTilesCount = 0,
                 verticalTilesCount = 0,
                 padding = 0,

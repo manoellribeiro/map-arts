@@ -6,6 +6,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.LiveData
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
@@ -23,6 +24,7 @@ import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
+import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.services.ConnectivityService
 import okhttp3.ResponseBody
 import java.io.File
@@ -43,11 +45,37 @@ class MartpRepository @Inject constructor(
 
     companion object {
         private const val MAP_ZOOM_KEY = "MAP_ZOOM_KEY"
+        private const val MAP_ART_STYLE_KEY = "MAP_ART_STYLE_KEY"
+    }
+
+    fun setMapArtStylePreference(sketchArtType: SketchArtType) = ioScope.launch {
+        try {
+            Log.i("MartpRepository", "set sketch type " + sketchArtType.name)
+            val artStyleKey = stringPreferencesKey(MAP_ART_STYLE_KEY)
+            artSettingsDataSore.edit { preferences ->
+                preferences[artStyleKey] = sketchArtType.name
+            }
+        } catch (e: Exception) {
+            throw LocalStorageErrorFailure(e.message)
+        }
+    }
+
+    fun getArtStylePreference(): Deferred<SketchArtType> = ioScope.async {
+        val defaultArtStyle = SketchArtType.DEFAULT
+        try {
+            val artStyleKey = stringPreferencesKey(MAP_ART_STYLE_KEY)
+            return@async SketchArtType.valueOf(
+                artSettingsDataSore.data.map { preferences ->
+                    preferences[artStyleKey]
+                }.first() ?: defaultArtStyle.name
+            )
+        } catch (e: Exception) {
+            return@async defaultArtStyle
+        }
     }
 
     fun setMapZoomPreference(mapZoom: Float) = ioScope.launch {
         try {
-            Log.i("MainViewModel", "setMapZoom" + mapZoom.toString())
             val mapZoomKey = floatPreferencesKey(MAP_ZOOM_KEY)
             artSettingsDataSore.edit { preferences ->
                 preferences[mapZoomKey] = mapZoom
@@ -117,6 +145,7 @@ class MartpRepository @Inject constructor(
     }
 
     fun fetchStaticMapImageAsync(
+        sketchArtType: SketchArtType,
         latitude: Double,
         longitude: Double,
         mapWidth: Int,
@@ -125,12 +154,14 @@ class MartpRepository @Inject constructor(
     ): Deferred<String> = ioScope.async {
         if(connectivityService.isInternetConnected()) {
             try {
+                val mapZoom = getMapZoomPreference().await()
                 val response: ResponseBody = mapboxApiService.getStaticMapImageAsync(
-                    styleId = MapboxMapStyle.DarkV11.id,
+                    styleId = sketchArtType.mapBoxMapStyle.id,
                     latitude = latitude,
                     longitude = longitude,
                     mapWidth = mapWidth,
-                    mapHeight = mapHeight
+                    mapHeight = mapHeight,
+                    mapZoom = mapZoom
                 )
 
                 val imageFile = File(dir,"image.png")

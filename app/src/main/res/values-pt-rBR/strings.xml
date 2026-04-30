@@ -59,4 +59,9 @@
     <string name="choose_complete_color_set">Escolha um conjunto completo de cores para sua arte</string>
     <string name="map_zoom">Zoom do Mapa</string>
     <string name="control_map_zoom">Controle o quão perto ou longe a visualização do mapa ficará</string>
+    <string name="colorful_map">Mapa Colorido</string>
+    <string name="colorful_map_description">Um mapa colorido renderizado nas cores que você escolher</string>
+    <string name="pointillism_colorful_description">Um mapa colorido, mas com renderização artística em padrão de pontos</string>
+    <string name="geo_realistic">Geo Realista</string>
+    <string name="geo_realistic_description">Uma forma rápida de obter uma imagem de satélite da sua localização atual</string>
 </resources>

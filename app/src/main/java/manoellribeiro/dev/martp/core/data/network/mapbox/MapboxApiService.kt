@@ -17,13 +17,14 @@ import retrofit2.http.Path
 
 interface MapboxApiService {
 
-    @GET("manoellribeiro/{style_id}/static/{lon},{lat},15,0,0/{width}x{height}")
+    @GET("manoellribeiro/{style_id}/static/{lon},{lat},{zoom},0,0/{width}x{height}")
     suspend fun getStaticMapImageAsync(
         @Path("style_id") styleId: String,
         @Path("lat") latitude: Double,
         @Path("lon") longitude: Double,
         @Path("width") mapWidth: Int,
         @Path("height") mapHeight: Int,
+        @Path("zoom") mapZoom: Float,
     ): ResponseBody
 
     companion object {

@@ -36,12 +36,6 @@ class PointillismMartpSketch(
     private val pixelsToAddCircles = arrayListOf<Pair<Int, Int>>()
 
     private fun changePixelColors(mapImage: PImage) {
-        val colorsArray = arrayListOf(
-            color(204, 88, 3),
-            color(226, 113, 29),
-            color(255, 149, 5),
-        )
-
         var nextXPixelAllowedToPutCircle = 0F
         var nextYPixelAllowedToPutCircle = 0F
 
@@ -53,7 +47,7 @@ class PointillismMartpSketch(
                 if(isStreetPixel(currentPixelColor) && y >= nextYPixelAllowedToPutCircle) {
                     if(x >= nextXPixelAllowedToPutCircle) {
                         pixelsToAddCircles.add(Pair(x, y))
-                        nextXPixelAllowedToPutCircle = nextXPixelAllowedToPutCircle + 7
+                        nextXPixelAllowedToPutCircle = nextXPixelAllowedToPutCircle + 8
                     }
                 } else {
                     mapImage.set(x, y, color(255, 201, 113))
@@ -62,7 +56,7 @@ class PointillismMartpSketch(
             nextXPixelAllowedToPutCircle = 0F
 
             if(y >= nextYPixelAllowedToPutCircle) {
-                nextYPixelAllowedToPutCircle = nextYPixelAllowedToPutCircle + 7
+                nextYPixelAllowedToPutCircle = nextYPixelAllowedToPutCircle + 8
             }
         }
         mapImage.updatePixels()

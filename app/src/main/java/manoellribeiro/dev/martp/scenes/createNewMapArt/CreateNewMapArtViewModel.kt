@@ -53,7 +53,7 @@ class CreateNewMapArtViewModel @Inject constructor(
     ) {
         try {
             emitNewState(CreateNewMapArtUiState.Loading)
-            delay(4000)
+            val sketchArtType = repository.getArtStylePreference().await()
             val location = locationService.getCurrentLocation().await()
             val address = getAddressService.getAddress(
                 location.latitude,
@@ -61,18 +61,24 @@ class CreateNewMapArtViewModel @Inject constructor(
             ).await()
             currentArtAddress = address
             currentArtLocation = location
+            val horizontalTilesCount = 4
+            val verticalTilesCount = 4
+            val horizontalPaddingsNumber = horizontalTilesCount + 1
+            val verticalPaddingsNumber = verticalTilesCount + 1
+            val padding = 20
             val staticImagePath = repository.fetchStaticMapImageAsync(
+                sketchArtType = sketchArtType,
                 longitude = location.longitude,
                 latitude = location.latitude,
-                mapWidth = canvasToDrawArtWidth - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
-                mapHeight = canvasToDrawArtHeight - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
+                mapWidth = canvasToDrawArtWidth - (horizontalPaddingsNumber * padding) - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
+                mapHeight = canvasToDrawArtHeight - (verticalPaddingsNumber * padding) - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
                 dir = directory
             ).await()
             emitNewState(
         CreateNewMapArtUiState.ImageDownloaded(
                         staticMapImagePath = staticImagePath,
                         title = address?.locality + ", " + address?.countryName + ", " + address?.thoroughfare,
-                        aiDescription = null.orEmpty()
+                        sketchArtType = sketchArtType
                     )
             )
         } catch (failure: Failure) {

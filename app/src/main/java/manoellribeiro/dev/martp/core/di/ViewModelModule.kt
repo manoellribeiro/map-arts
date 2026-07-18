@@ -16,6 +16,7 @@ import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ActivityContext
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
+import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.services.ConnectivityService
@@ -33,6 +34,7 @@ object ViewModelModule {
         mapArtsDao: MapArtsDao,
         userInfoDao: UserInfoDao,
         mapboxApiService: MapboxApiService,
+        geoapifyApiService: GeoapifyApiService,
         connectivityService: ConnectivityService,
         artSettingsDataStore: DataStore<Preferences>
     ): MartpRepository {
@@ -41,7 +43,8 @@ object ViewModelModule {
             connectivityService = connectivityService,
             mapboxApiService = mapboxApiService,
             userInfoDao = userInfoDao,
-            artSettingsDataSore = artSettingsDataStore
+            artSettingsDataSore = artSettingsDataStore,
+            geoapifyApiService = geoapifyApiService
         )
     }
 

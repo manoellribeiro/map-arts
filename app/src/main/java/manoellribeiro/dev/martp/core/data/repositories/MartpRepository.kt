@@ -22,10 +22,12 @@ import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
+import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.services.ConnectivityService
+import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
@@ -34,6 +36,7 @@ import javax.inject.Inject
 
 class MartpRepository @Inject constructor(
     private val mapboxApiService: MapboxApiService,
+    private val geoapifyApiService: GeoapifyApiService,
     private val connectivityService: ConnectivityService,
     private val mapArtDao: MapArtsDao,
     private val userInfoDao: UserInfoDao,
@@ -155,6 +158,15 @@ class MartpRepository @Inject constructor(
         if(connectivityService.isInternetConnected()) {
             try {
                 val mapZoom = getMapZoomPreference().await()
+                //TODO: this is the implementation for the geoapifyApiService, it is ready to use when I create the art style of it
+//                val response: ResponseBody = geoapifyApiService.getStaticMapImageAsync(
+//                    styleId = "toner",
+//                    latitude = "lonlat:${longitude},${latitude}",
+//                    mapWidth = mapWidth - MartpSketch.framePadding.toInt() - MartpSketch.frameThickness.toInt(),
+//                    mapHeight = mapHeight - MartpSketch.framePadding.toInt() - MartpSketch.frameThickness.toInt(),
+//                    mapZoom = mapZoom
+//                )
+
                 val response: ResponseBody = mapboxApiService.getStaticMapImageAsync(
                     styleId = sketchArtType.mapBoxMapStyle.id,
                     latitude = latitude,

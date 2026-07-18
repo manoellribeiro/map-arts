@@ -19,9 +19,9 @@ import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
-import manoellribeiro.dev.martp.core.sketches.GeoRealisticMartpSketch
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.sketches.PointillismMartpSketch
+import manoellribeiro.dev.martp.core.sketches.WaterFlowMartpSketch
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import processing.android.PFragment
 
@@ -168,14 +168,6 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 imagePath = imagePath,
             )
             SketchArtType.POINTILLISM -> PointillismMartpSketch(
-                horizontalTilesCount = 0,
-                verticalTilesCount = 0,
-                padding = 0,
-                canvasWidth = mapArtsContainer.width.toFloat(),
-                canvasHeight = mapArtsContainer.height.toFloat(),
-                imagePath = imagePath,
-            )
-            SketchArtType.GEO_REALISTIC -> GeoRealisticMartpSketch(
                 horizontalTilesCount = 0,
                 verticalTilesCount = 0,
                 padding = 0,

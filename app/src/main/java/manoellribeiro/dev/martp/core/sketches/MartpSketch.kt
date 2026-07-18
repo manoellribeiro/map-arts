@@ -39,6 +39,19 @@ abstract class MartpSketch(
                 blueValue in rangeOfStreetColorsForRGB
     }
 
+    //Tone is one of the geoapify pre defined style
+    protected fun isStreetPixelForTone(
+        color: Int
+    ): Boolean {
+        val redValue = color shr 16 and 0xFF
+        val greenValue = color shr 8 and 0xFF
+        val blueValue = color and 0xFF
+        val rangeOfStreetColorsForRGB = 0..30
+        return redValue in rangeOfStreetColorsForRGB &&
+                greenValue in rangeOfStreetColorsForRGB &&
+                blueValue in rangeOfStreetColorsForRGB
+    }
+
     protected fun drawArtFrame() {
         noStroke()
         val frameGray = color(51, 51, 51)

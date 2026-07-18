@@ -26,17 +26,19 @@ class DefaultMartpSketch(
         val mapImage = loadImage(imagePath)
         changePixelColors(mapImage)
         drawArtFrame()
-        if(horizontalTilesCount > 0) {
-            createTiles(mapImage)
-        } else {
-            image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
-        }
+//        if(horizontalTilesCount > 0) {
+//            createTiles(mapImage)
+//        } else {
+//            image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
+//        }
+        image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
         filter(ERODE)
         noLoop()
     }
 
+
+    // TODO: Getting the color of a single pixel with get(x, y) is easy, but not as fast as grabbing the data directly from pixels[]. The equivalent statement to get(x, y) using pixels[] is pixels[y*width+x]. See the reference for pixels[] for more information.
     private fun changePixelColors(mapImage: PImage) {
-        Log.i("DefaultMartpSketch", "changePixelColors begin")
         mapImage.loadPixels()
 
         for (y in 0..mapImage.height) {
@@ -51,11 +53,9 @@ class DefaultMartpSketch(
             }
         }
         mapImage.updatePixels()
-        Log.i("DefaultMartpSketch", "changePixelColors final")
     }
 
     private fun createTiles(mapImage: PImage) {
-        Log.i("DefaultMartpSketch", "createTiles Begin")
         var mapTiles = arrayListOf<PImage>()
         val tileWidth = mapImage.width / horizontalTilesCount
         val tileHeight = mapImage.height / verticalTilesCount
@@ -78,7 +78,6 @@ class DefaultMartpSketch(
                 tileY += tileHeight + padding
             }
         }
-        Log.i("DefaultMartpSketch", "createTiles final")
     }
 
     override val type: SketchArtType

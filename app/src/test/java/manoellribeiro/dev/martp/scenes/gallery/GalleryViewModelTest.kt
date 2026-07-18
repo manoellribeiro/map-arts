@@ -30,7 +30,6 @@ class GalleryViewModelTest {
         repository = mockk(relaxed = true)
         viewModel = MainViewModel(repository = repository)
         observer =  mockk<Observer<GalleryUiState>>(relaxed = true)
-        viewModel.state.observeForever(observer)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

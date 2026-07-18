@@ -286,17 +286,17 @@ fun ArtStyleSelectors(
                 sketchArtType = SketchArtType.POINTILLISM
             )
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        ArtStyleCardSelector(
-            viewModel = viewModel,
-            currentArtStyleSelected = selectedArtStyle,
-            mapArtStyleModel = MapArtStyleModel(
-                titleId = R.string.geo_realistic,
-                descriptionId = R.string.geo_realistic_description,
-                drawableImageId = R.drawable.ic_geo_realistic,
-                sketchArtType = SketchArtType.GEO_REALISTIC
-            )
-        )
+//        Spacer(modifier = Modifier.height(8.dp))
+//        ArtStyleCardSelector(
+//            viewModel = viewModel,
+//            currentArtStyleSelected = selectedArtStyle,
+//            mapArtStyleModel = MapArtStyleModel(
+//                titleId = R.string.geo_realistic,
+//                descriptionId = R.string.geo_realistic_description,
+//                drawableImageId = R.drawable.ic_geo_realistic,
+//                sketchArtType = SketchArtType.GEO_REALISTIC
+//            )
+//        )
     }
 }
 

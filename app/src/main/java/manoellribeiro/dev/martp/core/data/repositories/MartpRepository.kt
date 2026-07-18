@@ -158,6 +158,7 @@ class MartpRepository @Inject constructor(
         if(connectivityService.isInternetConnected()) {
             try {
                 val mapZoom = getMapZoomPreference().await()
+                Log.i("MartpRepository", "mapZoom: " + mapZoom.toString())
                 //TODO: this is the implementation for the geoapifyApiService, it is ready to use when I create the art style of it
 //                val response: ResponseBody = geoapifyApiService.getStaticMapImageAsync(
 //                    styleId = "toner",

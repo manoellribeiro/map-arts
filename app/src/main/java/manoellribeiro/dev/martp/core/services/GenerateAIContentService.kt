@@ -21,8 +21,6 @@ class GenerateAIContentService(
             } catch (e: Exception) {
                 throw GeneratingAIContentFailure(originalExceptionMessage = e.message)
             }
-            //val model = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel("gemini-3-flash-preview")
-
         }
     }
 }

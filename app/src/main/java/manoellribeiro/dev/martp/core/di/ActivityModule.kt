@@ -1,5 +1,6 @@
 package manoellribeiro.dev.martp.core.di
 
+import android.os.Handler
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,9 +20,13 @@ object ActivityModule {
     @Provides
     fun providesGalleryViewModel(
         repository: MartpRepository,
+        setMapZoomHandler: Handler,
+        setMapStyleHandler: Handler
     ): MainViewModel {
         return MainViewModel(
             repository = repository,
+            setMapZoomHandler = setMapZoomHandler,
+            setMapStyleHandler = setMapZoomHandler
         )
     }
 

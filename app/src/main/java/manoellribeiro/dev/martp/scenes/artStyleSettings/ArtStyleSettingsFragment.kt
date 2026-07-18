@@ -228,12 +228,12 @@ private fun SlideComponent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = stringResource(R.string.close),
+                text = stringResource(R.string.far),
                 style = TextMiddleScreenInfoText,
                 color = DarkD4
             )
             Text(
-                text = stringResource(R.string.far),
+                text = stringResource(R.string.close),
                 style = TextMiddleScreenInfoText,
                 color = DarkD4
             )

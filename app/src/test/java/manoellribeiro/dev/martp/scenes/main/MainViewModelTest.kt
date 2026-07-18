@@ -1,5 +1,6 @@
-package manoellribeiro.dev.martp.scenes.gallery
+package manoellribeiro.dev.martp.scenes.main
 
+import android.os.Handler
 import androidx.lifecycle.Observer
 import io.mockk.every
 import io.mockk.mockk
@@ -11,25 +12,34 @@ import kotlinx.coroutines.test.runTest
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.infra.InstantTaskExecutorRuleForJUnit5
-import manoellribeiro.dev.martp.scenes.main.MainViewModel
+import manoellribeiro.dev.martp.scenes.gallery.GalleryUiState
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(InstantTaskExecutorRuleForJUnit5::class)
-class GalleryViewModelTest {
+class MainViewModelTest {
 
     private lateinit var viewModel: MainViewModel
     private lateinit var repository: MartpRepository
 
     private lateinit var observer: Observer<GalleryUiState>
+    private lateinit var setMapZoomHandle: Handler
+    private lateinit var setMapStyleHandle: Handler
 
 
     @BeforeEach
     fun setup() {
         repository = mockk(relaxed = true)
-        viewModel = MainViewModel(repository = repository)
+        setMapStyleHandle = mockk(relaxed = true)
+        setMapZoomHandle = mockk(relaxed = true)
+        viewModel = MainViewModel(
+            repository = repository,
+            setMapStyleHandler = setMapStyleHandle,
+            setMapZoomHandler = setMapZoomHandle
+        )
         observer =  mockk<Observer<GalleryUiState>>(relaxed = true)
+        viewModel.galleryState.observeForever(observer)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

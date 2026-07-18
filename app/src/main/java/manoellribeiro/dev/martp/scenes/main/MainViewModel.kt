@@ -1,7 +1,6 @@
 package manoellribeiro.dev.martp.scenes.main
 
 import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,6 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val repository: MartpRepository,
+    private val setMapZoomHandler: Handler,
+    private val setMapStyleHandler: Handler
 ): ViewModel() {
 
     private val _galleryState: MutableLiveData<GalleryUiState> = MutableLiveData<GalleryUiState>()
@@ -95,8 +96,6 @@ class MainViewModel @Inject constructor(
         repository.setUserEmail(email, userId)
     }
 
-    val setMapZoomHandle = Handler(Looper.getMainLooper())
-
     private fun createSetMapZoomRunnable(mapZoom: Float): Runnable {
         return Runnable {
             repository.setMapZoomPreference(mapZoom)
@@ -104,11 +103,10 @@ class MainViewModel @Inject constructor(
     }
 
     fun setMapZoom(mapZoom: Float) {
-        setMapZoomHandle.removeCallbacksAndMessages(null)
-        setMapZoomHandle.postDelayed(createSetMapZoomRunnable(mapZoom), 1500)
+        Log.i("MartpRepository", "mapZoom main viewModel: " + mapZoom.toString())
+        setMapZoomHandler.removeCallbacksAndMessages(null)
+        setMapZoomHandler.postDelayed(createSetMapZoomRunnable(mapZoom), 1500)
     }
-
-    val setMapStyleHandle = Handler(Looper.getMainLooper())
 
     private fun createSetMapStyleRunnable(sketchArtType: SketchArtType): Runnable {
         return Runnable {
@@ -117,8 +115,8 @@ class MainViewModel @Inject constructor(
     }
 
     fun setMapStyle(sketchArtType: SketchArtType) {
-        setMapStyleHandle.removeCallbacksAndMessages(null)
-        setMapStyleHandle.postDelayed(createSetMapStyleRunnable(sketchArtType), 1500)
+        setMapStyleHandler.removeCallbacksAndMessages(null)
+        setMapStyleHandler.postDelayed(createSetMapStyleRunnable(sketchArtType), 1500)
     }
 
     fun handleBadgesVisibilities() = viewModelScope.launch {

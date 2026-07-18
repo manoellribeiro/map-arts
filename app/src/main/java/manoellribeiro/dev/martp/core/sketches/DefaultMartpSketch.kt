@@ -1,5 +1,6 @@
 package manoellribeiro.dev.martp.core.sketches
 
+import android.util.Log
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import processing.core.PApplet
 import processing.core.PImage
@@ -11,7 +12,6 @@ class DefaultMartpSketch(
     private val canvasWidth: Float = 640.0F,
     private val canvasHeight: Float = 640.0F,
     private val imagePath: String,
-    private val drawingFinishedCallback: () -> Unit
 ) : MartpSketch(
     horizontalTilesCount,
     verticalTilesCount,
@@ -19,7 +19,6 @@ class DefaultMartpSketch(
     canvasWidth,
     canvasHeight,
     imagePath,
-    drawingFinishedCallback
 ) {
 
 
@@ -27,26 +26,19 @@ class DefaultMartpSketch(
         val mapImage = loadImage(imagePath)
         changePixelColors(mapImage)
         drawArtFrame()
+//        if(horizontalTilesCount > 0) {
+//            createTiles(mapImage)
+//        } else {
+//            image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
+//        }
         image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
         filter(ERODE)
         noLoop()
-        drawingFinishedCallback.invoke()
     }
 
+
+    // TODO: Getting the color of a single pixel with get(x, y) is easy, but not as fast as grabbing the data directly from pixels[]. The equivalent statement to get(x, y) using pixels[] is pixels[y*width+x]. See the reference for pixels[] for more information.
     private fun changePixelColors(mapImage: PImage) {
-        val colorsArray = arrayListOf(
-            color(204, 88, 3),
-            color(226, 113, 29),
-            color(255, 149, 5),
-        )
-        val colorsArray2 = arrayListOf(
-            color(2, 244, 208),
-            color(18, 13, 49),
-            color(250, 121, 33),
-        )
-
-        //val streetPixels = arrayListOf();
-
         mapImage.loadPixels()
 
         for (y in 0..mapImage.height) {
@@ -54,15 +46,38 @@ class DefaultMartpSketch(
             for (x in 0..mapImage.width) {
                 val currentPixelColor = mapImage.get(x, y)
                 if(isStreetPixel(currentPixelColor)) {
-                    val newPixelColor = colorsArray[(0 until colorsArray.size).random()]
                     mapImage.set(x, y, color(18, 13, 49))
                 } else {
                     mapImage.set(x, y, color(255, 201, 113))
                 }
             }
-            //streetPixels.add()
         }
         mapImage.updatePixels()
+    }
+
+    private fun createTiles(mapImage: PImage) {
+        var mapTiles = arrayListOf<PImage>()
+        val tileWidth = mapImage.width / horizontalTilesCount
+        val tileHeight = mapImage.height / verticalTilesCount
+
+        for(y in 0 ..<mapImage.height step tileHeight) {
+            for(x in 0..<mapImage.width step tileWidth) {
+                mapTiles.add(mapImage.get(x, y, tileWidth, tileHeight))
+            }
+        }
+
+        //mapTiles.shuffle()
+
+        var tileX = padding + frameThickness + framePadding
+        var tileY = padding + frameThickness + framePadding
+        for(tile in mapTiles) {
+            image(tile, tileX, tileY)
+            tileX += tileWidth + padding
+            if(tileX >= width - (frameThickness + framePadding)) {
+                tileX = padding + frameThickness + framePadding
+                tileY += tileHeight + padding
+            }
+        }
     }
 
     override val type: SketchArtType

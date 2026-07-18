@@ -1,10 +1,14 @@
 package manoellribeiro.dev.martp.core.data.repositories
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
+import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
+import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.services.ConnectivityService
@@ -18,16 +22,22 @@ class MartpRepositoryTest {
 
     private lateinit var repository: MartpRepository
     private lateinit var mapboxApiService: MapboxApiService
+    private lateinit var geoapifyApiService: GeoapifyApiService
     private lateinit var mapArtsDao: MapArtsDao
     private lateinit var connectivityService: ConnectivityService
+    private lateinit var userInfoDao: UserInfoDao
+    private lateinit var artSettingsDataSore: DataStore<Preferences>
 
     @BeforeEach
     fun setup() {
         mapboxApiService = mockk(relaxed = true)
         mapArtsDao = mockk(relaxed = true)
         connectivityService = mockk(relaxed = true)
+        geoapifyApiService = mockk(relaxed = true)
+        userInfoDao = mockk(relaxed = true)
+        artSettingsDataSore = mockk(relaxed = true)
         repository = MartpRepository(
-            mapboxApiService, connectivityService, mapArtsDao
+            mapboxApiService, geoapifyApiService, connectivityService, mapArtsDao, userInfoDao, artSettingsDataSore
         )
     }
 

@@ -1,7 +1,8 @@
 package manoellribeiro.dev.martp.scenes.createNewMapArt
 
 import android.os.Bundle
-import android.text.InputType
+import android.os.Handler
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -20,9 +21,10 @@ import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.sketches.PointillismMartpSketch
+import manoellribeiro.dev.martp.core.sketches.WaterFlowMartpSketch
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import processing.android.PFragment
-import kotlin.properties.Delegates
+
 
 @AndroidEntryPoint
 class CreateNewMapArtActivity: AppCompatActivity() {
@@ -30,23 +32,13 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     private lateinit var binding: ActivityCreateNewMapArtBinding
     private val viewModel: CreateNewMapArtViewModel by viewModels()
     private var sketch: MartpSketch? = null
-    private lateinit var type: SketchArtType
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCreateNewMapArtBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        getExtras(savedInstanceState)
         setupObservables()
-    }
-
-    private fun getExtras(savedInstanceState: Bundle?) {
-        type = intent.getEnumExtra<SketchArtType>().orNull { SketchArtType.DEFAULT }
-    }
-
-    override fun onResume() {
-        super.onResume()
         binding.mapArtsContainer.doOnLayout {
             lifecycleScope.launch {
                 viewModel.startToGenerateMapArt(
@@ -62,33 +54,45 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         viewModel.state.observe(this@CreateNewMapArtActivity) { state ->
             when(state) {
                 is CreateNewMapArtUiState.Error -> handleStateError(state.failure)
-                is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state.staticMapImagePath)
+                is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state.staticMapImagePath, state.title, state.sketchArtType)
                 CreateNewMapArtUiState.Loading -> handleLoadingState()
                 CreateNewMapArtUiState.ActionButtonLoading -> handleActionButtonLoadingState()
                 is CreateNewMapArtUiState.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState(state.pathToStoreArtImage)
-                CreateNewMapArtUiState.DisableActionButton -> disableActionButton()
-                CreateNewMapArtUiState.EnableActionButton -> enableActionButton()
+                CreateNewMapArtUiState.ErrorGeneratingAIText -> handleErrorGeneratingAIText()
+                is CreateNewMapArtUiState.GeneratedAIText -> handleGeneratedAIText(state.text)
+                CreateNewMapArtUiState.LoadingAIText -> handleLoadingAIText()
             }
         }
     }
 
-    private fun disableActionButton() = with(binding) {
-        actionMB.isEnabled = false
-        actionMB.isClickable = false
-        descriptionMTI.setOnEditorActionListener { _, _, _ ->
-            true
+    private fun handleErrorGeneratingAIText() = with(binding) {
+        aiTextTV.text = getString(R.string.create_description_with_ai)
+        aiPoweradeIV.visible()
+        loadingAIIndicatorPB.gone()
+        aiPoweredLL.isClickable = true
+        aiPoweredLL.setOnClickListener {
+            lifecycleScope.launch {
+                viewModel.generateAiText()
+            }
         }
     }
 
-    private fun enableActionButton()  = with(binding) {
-        actionMB.isEnabled = true
-        actionMB.isClickable = true
-        actionMB.setOnClickListener {
-            saveArtToLocalDatabase()
-        }
-        descriptionMTI.setOnEditorActionListener { _, _, _ ->
-            saveArtToLocalDatabase()
-            true
+    private fun handleLoadingAIText() = with(binding) {
+        aiTextTV.text = getString(R.string.thinking)
+        aiPoweradeIV.gone()
+        loadingAIIndicatorPB.visible()
+        aiPoweredLL.setOnClickListener(null)
+        aiPoweredLL.isClickable = false
+    }
+
+    private fun handleGeneratedAIText(text: String) = with(binding) {
+        descriptionTV.visible()
+        typingAnimation(descriptionTV, text, 1) {
+            aiTextTV.text = getString(R.string.ai_powered)
+            aiPoweradeIV.visible()
+            loadingAIIndicatorPB.gone()
+            aiPoweredLL.setOnClickListener(null)
+            aiPoweredLL.isClickable = false
         }
     }
 
@@ -99,8 +103,6 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 R.color.white
             )
         )
-        titleMTI.inputType = InputType.TYPE_NULL
-        descriptionMTI.inputType = InputType.TYPE_NULL
     }
 
     private fun handleArtCreatedSuccessfullyState(pathToStoreArtImage: String) {
@@ -109,16 +111,13 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     }
 
     private fun handleStateError(failure: Failure) = with(binding) {
-        backIB.visible()
-        backIB.setOnClickListener {
-            finish()
-        }
         stateErrorS.visible()
         errorImageIV.visible()
         errorTextTV.visible()
         errorTextTV.text = getString(failure.messageToBeDisplayedToUserId)
         mapArtsContainer.gone()
         titleTV.gone()
+        loadingIndicatorLAV.gone()
         actionMB.visible()
         actionMB.isEnabled = true
         actionMB.isClickable = true
@@ -132,44 +131,41 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 )
             }
         }
+        cityCountryTV.gone()
+        descriptionTV.gone()
+        aiPoweredLL.gone()
     }
 
     private fun handleLoadingState() = with(binding) {
-        backIB.visible()
-        backIB.setOnClickListener {
-            finish()
-        }
         titleTV.text = getString(R.string.we_are_generating_your_art)
-        titleMTI.gone()
-        descriptionMTI.gone()
-        stateErrorS.gone()
+        stateErrorS.visible()
         errorImageIV.gone()
         errorTextTV.gone()
         actionMB.gone()
-        mapArtsContainer.visible()
+        mapArtsContainer.gone()
+        loadingIndicatorLAV.visible()
         titleTV.visible()
+        cityCountryTV.gone()
+        descriptionTV.gone()
+        aiPoweredLL.gone()
     }
 
-    private fun handleImageDownloadedState(imagePath: String) = with(binding) {
-        backIB.visible()
-        backIB.setOnClickListener {
-            finish()
-        }
+    private fun handleImageDownloadedState(
+        imagePath: String,
+        title: String,
+        artType: SketchArtType
+    ) = with(binding) {
         mapArtsContainer.visible()
+        loadingIndicatorLAV.gone()
         titleTV.visible()
-        sketch = when(type) {
+        sketch = when(artType) {
             SketchArtType.DEFAULT -> DefaultMartpSketch(
-                horizontalTilesCount = 0,
-                verticalTilesCount = 0,
-                padding = 0,
+                horizontalTilesCount = 4,
+                verticalTilesCount = 4,
+                padding = 20,
                 canvasWidth = mapArtsContainer.width.toFloat(),
                 canvasHeight = mapArtsContainer.height.toFloat(),
                 imagePath = imagePath,
-                drawingFinishedCallback = {
-                    runOnUiThread {
-                        titleMTI.showKeyboard()
-                    }
-                }
             )
             SketchArtType.POINTILLISM -> PointillismMartpSketch(
                 horizontalTilesCount = 0,
@@ -178,40 +174,63 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 canvasWidth = mapArtsContainer.width.toFloat(),
                 canvasHeight = mapArtsContainer.height.toFloat(),
                 imagePath = imagePath,
-                drawingFinishedCallback = {
-                    runOnUiThread {
-                        titleMTI.showKeyboard()
-                    }
-                }
             )
         }
         val processingFragment = PFragment(sketch)
         processingFragment.setView(mapArtsContainer, this@CreateNewMapArtActivity)
-        titleMTI.visible()
-        descriptionMTI.visible()
+        cityCountryTV.visible()
+        descriptionTV.gone()
+        aiPoweredLL.visible()
+        aiPoweredLL.isClickable = true
+        aiPoweredLL.setOnClickListener {
+            lifecycleScope.launch {
+                viewModel.generateAiText()
+            }
+        }
+        cityCountryTV.text = title
         stateErrorS.gone()
         errorImageIV.gone()
         errorTextTV.gone()
-        val hints = viewModel.getRandomInputHintsIds()
-        titleMTI.hint = getString(hints.titleInputId)
-        descriptionMTI.hint = getString(hints.descriptionInputId)
         titleTV.text = getString(R.string.this_is_your_new_art)
         actionMB.visible()
-        actionMB.isClickable = false
-        titleMTI.setOnChangedTextListener {
-            viewModel.handleActionButtonState(titleMTI.currentText)
-        }
+        actionMB.isClickable = true
         actionMB.title = getString(R.string.save_art)
+        actionMB.setOnClickListener {
+            saveArtToLocalDatabase()
+        }
     }
 
     private fun saveArtToLocalDatabase() = with(binding) {
         lifecycleScope.launch {
             viewModel.saveArtToLocalDatabase(
-                title = titleMTI.currentText,
-                description = descriptionMTI.currentText,
+                title = cityCountryTV.text.toString(),
+                description = descriptionTV.text.toString(), //todo: entender o que acontece se esse não estiver preenchido
                 directory = this@CreateNewMapArtActivity.filesDir,
                 newArtBitMap = mapArtsContainer.toBitmap()
             )
+        }
+    }
+
+    private fun typingAnimation(
+        view: TextView,
+        text: String,
+        length: Int,
+        onComplete: () -> Unit
+    ) {
+        //todo: add a check to see if the text is empty to prevent crashes
+        var delay = 25L
+        if(Character.isWhitespace(text.elementAt(length-1))){
+            delay = 50L
+        }
+        view.text = text.substring(0,length)
+        when (length) {
+            text.length -> {
+                onComplete.invoke()
+                return
+            }
+            else -> Handler().postDelayed({
+                typingAnimation(view, text, length + 1, onComplete)
+            }, delay)
         }
     }
 }

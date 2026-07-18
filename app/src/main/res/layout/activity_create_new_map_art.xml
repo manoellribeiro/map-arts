@@ -11,23 +11,12 @@
         android:layout_width="match_parent"
 
         android:orientation="vertical"
-        android:background="@color/light_l5"
+        android:background="@color/light_cream"
         android:layout_height="match_parent">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
-            <ImageButton
-                android:id="@+id/backIB"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:layout_alignParentStart="true"
-                android:src="@drawable/ic_arrow_back"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless" />
 
             <TextView
                 android:id="@+id/titleTV"
@@ -47,15 +36,9 @@
             android:background="@color/dark_d5"
             android:layout_width="match_parent"
             android:layout_marginHorizontal="16dp"
+            android:visibility="invisible"
             tools:visibility="visible"
             android:layout_height="200dp" >
-
-            <ProgressBar
-                android:id="@+id/loadingIndicatorPB"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:theme="@style/Theme.GenerateMapArts.ProgressBarTheme"
-                android:layout_gravity="center"/>
 
         </FrameLayout>
 
@@ -65,7 +48,7 @@
             android:layout_height="0dp"
             android:layout_weight="0.5"
             android:visibility="gone"
-            tools:visibility="visible"
+            tools:visibility="gone"
             />
 
         <ImageView
@@ -74,6 +57,7 @@
             android:layout_height="200dp"
             android:layout_marginTop="56dp"
             android:layout_gravity="center"
+            tools:visibility="gone"
             android:src="@drawable/ic_error_general"/>
 
         <TextView
@@ -84,32 +68,88 @@
             android:textAlignment="center"
             android:layout_marginTop="16dp"
             android:layout_marginHorizontal="16dp"
+            tools:visibility="gone"
             style="@style/Text.MiddleScreenInfoText"
             tools:text="It seems like something wrong happened. Please try again" />
 
-        <manoellribeiro.dev.martp.core.components.MartpTextInput
-            android:id="@+id/titleMTI"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/cityCountryTV"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:imeOptions="actionNext"
-            android:layout_marginTop="12dp"
-            tools:visibility="gone"
-            app:cornerRadius="12dp"
-            app:label="@string/choose_a_title_for_you_map_art"
-            app:placeholder="@string/enter_title" />
+            style="@style/Text.Title"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            tools:visibility="visible"
+            app:layout_constraintTop_toBottomOf="@id/mapArtsContainer"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="Salvador - Casa" />
 
-        <manoellribeiro.dev.martp.core.components.MartpTextInput
-            android:id="@+id/descriptionMTI"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/descriptionTV"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:imeOptions="actionDone"
-            android:layout_marginTop="12dp"
-            app:cornerRadius="12dp"
-            app:label="@string/add_a_description_for_you_map_art"
+            app:layout_constraintTop_toBottomOf="@id/artTitleTV"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/Text.GraySubTitle"
             tools:visibility="gone"
-            app:placeholder="@string/enter_description" />
+            android:layout_marginHorizontal="16dp"
+            tools:text="Uma arte criada a partir da minha casa easdasdasdasdasdadadadsadam salvador no politeama" />
+
+        <LinearLayout
+            android:id="@+id/aiPoweredLL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="16dp"
+            android:paddingVertical="4dp"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/aiTextTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/green_darker"
+                android:textSize="14sp"
+                android:fontFamily="@font/nunito_extra_bold"
+                android:layout_gravity="center_vertical"
+                android:text="@string/create_description_with_ai"/>
+
+            <ProgressBar
+                android:id="@+id/loadingAIIndicatorPB"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="8dp"
+                android:visibility="gone"
+                android:theme="@style/Theme.GenerateMapArts.ProgressBarTheme"
+                android:layout_gravity="center"/>
+
+            <ImageView
+                android:id="@+id/aiPoweradeIV"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_ai_powerade"
+                />
+
+        </LinearLayout>
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:id="@+id/loadingIndicatorLAV"
+            app:lottie_rawRes="@raw/loading_globe"
+            app:lottie_loop="true"
+            android:visibility="gone"
+            tools:visibility="gone"
+            android:layout_gravity="center"
+            app:lottie_autoPlay="true"/>
 
         <Space
             android:layout_width="match_parent"
@@ -125,8 +165,6 @@
             android:layout_marginHorizontal="16dp"
             android:layout_marginVertical="8dp"
             app:cornerRadius="50dp"
-            app:isEnabled="false"
-            android:clickable="false"
             style="@style/MartpButton.Primary"/>
 
     </LinearLayout>

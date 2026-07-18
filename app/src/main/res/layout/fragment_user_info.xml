@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    tools:context=".scenes.gallery.GalleryFragment"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/light_cream"
+        android:paddingTop="16dp"
+        tools:context=".scenes.gallery.GalleryFragment">
+
+        <ImageView
+            android:id="@+id/logoIV"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="11dp"
+            android:visibility="visible"
+            android:src="@drawable/ic_martp_logo"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/digitalExpositionTV"
+            style="@style/Text.ScreenTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/digital_exposition"
+            android:textSize="18sp"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/logoIV" />
+
+        <TextView
+            android:id="@+id/digitalExpositionDescriptionTV"
+            style="@style/Text.GraySubTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/digital_exposition_description"
+            android:textSize="14sp"
+            android:visibility="visible"
+            android:lineSpacingMultiplier="0.8"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/digitalExpositionTV" />
+
+        <manoellribeiro.dev.martp.core.components.MartpTextInput
+            android:id="@+id/usernameMTI"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:imeOptions="actionNext"
+            android:layout_marginTop="12dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/digitalExpositionDescriptionTV"
+            app:cornerRadius="10dp"
+            app:label="@string/username"
+            app:placeholder="@string/name_or_nickname_hint" />
+
+        <TextView
+            android:id="@+id/usernameDescriptionTV"
+            style="@style/Text.GraySubTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="16dp"
+            android:lineSpacingMultiplier="0.9"
+            android:text="@string/name_suggestion_hint"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/usernameMTI" />
+
+        <manoellribeiro.dev.martp.core.components.MartpTextInput
+            android:id="@+id/emailMTI"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:imeOptions="actionDone"
+            android:layout_marginTop="12dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/usernameDescriptionTV"
+            app:cornerRadius="10dp"
+            app:label="@string/email_optional_hint"
+            app:placeholder="@string/name_or_nickname_hint" />
+
+        <TextView
+            android:id="@+id/emailDescriptionTV"
+            style="@style/Text.GraySubTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp"
+            android:lineSpacingMultiplier="0.9"
+            android:text="@string/email_not_mandatory_hint"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/emailMTI" />
+
+        <ProgressBar
+            android:id="@+id/loadingIndicatorPB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:theme="@style/Theme.GenerateMapArts.ProgressBarTheme"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/digitalExpositionTV" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</RelativeLayout>

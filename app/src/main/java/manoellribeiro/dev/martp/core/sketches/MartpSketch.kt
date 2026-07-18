@@ -10,7 +10,6 @@ abstract class MartpSketch(
     private val canvasWidth: Float = 640.0F,
     private val canvasHeight: Float = 640.0F,
     private val imagePath: String,
-    private val drawingFinishedCallback: () -> Unit
 ): PApplet() {
 
     companion object {
@@ -35,6 +34,19 @@ abstract class MartpSketch(
         val greenValue = color shr 8 and 0xFF
         val blueValue = color and 0xFF
         val rangeOfStreetColorsForRGB = 56..64
+        return redValue in rangeOfStreetColorsForRGB &&
+                greenValue in rangeOfStreetColorsForRGB &&
+                blueValue in rangeOfStreetColorsForRGB
+    }
+
+    //Tone is one of the geoapify pre defined style
+    protected fun isStreetPixelForTone(
+        color: Int
+    ): Boolean {
+        val redValue = color shr 16 and 0xFF
+        val greenValue = color shr 8 and 0xFF
+        val blueValue = color and 0xFF
+        val rangeOfStreetColorsForRGB = 0..30
         return redValue in rangeOfStreetColorsForRGB &&
                 greenValue in rangeOfStreetColorsForRGB &&
                 blueValue in rangeOfStreetColorsForRGB

@@ -52,11 +52,12 @@
 
 
     <style name="Theme.GenerateMapArts.ProgressBarTheme">
-        <item name="colorAccent">@color/blue</item>
+        <item name="colorAccent">@color/green_darker</item>
     </style>
 
     <style name="Theme.GenerateMapArts.FloatingActionButton">
-        <item name="colorAccent">@color/white</item>
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
     </style>
 
     <!--Text-->
@@ -98,6 +99,10 @@
         <item name="android:fontFamily">@font/nunito_medium</item>
         <item name="android:textColor">@color/dark_d1</item>
         <item name="android:lineSpacingMultiplier">1.5</item>
+    </style>
+
+    <style name="Theme.BottomNavigationView.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/yellow</item>
     </style>
 
 </resources>

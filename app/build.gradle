@@ -38,6 +38,7 @@ android {
 
         debug {
             buildConfigField("String", "MAPBOX_API_KEY", "\"${System.getenv("MAPBOX_API_KEY") ?: localProperties.getProperty("MAPBOX_API_KEY")}\"")
+            buildConfigField("String", "GEOAPIFY_API_KEY", "\"${System.getenv("GEOAPIFY_API_KEY") ?: localProperties.getProperty("GEOAPIFY_API_KEY")}\"")
         }
 
         release {
@@ -45,6 +46,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField("String", "MAPBOX_API_KEY", "\"${System.getenv("MAPBOX_API_KEY") ?: localProperties.getProperty("MAPBOX_API_KEY")}\"")
+            buildConfigField("String", "GEOAPIFY_API_KEY", "\"${System.getenv("GEOAPIFY_API_KEY") ?: localProperties.getProperty("GEOAPIFY_API_KEY")}\"")
         }
     }
     compileOptions {
@@ -72,7 +74,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0'
     implementation 'androidx.compose.runtime:runtime-livedata'
     implementation "androidx.navigation:navigation-compose:2.9.6"
-
+    implementation "androidx.datastore:datastore-preferences:1.2.1"
     implementation 'androidx.core:core-ktx:1.17.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'com.google.android.material:material:1.13.0'
@@ -86,6 +88,13 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.57.2")
     kapt "com.google.dagger:hilt-compiler:2.57.2"
     implementation 'androidx.activity:activity-ktx:1.12.2'
+    implementation("androidx.fragment:fragment-ktx:1.8.9")
+    // Jetpack Compose integration
+    implementation("androidx.navigation:navigation-compose:2.9.7")
+
+    // Views/Fragments integration
+    implementation("androidx.navigation:navigation-fragment:2.9.7")
+    implementation("androidx.navigation:navigation-ui:2.9.7")
 
     //Retrofit
     implementation 'com.squareup.retrofit2:retrofit:3.0.0'
@@ -104,11 +113,14 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-ai")
+
+    implementation 'com.airbnb.android:lottie:6.7.1'
 
     //Tests
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
-    testImplementation "io.mockk:mockk:1.14.7"
-    androidTestImplementation "io.mockk:mockk-android:1.14.7"
+    testImplementation "io.mockk:mockk:1.14.9"
+    androidTestImplementation "io.mockk:mockk-android:1.14.9"
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
     testImplementation "org.junit.jupiter:junit-jupiter-api:6.0.1"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:6.0.1"

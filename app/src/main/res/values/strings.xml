@@ -36,4 +36,33 @@
     <string name="pointillism_description">Pointillism is a painting technique where small, distinct dots of pure color are applied in patterns to form an image. It is more abstract but still preserves a little of the shape of the streets.</string>
     <string name="choose_art_style_description">Styles will define whether your art will look closer to a regular map or something more abstract. You can choose to use an artistic movement such as pointillism or even select styles to highlight places crossed by rivers.</string>
     <string name="location_not_enabled_error">To create a map art, you need to enable location in the settings.</string>
+    <string name="ai_powered">AI Powered</string>
+    <string name="generate_ai_content_failure_message">An error occurred while generating the description of your art with Artificial Intelligence.</string>
+    <string name="your_gallery">Your Gallery</string>
+    <string name="create_description_with_ai">Create description with AI</string>
+    <string name="thinking">Thinking…</string>
+    <string name="digital_exposition">Digital Exposition</string>
+    <string name="digital_exposition_description">Every art created on Martp is sent to our digital exposition — a shared gallery where everyone can explore the creativity of our community. If you want your name alongside your art, fill in the fields below.</string>
+    <string name="email_not_mandatory_hint">Not mandatory! The only downside is that I won\'t be able to contact you if I really like your art :)</string>
+    <string name="save_my_info">Save my info</string>
+    <string name="username" translatable="false">Username</string>
+    <string name="email_optional_hint">Email (optional)</string>
+    <string name="name_or_nickname_hint">Your name or nickname</string>
+    <string name="name_suggestion_hint">Give yourself an artistic name or even use your social media username</string>
+    <string name="art_settings">Art Settings</string>
+    <string name="customize_next_art">Customize how your next art will look</string>
+    <string name="reset">Reset</string>
+    <string name="close">Close</string>
+    <string name="far">Far</string>
+    <string name="art_style">Art Style</string>
+    <string name="choose_visual_style">Choose the visual style for your generated art</string>
+    <string name="color_palette">Color Palette</string>
+    <string name="choose_complete_color_set">Choose a complete color set for your art</string>
+    <string name="map_zoom">Map Zoom</string>
+    <string name="control_map_zoom">Control how close or far the map view will be</string>
+    <string name="colorful_map">Colorful Map</string>
+    <string name="colorful_map_description">A colourful map rendered in the colours you chose</string>
+    <string name="pointillism_colorful_description">A colourful map, but with Dot-pattern artistic rendering</string>
+    <string name="geo_realistic">Geo Realistic</string>
+    <string name="geo_realistic_description">A quick way to get a satellite image of your current location</string>
 </resources>

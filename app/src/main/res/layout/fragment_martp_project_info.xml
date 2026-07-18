@@ -4,24 +4,11 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="@color/light_yellow">
+    android:background="@color/light_cream">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-        <ImageButton
-            android:id="@+id/backButtonIV"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="top"
-            android:scaleType="fitXY"
-            android:layout_centerVertical="false"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_alignParentStart="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_arrow_back"/>
 
         <ImageView
             android:id="@+id/locationImageIV"
@@ -108,15 +95,5 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         />
-
-    <manoellribeiro.dev.martp.core.components.MartpButton
-        android:id="@+id/allowLocationAccessMB"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:title="@string/review_on_play_store"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="16dp"
-        app:cornerRadius="50dp"
-        style="@style/MartpButton.Primary"/>
 
 </LinearLayout>

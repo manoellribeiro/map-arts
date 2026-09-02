@@ -7,17 +7,17 @@
 
     <item android:id="@+id/chooseArtStyleFragment"
         android:icon="@drawable/ic_art_config"
-        android:title="Arte"/>
+        android:title="@string/menu_edit"/>
 
     <item android:id="@+id/none"
-        android:title="None"/>
+        android:title=""/>
 
     <item android:id="@+id/userInfoFragment"
         android:icon="@drawable/ic_user_data"
-        android:title="Artista"/>
+        android:title="@string/menu_user"/>
 
     <item android:id="@+id/martpProjectInfoFragment"
         android:icon="@drawable/ic_info"
-        android:title="Info"/>
+        android:title="@string/menu_info"/>
 
 </menu>

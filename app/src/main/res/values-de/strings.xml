@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Martp</string>
     <string name="gallery">Galerie</string>
+    <string name="menu_edit">Stil</string>
+    <string name="menu_user">Profil</string>
+    <string name="menu_info">Info</string>
     <string name="create_new_art">Neues Kunstwerk erstellen</string>
     <string name="error_executing_operation_in_the_local_database">Fehler beim Ausführen der Operation in der lokalen Datenbank</string>
     <string name="gallery_empty_state_state_message">Es sieht so aus, als hättest du noch keine Kunstwerke 😔\nTippe auf den Button unten und starte deine Galerie!</string>

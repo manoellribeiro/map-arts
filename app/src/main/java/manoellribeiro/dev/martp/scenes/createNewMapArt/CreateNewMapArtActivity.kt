@@ -2,15 +2,21 @@ package manoellribeiro.dev.martp.scenes.createNewMapArt
 
 import android.os.Bundle
 import android.os.Handler
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
+import manoellribeiro.dev.martp.core.extensions.dp
 import manoellribeiro.dev.martp.core.extensions.getEnumExtra
 import manoellribeiro.dev.martp.core.extensions.gone
 import manoellribeiro.dev.martp.core.extensions.orNull
@@ -39,6 +45,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         binding = ActivityCreateNewMapArtBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupObservables()
+        setupViews()
         binding.mapArtsContainer.doOnLayout {
             lifecycleScope.launch {
                 viewModel.startToGenerateMapArt(
@@ -47,6 +54,23 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                     canvasToDrawArtHeight = binding.mapArtsContainer.height
                 )
             }
+        }
+    }
+
+    private fun setupViews() = with(binding) {
+        ViewCompat.setOnApplyWindowInsetsListener(titleTV) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top + 16.dp(resources)
+            }
+            WindowInsetsCompat.CONSUMED
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(actionMB) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = insets.bottom
+            }
+            WindowInsetsCompat.CONSUMED
         }
     }
 

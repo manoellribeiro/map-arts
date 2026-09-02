@@ -14,6 +14,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -104,7 +105,15 @@ class ArtStyleSettingsFragment : Fragment() {
                 Column(modifier = Modifier.padding(contentPadding)) {
                     Header()
                     when(uiState) {
-                        ArtStyleSettingsUiState.Loading -> LoadingScreen()
+                        ArtStyleSettingsUiState.Loading -> {
+                            Spacer(modifier = Modifier.weight(1F))
+                            CircularProgressIndicator(
+                                modifier = Modifier.width(64.dp).align(Alignment.CenterHorizontally),
+                                color = DarkD4,
+                                trackColor = Blue,
+                            )
+                            Spacer(modifier = Modifier.weight(1F))
+                        }
                         is ArtStyleSettingsUiState.SettingsLoaded -> {
                             SlideComponent(viewModel, (uiState as ArtStyleSettingsUiState.SettingsLoaded).mapZoom)
                             ArtStyleSelectors(viewModel, (uiState as ArtStyleSettingsUiState.SettingsLoaded).mapArtStyle)
@@ -381,15 +390,6 @@ fun ArtStyleCardSelector(
             }
         }
     }
-}
-
-@Composable
-fun LoadingScreen() {
-    CircularProgressIndicator(
-        modifier = Modifier.width(64.dp),
-        color = DarkD4,
-        trackColor = Blue,
-    )
 }
 
 @Preview(showBackground = true)

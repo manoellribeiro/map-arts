@@ -9,6 +9,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,8 +36,19 @@ class UserInfoFragment : Fragment() {
         super.onCreateView(inflater, container, savedInstanceState)
         binding = FragmentUserInfoBinding.inflate(layoutInflater)
         setupObservables()
+        setupViews()
         viewModel.tryToGetUserInfo()
         return binding.root
+    }
+
+    private fun setupViews() = with(binding) {
+        ViewCompat.setOnApplyWindowInsetsListener(logoIV) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top
+            }
+            WindowInsetsCompat.CONSUMED
+        }
     }
 
     private fun setupObservables() {

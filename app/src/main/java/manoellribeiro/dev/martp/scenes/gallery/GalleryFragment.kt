@@ -6,12 +6,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
+import manoellribeiro.dev.martp.core.extensions.dp
 import manoellribeiro.dev.martp.core.extensions.gone
 import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
@@ -32,8 +36,19 @@ class GalleryFragment : Fragment() {
         super.onCreateView(inflater, container, savedInstanceState)
         binding = FragmentGalleryBinding.inflate(layoutInflater)
         setupObservables()
+        setupViews()
         viewModel.getUserMapArts()
         return binding.root
+    }
+
+    private fun setupViews() = with(binding) {
+        ViewCompat.setOnApplyWindowInsetsListener(logoIV) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top
+            }
+            WindowInsetsCompat.CONSUMED
+        }
     }
 
     private fun setupObservables() {

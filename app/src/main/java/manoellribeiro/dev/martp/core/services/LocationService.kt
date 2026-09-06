@@ -11,7 +11,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.suspendCancellableCoroutine
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.failures.LocationDisabledFailure
-import manoellribeiro.dev.martp.core.models.failures.GeneratingAIContentFailure
+import manoellribeiro.dev.martp.core.models.failures.LocationPermissionNotGrantedFailure
 import manoellribeiro.dev.martp.core.models.failures.UnknownErrorFailure
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -41,7 +41,7 @@ class LocationService @Inject constructor(
                             }
                         } else {
                             continuation.resumeWithException(
-                                GeneratingAIContentFailure(
+                                LocationPermissionNotGrantedFailure(
                                     originalExceptionMessage = it.exception?.message
                                 )
                             )
@@ -55,7 +55,7 @@ class LocationService @Inject constructor(
                 originalExceptionMessage = e.message
             )
         } catch (e: SecurityException) {
-            throw GeneratingAIContentFailure(
+            throw LocationPermissionNotGrantedFailure(
                 originalExceptionMessage = e.message
             )
         } catch (failure: Failure) {

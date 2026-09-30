@@ -295,17 +295,17 @@ fun ArtStyleSelectors(
                 sketchArtType = SketchArtType.POINTILLISM
             )
         )
-//        Spacer(modifier = Modifier.height(8.dp))
-//        ArtStyleCardSelector(
-//            viewModel = viewModel,
-//            currentArtStyleSelected = selectedArtStyle,
-//            mapArtStyleModel = MapArtStyleModel(
-//                titleId = R.string.geo_realistic,
-//                descriptionId = R.string.geo_realistic_description,
-//                drawableImageId = R.drawable.ic_geo_realistic,
-//                sketchArtType = SketchArtType.GEO_REALISTIC
-//            )
-//        )
+        Spacer(modifier = Modifier.height(8.dp))
+        ArtStyleCardSelector(
+            viewModel = viewModel,
+            currentArtStyleSelected = selectedArtStyle,
+            mapArtStyleModel = MapArtStyleModel(
+                titleId = R.string.water_flow,
+                descriptionId = R.string.water_flow_description,
+                drawableImageId = R.drawable.ic_water_flow,
+                sketchArtType = SketchArtType.WATER_FLOW
+            )
+        )
     }
 }
 
@@ -370,7 +370,6 @@ fun ArtStyleCardSelector(
                     style = TextMiddleScreenInfoText,
                     fontSize = 12.sp,
                     color = DarkD4,
-                    maxLines = 2
                 )
             }
             CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {

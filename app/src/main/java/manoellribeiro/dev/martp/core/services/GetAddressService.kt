@@ -9,12 +9,15 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.suspendCancellableCoroutine
+import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import kotlin.coroutines.resume
 import javax.inject.Inject
+import kotlin.coroutines.resumeWithException
 
 
 class GetAddressService @Inject constructor  (
-    private val geocoder: Geocoder
+    private val geocoder: Geocoder,
+    private val connectivityService: ConnectivityService
 ) {
     fun getAddress(
         latitude: Double,
@@ -23,32 +26,36 @@ class GetAddressService @Inject constructor  (
         try {
             return CoroutineScope(Dispatchers.IO).async {
                 val result = suspendCancellableCoroutine { continuation ->
-                    if(Geocoder.isPresent()) {
-                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            geocoder.getFromLocation(latitude, longitude, 1, object :
-                                Geocoder.GeocodeListener {
-                                override fun onError(errorMessage: String?) {
-                                    continuation.resume(null)
-                                }
-                                override fun onGeocode(addresses: List<Address?>) {
-                                    if(addresses.isEmpty()) {
+                    if(connectivityService.isInternetConnected()) {
+                        if(Geocoder.isPresent()) {
+                            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                geocoder.getFromLocation(latitude, longitude, 1, object :
+                                    Geocoder.GeocodeListener {
+                                    override fun onError(errorMessage: String?) {
                                         continuation.resume(null)
-                                    } else {
-                                        val address = addresses.first()
-                                        continuation.resume(address)
                                     }
-                                }
-                            })
-                        } else {
-                            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
-                            if(addresses.isNullOrEmpty()) {
-                                continuation.resume(null)
+                                    override fun onGeocode(addresses: List<Address?>) {
+                                        if(addresses.isEmpty()) {
+                                            continuation.resume(null)
+                                        } else {
+                                            val address = addresses.first()
+                                            continuation.resume(address)
+                                        }
+                                    }
+                                })
                             } else {
-                                continuation.resume(addresses.first())
+                                val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+                                if(addresses.isNullOrEmpty()) {
+                                    continuation.resume(null)
+                                } else {
+                                    continuation.resume(addresses.first())
+                                }
                             }
+                        } else {
+                            continuation.resume(null)
                         }
                     } else {
-                        continuation.resume(null)
+                        continuation.resumeWithException(NoInternetConnectionFailure(originalExceptionMessage = null))
                     }
                 }
                 return@async result

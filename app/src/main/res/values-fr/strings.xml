@@ -67,4 +67,6 @@
     <string name="pointillism_colorful_description">Une carte colorée, mais avec un rendu artistique en pointillé</string>
     <string name="geo_realistic">Géo Réaliste</string>
     <string name="geo_realistic_description">Un moyen rapide d\'obtenir une image satellite de votre position actuelle</string>
+    <string name="water_flow">Flux d\'Eau</string>
+    <string name="water_flow_description">Une carte animée qui se concentre sur le flux de toute eau apparaissant sur votre carte</string>
 </resources>

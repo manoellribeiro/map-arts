@@ -103,7 +103,6 @@ class MainViewModel @Inject constructor(
     }
 
     fun setMapZoom(mapZoom: Float) {
-        Log.i("MartpRepository", "mapZoom main viewModel: " + mapZoom.toString())
         setMapZoomHandler.removeCallbacksAndMessages(null)
         setMapZoomHandler.postDelayed(createSetMapZoomRunnable(mapZoom), 1500)
     }

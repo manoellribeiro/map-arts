@@ -68,4 +68,6 @@
     <string name="pointillism_colorful_description">A colourful map, but with Dot-pattern artistic rendering</string>
     <string name="geo_realistic">Geo Realistic</string>
     <string name="geo_realistic_description">A quick way to get a satellite image of your current location</string>
+    <string name="water_flow">Water Flow</string>
+    <string name="water_flow_description">An animated map that focuses on showing the flow of any water that appears on your map</string>
 </resources>

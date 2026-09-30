@@ -1,94 +1,91 @@
 package manoellribeiro.dev.martp.core.sketches
 
+import android.util.Log
+import androidx.compose.runtime.currentRecomposeScope
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import processing.core.PImage
 
-//TODO: this is a unfinished sketch
 class WaterFlowMartpSketch(
-    private val horizontalTilesCount: Int,
-    private val verticalTilesCount: Int,
     private val padding: Int,
     private val canvasWidth: Float = 640.0F,
     private val canvasHeight: Float = 640.0F,
     private val imagePath: String,
 ) : MartpSketch(
-    horizontalTilesCount,
-    verticalTilesCount,
+    0,
+    0,
     padding,
     canvasWidth,
     canvasHeight,
     imagePath,
-)  {
+) {
+
+    val current = arrayListOf<Int>()
+    val previous = arrayListOf<Int>()
+
+    private val waterPixelsToAnimate = arrayListOf<Pair<Int, Int>>()
+    private val waterTextPixelsToPaint = arrayListOf<Pair<Int, Int>>()
+    private lateinit var mapImage: PImage
+    private val oceanBlueColors = arrayListOf(
+        color(3, 4, 94),
+        color(2, 62, 138),
+        color(0, 119, 182),
+        color(0, 150, 199),
+        color(0, 180, 216),
+        color(72, 202, 228),
+        color(144, 224, 239),
+        color(173, 232, 244),
+        color(202, 240, 248),
+    )
 
     override fun setup() {
-        super.setup()
-        val mapImage = loadImage(imagePath)
+        mapImage = loadImage(imagePath)
         changePixelColors(mapImage)
         drawArtFrame()
         image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
         filter(ERODE)
-        val brazilianColors = arrayListOf(
-            color(254, 251, 0),
-            color(255, 255, 255),
-            color(1, 33, 105)
-        )
-        val prideColors = arrayListOf(
-            color(228, 3, 3),
-            color(255, 140, 0),
-            color(255, 237, 0),
-            color(0, 128, 38),
-            color(0, 76, 255),
-            color(115, 41, 130),
-        )
-        pixelsToAddCircles.forEach {
-            fill(brazilianColors.random())
-            ellipseMode(RADIUS)
-            ellipse(it.first.toFloat() + frameThickness + framePadding, it.second.toFloat() + frameThickness + framePadding, 4F, 4F)
+        smooth()
+        waterPixelsToAnimate.forEach {
+            mapImage.set(it.first, it.second, oceanBlueColors.random())
         }
+        mapImage.updatePixels()
     }
+
 
     override fun draw() {
-        val brazilianColors = arrayListOf(
-            color(254, 251, 0),
-            color(255, 255, 255),
-            color(1, 33, 105)
-        )
-        pixelsToAddCircles.forEach {
-            fill(brazilianColors.random())
-            ellipseMode(RADIUS)
-            ellipse(it.first.toFloat() + frameThickness + framePadding, it.second.toFloat() + frameThickness + framePadding, 4F, 4F)
+        waterPixelsToAnimate.forEach {
+            mapImage.set(it.first, it.second, oceanBlueColors.random())
         }
+        mapImage.updatePixels()
+        image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
     }
 
-    private val pixelsToAddCircles = arrayListOf<Pair<Int, Int>>()
-
+    // TODO: Getting the color of a single pixel with get(x, y) is easy, but not as fast as grabbing the data directly from pixels[]. The equivalent statement to get(x, y) using pixels[] is pixels[y*width+x]. See the reference for pixels[] for more information.
     private fun changePixelColors(mapImage: PImage) {
-        var nextXPixelAllowedToPutCircle = 0F
-        var nextYPixelAllowedToPutCircle = 0F
-
         mapImage.loadPixels()
 
         for (y in 0..mapImage.height) {
             for (x in 0..mapImage.width) {
                 val currentPixelColor = mapImage.get(x, y)
-                if(isStreetPixel(currentPixelColor) && y >= nextYPixelAllowedToPutCircle) {
-                    if(x >= nextXPixelAllowedToPutCircle) {
-                        pixelsToAddCircles.add(Pair(x, y))
-                        nextXPixelAllowedToPutCircle = nextXPixelAllowedToPutCircle + 8
+                when {
+                    isWaterPixel(currentPixelColor) -> {
+                        waterPixelsToAnimate.add(Pair(x, y))
                     }
-                } else {
-                    mapImage.set(x, y, color(0, 151, 57))
                 }
             }
-            nextXPixelAllowedToPutCircle = 0F
-
-            if(y >= nextYPixelAllowedToPutCircle) {
-                nextYPixelAllowedToPutCircle = nextYPixelAllowedToPutCircle + 8
-            }
         }
-        mapImage.updatePixels()
+    }
+
+    private fun isWaterPixel(
+        color: Int
+    ): Boolean {
+        val redValue = color shr 16 and 0xFF
+        val greenValue = color shr 8 and 0xFF
+        val blueValue = color and 0xFF
+        return redValue in 28..30 &&
+                greenValue in 20..22 &&
+                blueValue in 243..245
     }
 
     override val type: SketchArtType
-        get() = SketchArtType.POINTILLISM
+        get() = SketchArtType.WATER_FLOW
 }

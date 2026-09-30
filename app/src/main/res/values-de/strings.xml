@@ -67,4 +67,6 @@
     <string name="pointillism_colorful_description">Eine bunte Karte, aber mit künstlerischer Punktmuster-Darstellung</string>
     <string name="geo_realistic">Geo-Realistisch</string>
     <string name="geo_realistic_description">Ein schneller Weg zu einem Satellitenbild deines aktuellen Standorts</string>
+    <string name="water_flow">Wasserfluss</string>
+    <string name="water_flow_description">Eine animierte Karte, die den Fluss aller Gewässer zeigt, die auf deiner Karte erscheinen</string>
 </resources>

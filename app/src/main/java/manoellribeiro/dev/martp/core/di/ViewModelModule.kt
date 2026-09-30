@@ -54,8 +54,8 @@ object ViewModelModule {
     }
 
     @Provides
-    fun providesGetAddressService(geocoder: Geocoder): GetAddressService {
-        return GetAddressService(geocoder)
+    fun providesGetAddressService(geocoder: Geocoder, connectivityService: ConnectivityService): GetAddressService {
+        return GetAddressService(geocoder, connectivityService)
     }
 
     @Provides

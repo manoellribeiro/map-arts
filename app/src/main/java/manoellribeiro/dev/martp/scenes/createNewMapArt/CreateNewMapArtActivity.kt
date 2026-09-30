@@ -199,6 +199,12 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 canvasHeight = mapArtsContainer.height.toFloat(),
                 imagePath = imagePath,
             )
+            SketchArtType.WATER_FLOW -> WaterFlowMartpSketch(
+                padding = 20,
+                canvasWidth = mapArtsContainer.width.toFloat(),
+                canvasHeight = mapArtsContainer.height.toFloat(),
+                imagePath = imagePath,
+            )
         }
         val processingFragment = PFragment(sketch)
         processingFragment.setView(mapArtsContainer, this@CreateNewMapArtActivity)

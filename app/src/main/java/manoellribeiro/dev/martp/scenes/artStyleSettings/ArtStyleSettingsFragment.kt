@@ -30,7 +30,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -260,7 +262,7 @@ fun ArtStyleSelectors(
         modifier = Modifier.padding(
             start = 16.dp,
             end = 16.dp,
-            top = 16.dp
+            top = 16.dp,
         )
     ) {
         Text(
@@ -274,38 +276,55 @@ fun ArtStyleSelectors(
             style = TextMiddleScreenInfoText,
             color = DarkD4
         )
-        ArtStyleCardSelector(
-            viewModel = viewModel,
-            currentArtStyleSelected = selectedArtStyle,
-            mapArtStyleModel = MapArtStyleModel(
-                titleId = R.string.colorful_map,
-                descriptionId = R.string.colorful_map_description,
-                drawableImageId = R.drawable.ic_colorful_map,
-                sketchArtType = SketchArtType.DEFAULT
+
+        Column(
+            modifier = Modifier.verticalScroll(rememberScrollState())
+        ) {
+            ArtStyleCardSelector(
+                viewModel = viewModel,
+                currentArtStyleSelected = selectedArtStyle,
+                mapArtStyleModel = MapArtStyleModel(
+                    titleId = R.string.colorful_map,
+                    descriptionId = R.string.colorful_map_description,
+                    drawableImageId = R.drawable.ic_colorful_map,
+                    sketchArtType = SketchArtType.DEFAULT
+                )
             )
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        ArtStyleCardSelector(
-            viewModel = viewModel,
-            currentArtStyleSelected = selectedArtStyle,
-            mapArtStyleModel = MapArtStyleModel(
-                titleId = R.string.pointillism,
-                descriptionId = R.string.pointillism_colorful_description,
-                drawableImageId = R.drawable.ic_pointllism,
-                sketchArtType = SketchArtType.POINTILLISM
+            Spacer(modifier = Modifier.height(8.dp))
+            ArtStyleCardSelector(
+                viewModel = viewModel,
+                currentArtStyleSelected = selectedArtStyle,
+                mapArtStyleModel = MapArtStyleModel(
+                    titleId = R.string.pointillism,
+                    descriptionId = R.string.pointillism_colorful_description,
+                    drawableImageId = R.drawable.ic_pointllism,
+                    sketchArtType = SketchArtType.POINTILLISM
+                )
             )
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        ArtStyleCardSelector(
-            viewModel = viewModel,
-            currentArtStyleSelected = selectedArtStyle,
-            mapArtStyleModel = MapArtStyleModel(
-                titleId = R.string.water_flow,
-                descriptionId = R.string.water_flow_description,
-                drawableImageId = R.drawable.ic_water_flow,
-                sketchArtType = SketchArtType.WATER_FLOW
+            Spacer(modifier = Modifier.height(8.dp))
+            ArtStyleCardSelector(
+                viewModel = viewModel,
+                currentArtStyleSelected = selectedArtStyle,
+                mapArtStyleModel = MapArtStyleModel(
+                    titleId = R.string.water_flow,
+                    descriptionId = R.string.water_flow_description,
+                    drawableImageId = R.drawable.ic_water_flow,
+                    sketchArtType = SketchArtType.WATER_FLOW
+                )
             )
-        )
+            Spacer(modifier = Modifier.height(8.dp))
+            ArtStyleCardSelector(
+                viewModel = viewModel,
+                currentArtStyleSelected = selectedArtStyle,
+                mapArtStyleModel = MapArtStyleModel(
+                    titleId = R.string.walking_people,
+                    descriptionId = R.string.walking_people_description,
+                    drawableImageId = R.drawable.ic_walking_people,
+                    sketchArtType = SketchArtType.WALKING_PEOPLE
+                )
+            )
+            Spacer(modifier = Modifier.height(72.dp))
+        }
     }
 }
 

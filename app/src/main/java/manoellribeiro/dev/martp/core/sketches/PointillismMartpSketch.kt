@@ -7,8 +7,8 @@ class PointillismMartpSketch(
     private val horizontalTilesCount: Int,
     private val verticalTilesCount: Int,
     private val padding: Int,
-    private val canvasWidth: Float = 640.0F,
-    private val canvasHeight: Float = 640.0F,
+    canvasWidth: Float = 640.0F,
+    canvasHeight: Float = 640.0F,
     private val imagePath: String,
 ) : MartpSketch(
     horizontalTilesCount,

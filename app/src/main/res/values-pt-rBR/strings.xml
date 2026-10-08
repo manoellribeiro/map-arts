@@ -69,4 +69,6 @@
     <string name="geo_realistic_description">Uma forma rápida de obter uma imagem de satélite da sua localização atual</string>
     <string name="water_flow">Fluxo de Água</string>
     <string name="water_flow_description">Um mapa animado que foca em mostrar o fluxo de qualquer água que apareça no seu mapa</string>
+    <string name="walking_people">Pessoas Caminhando</string>
+    <string name="walking_people_description">Um mapa colorido com uma simulação de pessoas caminhando nas áreas dos prédios</string>
 </resources>

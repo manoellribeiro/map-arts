@@ -70,4 +70,6 @@
     <string name="geo_realistic_description">A quick way to get a satellite image of your current location</string>
     <string name="water_flow">Water Flow</string>
     <string name="water_flow_description">An animated map that focuses on showing the flow of any water that appears on your map</string>
+    <string name="walking_people">Walking People</string>
+    <string name="walking_people_description">A colorful map with a simulation of people walking in the building areas</string>
 </resources>

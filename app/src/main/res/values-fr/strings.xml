@@ -69,4 +69,6 @@
     <string name="geo_realistic_description">Un moyen rapide d\'obtenir une image satellite de votre position actuelle</string>
     <string name="water_flow">Flux d\'Eau</string>
     <string name="water_flow_description">Une carte animée qui se concentre sur le flux de toute eau apparaissant sur votre carte</string>
+    <string name="walking_people">Personnes en Marche</string>
+    <string name="walking_people_description">Une carte colorée avec une simulation de personnes marchant dans les zones des bâtiments</string>
 </resources>

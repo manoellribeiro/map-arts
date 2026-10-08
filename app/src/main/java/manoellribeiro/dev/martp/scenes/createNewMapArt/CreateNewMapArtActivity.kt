@@ -27,6 +27,7 @@ import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.sketches.PointillismMartpSketch
+import manoellribeiro.dev.martp.core.sketches.WalkingPeopleSketch
 import manoellribeiro.dev.martp.core.sketches.WaterFlowMartpSketch
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import processing.android.PFragment
@@ -200,6 +201,12 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 imagePath = imagePath,
             )
             SketchArtType.WATER_FLOW -> WaterFlowMartpSketch(
+                padding = 20,
+                canvasWidth = mapArtsContainer.width.toFloat(),
+                canvasHeight = mapArtsContainer.height.toFloat(),
+                imagePath = imagePath,
+            )
+            SketchArtType.WALKING_PEOPLE -> WalkingPeopleSketch(
                 padding = 20,
                 canvasWidth = mapArtsContainer.width.toFloat(),
                 canvasHeight = mapArtsContainer.height.toFloat(),

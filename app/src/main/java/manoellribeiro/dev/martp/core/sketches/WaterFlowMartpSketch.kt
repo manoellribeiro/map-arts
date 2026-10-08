@@ -7,8 +7,8 @@ import processing.core.PImage
 
 class WaterFlowMartpSketch(
     private val padding: Int,
-    private val canvasWidth: Float = 640.0F,
-    private val canvasHeight: Float = 640.0F,
+    canvasWidth: Float = 640.0F,
+    canvasHeight: Float = 640.0F,
     private val imagePath: String,
 ) : MartpSketch(
     0,
@@ -22,7 +22,7 @@ class WaterFlowMartpSketch(
     val current = arrayListOf<Int>()
     val previous = arrayListOf<Int>()
 
-    private val waterPixelsToAnimate = arrayListOf<Pair<Int, Int>>()
+    private val waterPixelsToAnimate = arrayListOf<WaterPixel>()
     private val waterTextPixelsToPaint = arrayListOf<Pair<Int, Int>>()
     private lateinit var mapImage: PImage
     private val oceanBlueColors = arrayListOf(
@@ -44,16 +44,42 @@ class WaterFlowMartpSketch(
         image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
         filter(ERODE)
         smooth()
-        waterPixelsToAnimate.forEach {
-            mapImage.set(it.first, it.second, oceanBlueColors.random())
+        waterPixelsToAnimate.forEach { waterPixel ->
+            mapImage.set(
+                waterPixel.coordinates.first,
+                waterPixel.coordinates.second,
+                color(waterPixel.redValue, waterPixel.greenValue, waterPixel.blueValue)
+            )
         }
         mapImage.updatePixels()
     }
 
+    var xoff = 0F
 
     override fun draw() {
-        waterPixelsToAnimate.forEach {
-            mapImage.set(it.first, it.second, oceanBlueColors.random())
+        waterPixelsToAnimate.forEach { waterPixel ->
+            val x = waterPixel.coordinates.first
+            val y = waterPixel.coordinates.second
+//            mapImage.set(
+//                waterPixel.coordinates.first,
+//                waterPixel.coordinates.second,
+//                color(
+//                    (waterPixel.redValue * noise(x + xoff)).toInt(),
+//                    (waterPixel.greenValue * noise(y + xoff)).toInt(),
+//                    waterPixel.blueValue
+//                )
+//            )
+//            xoff += 0.01F
+//            Log.i("frameCount", frameCount.toString())
+            mapImage.set(
+                waterPixel.coordinates.first,
+                waterPixel.coordinates.second,
+                color(
+                    (waterPixel.redValue * noise((0.01 * x + frameCount / 30).toFloat(), (0.03*y).toFloat(), (frameCount / 20).toFloat())).toInt(),
+                    (waterPixel.greenValue * noise(((y + x)*0.04).toFloat(), (0.01*x - frameCount / 30).toFloat(), (frameCount / 50).toFloat())).toInt(),
+                    waterPixel.blueValue
+                )
+            )
         }
         mapImage.updatePixels()
         image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
@@ -68,12 +94,27 @@ class WaterFlowMartpSketch(
                 val currentPixelColor = mapImage.get(x, y)
                 when {
                     isWaterPixel(currentPixelColor) -> {
-                        waterPixelsToAnimate.add(Pair(x, y))
+                        val color = oceanBlueColors.random()
+                        waterPixelsToAnimate.add(
+                            WaterPixel(
+                                coordinates = Pair(x, y),
+                                redValue = color shr 16 and 0xFF,
+                                greenValue = color shr 8 and 0xFF,
+                                blueValue = color and 0xFF
+                            )
+                        )
                     }
                 }
             }
         }
     }
+
+    private data class WaterPixel(
+        val coordinates: Pair<Int, Int>,
+        val redValue: Int,
+        val greenValue: Int,
+        val blueValue: Int
+    )
 
     private fun isWaterPixel(
         color: Int

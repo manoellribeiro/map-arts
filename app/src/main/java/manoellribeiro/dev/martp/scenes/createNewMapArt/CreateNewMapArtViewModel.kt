@@ -69,8 +69,8 @@ class CreateNewMapArtViewModel @Inject constructor(
             val padding = 20
             val staticImagePath = repository.fetchStaticMapImageAsync(
                 sketchArtType = sketchArtType,
-                longitude = location.longitude,
-                latitude = location.latitude,
+                longitude = location.longitude, //4.817737,
+                latitude = location.latitude, //45.736222,
                 mapWidth = canvasToDrawArtWidth - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
                 mapHeight = canvasToDrawArtHeight - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
                 //mapWidth = canvasToDrawArtWidth - (horizontalPaddingsNumber * padding) - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(), this is the right one to use when creating arts with tiles

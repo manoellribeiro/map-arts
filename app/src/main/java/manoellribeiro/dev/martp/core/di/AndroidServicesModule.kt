@@ -3,8 +3,6 @@ package manoellribeiro.dev.martp.core.di
 import android.content.Context
 import android.location.Geocoder
 import android.net.ConnectivityManager
-import android.os.Handler
-import android.os.Looper
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.Firebase
@@ -47,11 +45,6 @@ object AndroidServicesModule {
         @ApplicationContext context: Context
     ): GenerativeModel {
         return Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel("gemini-3-flash-preview")
-    }
-
-    @Provides
-    fun providesHandler(): Handler {
-        return Handler(Looper.getMainLooper())
     }
 
 }

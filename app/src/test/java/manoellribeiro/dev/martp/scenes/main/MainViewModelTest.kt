@@ -1,11 +1,9 @@
 package manoellribeiro.dev.martp.scenes.main
 
-import android.os.Handler
 import androidx.lifecycle.Observer
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verifySequence
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -24,19 +22,13 @@ class MainViewModelTest {
     private lateinit var repository: MartpRepository
 
     private lateinit var observer: Observer<GalleryUiState>
-    private lateinit var setMapZoomHandle: Handler
-    private lateinit var setMapStyleHandle: Handler
 
 
     @BeforeEach
     fun setup() {
         repository = mockk(relaxed = true)
-        setMapStyleHandle = mockk(relaxed = true)
-        setMapZoomHandle = mockk(relaxed = true)
         viewModel = MainViewModel(
-            repository = repository,
-            setMapStyleHandler = setMapStyleHandle,
-            setMapZoomHandler = setMapZoomHandle
+            repository = repository
         )
         observer =  mockk<Observer<GalleryUiState>>(relaxed = true)
         viewModel.galleryState.observeForever(observer)
@@ -45,7 +37,7 @@ class MainViewModelTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `if repository returns an empty list should emit EmptyList ui state`() = runTest {
-        every { repository.fetchUserMapArts() } returns CompletableDeferred(value = arrayListOf())
+        coEvery { repository.fetchUserMapArts() } returns arrayListOf()
 
         viewModel.getUserMapArts()
 
@@ -61,7 +53,7 @@ class MainViewModelTest {
     @Test
     fun `if repository throws an exception should emit Error ui state`() = runTest {
 
-        every { repository.fetchUserMapArts() } throws LocalStorageErrorFailure("error")
+        coEvery { repository.fetchUserMapArts() } throws LocalStorageErrorFailure("error")
 
         viewModel.getUserMapArts()
 
@@ -77,7 +69,7 @@ class MainViewModelTest {
     @Test
     fun `if repository returns not empty list should emit NotEmptyList ui state`() = runTest {
 
-        every { repository.fetchUserMapArts() } returns CompletableDeferred(value = arrayListOf(mockk(relaxed = true)))
+        coEvery { repository.fetchUserMapArts() } returns arrayListOf(mockk(relaxed = true))
 
         viewModel.getUserMapArts()
 

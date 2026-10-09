@@ -10,19 +10,17 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.LiveData
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
+import manoellribeiro.dev.martp.core.di.IoDispatcher
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
@@ -40,86 +38,96 @@ class MartpRepository @Inject constructor(
     private val connectivityService: ConnectivityService,
     private val mapArtDao: MapArtsDao,
     private val userInfoDao: UserInfoDao,
-    private val artSettingsDataSore: DataStore<Preferences>
+    private val artSettingsDataSore: DataStore<Preferences>,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
-
-    //TODO: Refactor this way of using ioScope
-    private val ioScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     companion object {
         private const val MAP_ZOOM_KEY = "MAP_ZOOM_KEY"
         private const val MAP_ART_STYLE_KEY = "MAP_ART_STYLE_KEY"
     }
 
-    fun setMapArtStylePreference(sketchArtType: SketchArtType) = ioScope.launch {
+    suspend fun setMapArtStylePreference(sketchArtType: SketchArtType) {
         try {
             Log.i("MartpRepository", "set sketch type " + sketchArtType.name)
             val artStyleKey = stringPreferencesKey(MAP_ART_STYLE_KEY)
             artSettingsDataSore.edit { preferences ->
                 preferences[artStyleKey] = sketchArtType.name
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             throw LocalStorageErrorFailure(e.message)
         }
     }
 
-    fun getArtStylePreference(): Deferred<SketchArtType> = ioScope.async {
+    suspend fun getArtStylePreference(): SketchArtType {
         val defaultArtStyle = SketchArtType.DEFAULT
         try {
             val artStyleKey = stringPreferencesKey(MAP_ART_STYLE_KEY)
-            return@async SketchArtType.valueOf(
+            return SketchArtType.valueOf(
                 artSettingsDataSore.data.map { preferences ->
                     preferences[artStyleKey]
                 }.first() ?: defaultArtStyle.name
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            return@async defaultArtStyle
+            return defaultArtStyle
         }
     }
 
-    fun setMapZoomPreference(mapZoom: Float) = ioScope.launch {
+    suspend fun setMapZoomPreference(mapZoom: Float) {
         try {
             val mapZoomKey = floatPreferencesKey(MAP_ZOOM_KEY)
             artSettingsDataSore.edit { preferences ->
                 preferences[mapZoomKey] = mapZoom
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             throw LocalStorageErrorFailure(e.message)
         }
     }
 
-    fun getMapZoomPreference(): Deferred<Float> = ioScope.async {
+    suspend fun getMapZoomPreference(): Float {
         val defaultZoom = 15F
         try {
             val mapZoomKey = floatPreferencesKey(MAP_ZOOM_KEY)
-            return@async artSettingsDataSore.data.map { preferences ->
+            return artSettingsDataSore.data.map { preferences ->
                 preferences[mapZoomKey]
             }.first() ?: defaultZoom
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            return@async defaultZoom
+            return defaultZoom
         }
     }
 
-    fun setUserName(username: String, userId: String) = ioScope.launch {
+    suspend fun setUserName(username: String, userId: String) {
         try {
             userInfoDao.setUserName(username = username, id = userId)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             //Log, but don't do nothing
         }
     }
 
-    fun setUserEmail(email: String, userId: String) = ioScope.launch {
+    suspend fun setUserEmail(email: String, userId: String) {
         try {
             userInfoDao.setUserEmail(email = email, id = userId)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             //Log, but don't do nothing
         }
     }
 
-    fun fetchCurrentUserInfo() :Deferred<UserInfoEntity> = ioScope.async {
+    suspend fun fetchCurrentUserInfo(): UserInfoEntity {
         try {
             var user = userInfoDao.getUser()
-            return@async if(user == null) {
+            return if(user == null) {
                user = UserInfoEntity(
                    id = UUID.randomUUID().toString(),
                    username = null,
@@ -130,8 +138,10 @@ class MartpRepository @Inject constructor(
                 )
                 user
             } else user
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            return@async UserInfoEntity(
+            return UserInfoEntity(
                 id = UUID.randomUUID().toString(),
                 username = null,
                 email = null
@@ -139,28 +149,30 @@ class MartpRepository @Inject constructor(
         }
     }
 
-    fun fetchUserMapArts(): Deferred<List<MapArtEntity>> = ioScope.async {
+    suspend fun fetchUserMapArts(): List<MapArtEntity> {
         try {
-            return@async mapArtDao.getAll()
+            return mapArtDao.getAll()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             throw LocalStorageErrorFailure(e.message)
         }
     }
 
-    fun fetchStaticMapImageAsync(
+    suspend fun fetchStaticMapImage(
         sketchArtType: SketchArtType,
         latitude: Double,
         longitude: Double,
         mapWidth: Int,
         mapHeight: Int,
         dir: File
-    ): Deferred<String> = ioScope.async {
+    ): String {
         if(connectivityService.isInternetConnected()) {
             try {
-                val mapZoom = getMapZoomPreference().await()
+                val mapZoom = getMapZoomPreference()
                 Log.i("MartpRepository", "mapZoom: " + mapZoom.toString())
                 //TODO: this is the implementation for the geoapifyApiService, it is ready to use when I create the art style of it
-//                val response: ResponseBody = geoapifyApiService.getStaticMapImageAsync(
+//                val response: ResponseBody = geoapifyApiService.getStaticMapImage(
 //                    styleId = "toner",
 //                    latitude = "lonlat:${longitude},${latitude}",
 //                    mapWidth = mapWidth - MartpSketch.framePadding.toInt() - MartpSketch.frameThickness.toInt(),
@@ -168,7 +180,7 @@ class MartpRepository @Inject constructor(
 //                    mapZoom = mapZoom
 //                )
 
-                val response: ResponseBody = mapboxApiService.getStaticMapImageAsync(
+                val response: ResponseBody = mapboxApiService.getStaticMapImage(
                     styleId = sketchArtType.mapBoxMapStyle.id,
                     latitude = latitude,
                     longitude = longitude,
@@ -177,15 +189,17 @@ class MartpRepository @Inject constructor(
                     mapZoom = mapZoom
                 )
 
-                val imageFile = File(dir,"image.png")
+                return withContext(ioDispatcher) {
+                    val imageFile = File(dir,"image.png")
 
-                imageFile.createNewFile()
+                    imageFile.createNewFile()
 
-                val fileOutputStream = FileOutputStream(imageFile)
-                fileOutputStream.write(response.bytes())
-                fileOutputStream.close()
+                    val fileOutputStream = FileOutputStream(imageFile)
+                    fileOutputStream.write(response.bytes())
+                    fileOutputStream.close()
 
-                return@async imageFile.path
+                    imageFile.path
+                }
             } catch (e: Exception) {
                 Log.i("MartpRepository", e.message ?: "")
                 throw e //TODO: this exception can't be thrown here
@@ -195,9 +209,11 @@ class MartpRepository @Inject constructor(
         }
     }
 
-    fun saveMapArtEntity(mapArtEntity: MapArtEntity): Deferred<Unit> = ioScope.async {
+    suspend fun saveMapArtEntity(mapArtEntity: MapArtEntity) {
         try {
             mapArtDao.insert(mapArtEntity)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             throw LocalStorageErrorFailure(originalExceptionMessage = e.message)
         }

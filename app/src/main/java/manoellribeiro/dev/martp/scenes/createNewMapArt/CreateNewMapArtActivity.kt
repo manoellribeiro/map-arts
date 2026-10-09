@@ -12,9 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.updateLayoutParams
-import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.extensions.dp
 import manoellribeiro.dev.martp.core.extensions.getEnumExtra
@@ -47,13 +45,11 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         setupObservables()
         setupViews()
         binding.mapArtsContainer.doOnLayout {
-            lifecycleScope.launch {
-                viewModel.startToGenerateMapArt(
-                    directory = this@CreateNewMapArtActivity.filesDir,
-                    canvasToDrawArtWidth = binding.mapArtsContainer.width,
-                    canvasToDrawArtHeight = binding.mapArtsContainer.height
-                )
-            }
+            viewModel.startToGenerateMapArt(
+                directory = this@CreateNewMapArtActivity.filesDir,
+                canvasToDrawArtWidth = binding.mapArtsContainer.width,
+                canvasToDrawArtHeight = binding.mapArtsContainer.height
+            )
         }
     }
 
@@ -95,9 +91,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         loadingAIIndicatorPB.gone()
         aiPoweredLL.isClickable = true
         aiPoweredLL.setOnClickListener {
-            lifecycleScope.launch {
-                viewModel.generateAiText()
-            }
+            viewModel.generateAiText()
         }
     }
 
@@ -147,13 +141,11 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         actionMB.isClickable = true
         actionMB.title = getString(R.string.try_again)
         actionMB.setOnClickListener {
-            lifecycleScope.launch {
-                viewModel.startToGenerateMapArt(
-                    directory = this@CreateNewMapArtActivity.filesDir,
-                    canvasToDrawArtWidth = binding.mapArtsContainer.width,
-                    canvasToDrawArtHeight = binding.mapArtsContainer.height
-                )
-            }
+            viewModel.startToGenerateMapArt(
+                directory = this@CreateNewMapArtActivity.filesDir,
+                canvasToDrawArtWidth = binding.mapArtsContainer.width,
+                canvasToDrawArtHeight = binding.mapArtsContainer.height
+            )
         }
         cityCountryTV.gone()
         descriptionTV.gone()
@@ -207,9 +199,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         aiPoweredLL.visible()
         aiPoweredLL.isClickable = true
         aiPoweredLL.setOnClickListener {
-            lifecycleScope.launch {
-                viewModel.generateAiText()
-            }
+            viewModel.generateAiText()
         }
         cityCountryTV.text = title
         stateErrorS.gone()
@@ -225,14 +215,12 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     }
 
     private fun saveArtToLocalDatabase() = with(binding) {
-        lifecycleScope.launch {
-            viewModel.saveArtToLocalDatabase(
-                title = cityCountryTV.text.toString(),
-                description = descriptionTV.text.toString(), //todo: entender o que acontece se esse não estiver preenchido
-                directory = this@CreateNewMapArtActivity.filesDir,
-                newArtBitMap = mapArtsContainer.toBitmap()
-            )
-        }
+        viewModel.saveArtToLocalDatabase(
+            title = cityCountryTV.text.toString(),
+            description = descriptionTV.text.toString(), //todo: entender o que acontece se esse não estiver preenchido
+            directory = this@CreateNewMapArtActivity.filesDir,
+            newArtBitMap = mapArtsContainer.toBitmap()
+        )
     }
 
     private fun typingAnimation(

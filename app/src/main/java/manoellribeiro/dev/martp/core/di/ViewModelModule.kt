@@ -14,6 +14,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ActivityContext
+import kotlinx.coroutines.CoroutineDispatcher
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
@@ -36,7 +37,8 @@ object ViewModelModule {
         mapboxApiService: MapboxApiService,
         geoapifyApiService: GeoapifyApiService,
         connectivityService: ConnectivityService,
-        artSettingsDataStore: DataStore<Preferences>
+        artSettingsDataStore: DataStore<Preferences>,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
     ): MartpRepository {
         return MartpRepository(
             mapArtDao = mapArtsDao,
@@ -44,7 +46,8 @@ object ViewModelModule {
             mapboxApiService = mapboxApiService,
             userInfoDao = userInfoDao,
             artSettingsDataSore = artSettingsDataStore,
-            geoapifyApiService = geoapifyApiService
+            geoapifyApiService = geoapifyApiService,
+            ioDispatcher = ioDispatcher
         )
     }
 
@@ -54,8 +57,11 @@ object ViewModelModule {
     }
 
     @Provides
-    fun providesGetAddressService(geocoder: Geocoder): GetAddressService {
-        return GetAddressService(geocoder)
+    fun providesGetAddressService(
+        geocoder: Geocoder,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
+    ): GetAddressService {
+        return GetAddressService(geocoder, ioDispatcher)
     }
 
     @Provides

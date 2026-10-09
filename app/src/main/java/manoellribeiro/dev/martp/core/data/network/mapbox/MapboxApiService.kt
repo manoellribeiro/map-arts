@@ -18,7 +18,7 @@ import retrofit2.http.Path
 interface MapboxApiService {
 
     @GET("manoellribeiro/{style_id}/static/{lon},{lat},{zoom},0,0/{width}x{height}")
-    suspend fun getStaticMapImageAsync(
+    suspend fun getStaticMapImage(
         @Path("style_id") styleId: String,
         @Path("lat") latitude: Double,
         @Path("lon") longitude: Double,

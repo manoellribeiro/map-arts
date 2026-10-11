@@ -1,8 +1,6 @@
 package manoellribeiro.dev.martp.scenes.userInfo
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -94,14 +92,9 @@ class UserInfoFragment : Fragment() {
         textInput: MartpTextInput,
         actionToExecute: () -> Unit
     ) {
-        val handler = Handler(Looper.getMainLooper())
         textInput.setOnChangedTextListener(
             textWatcher = object : TextWatcher {
                 override fun afterTextChanged(p0: Editable?) {
-                    handler.removeCallbacksAndMessages(null)
-                    handler.postDelayed(userStoppedTyping, 2000)
-                }
-                var userStoppedTyping: Runnable = Runnable {
                     actionToExecute.invoke()
                 }
                 override fun beforeTextChanged(

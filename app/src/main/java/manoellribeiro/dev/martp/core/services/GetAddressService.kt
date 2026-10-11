@@ -3,58 +3,58 @@ package manoellribeiro.dev.martp.core.services
 import android.location.Address
 import android.location.Geocoder
 import android.os.Build
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import manoellribeiro.dev.martp.core.di.IoDispatcher
 import kotlin.coroutines.resume
 import javax.inject.Inject
 
 
 class GetAddressService @Inject constructor  (
-    private val geocoder: Geocoder
+    private val geocoder: Geocoder,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
-    fun getAddress(
+    suspend fun getAddress(
         latitude: Double,
         longitude: Double
-    ): Deferred<Address?> {
+    ): Address? {
         try {
-            return CoroutineScope(Dispatchers.IO).async {
-                val result = suspendCancellableCoroutine { continuation ->
-                    if(Geocoder.isPresent()) {
-                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            geocoder.getFromLocation(latitude, longitude, 1, object :
-                                Geocoder.GeocodeListener {
-                                override fun onError(errorMessage: String?) {
-                                    continuation.resume(null)
-                                }
-                                override fun onGeocode(addresses: List<Address?>) {
-                                    if(addresses.isEmpty()) {
-                                        continuation.resume(null)
-                                    } else {
-                                        val address = addresses.first()
-                                        continuation.resume(address)
-                                    }
-                                }
-                            })
-                        } else {
-                            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
-                            if(addresses.isNullOrEmpty()) {
+            if(!Geocoder.isPresent()) {
+                return null
+            }
+            return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                suspendCancellableCoroutine { continuation ->
+                    geocoder.getFromLocation(latitude, longitude, 1, object :
+                        Geocoder.GeocodeListener {
+                        override fun onError(errorMessage: String?) {
+                            continuation.resume(null)
+                        }
+                        override fun onGeocode(addresses: List<Address?>) {
+                            if(addresses.isEmpty()) {
                                 continuation.resume(null)
                             } else {
-                                continuation.resume(addresses.first())
+                                val address = addresses.first()
+                                continuation.resume(address)
                             }
                         }
+                    })
+                }
+            } else {
+                withContext(ioDispatcher) {
+                    val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+                    if(addresses.isNullOrEmpty()) {
+                        null
                     } else {
-                        continuation.resume(null)
+                        addresses.first()
                     }
                 }
-                return@async result
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            return CompletableDeferred(null)
+            return null
         }
     }
 }

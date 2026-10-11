@@ -20,7 +20,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.databinding.ActivityMainBinding
 import manoellribeiro.dev.martp.scenes.createNewMapArt.CreateNewMapArtActivity
 import manoellribeiro.dev.martp.scenes.locationAcessDetails.LocationAccessDetailsActivity
@@ -55,9 +59,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupObservables() {
-        viewModel.mainState.observe(this) { state ->
-            when(state) {
-                is MainUiState.SetUserInfoBadgeVisibility -> setupUserInfoBadgeVisibility(state.visible)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isUserInfoBadgeVisible.collect { visible ->
+                    setupUserInfoBadgeVisibility(visible)
+                }
             }
         }
     }

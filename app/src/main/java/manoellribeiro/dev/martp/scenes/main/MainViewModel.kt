@@ -8,6 +8,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.Failure
@@ -49,12 +52,8 @@ class MainViewModel @Inject constructor(
         _artStyleSettingsState.value = newState
     }
 
-    private val _mainState: MutableLiveData<MainUiState> = MutableLiveData<MainUiState>()
-    val mainState: LiveData<MainUiState> = _mainState
-
-    private fun emitNewMainState(newState: MainUiState) {
-        _mainState.value = newState
-    }
+    private val _isUserInfoBadgeVisible: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isUserInfoBadgeVisible: StateFlow<Boolean> = _isUserInfoBadgeVisible.asStateFlow()
 
     fun getUserMapArts() {
         viewModelScope.launch {
@@ -74,11 +73,7 @@ class MainViewModel @Inject constructor(
 
     fun tryToGetUserInfo() {
         viewModelScope.launch {
-            emitNewMainState(
-                MainUiState.SetUserInfoBadgeVisibility(
-                    visible = false
-                )
-            )
+            _isUserInfoBadgeVisible.value = false
             emitNewUserInfoState(UserInfoUiState.Loading)
             val userInfo = repository.fetchCurrentUserInfo()
             emitNewUserInfoState(UserInfoUiState.UserFound(userInfo))
@@ -134,11 +129,7 @@ class MainViewModel @Inject constructor(
     fun handleBadgesVisibilities() {
         viewModelScope.launch {
             val user = repository.fetchCurrentUserInfo()
-            emitNewMainState(
-                MainUiState.SetUserInfoBadgeVisibility(
-                    visible = user.username.isNullOrEmpty() && user.email.isNullOrEmpty()
-                )
-            )
+            _isUserInfoBadgeVisible.value = user.username.isNullOrEmpty() && user.email.isNullOrEmpty()
         }
     }
 }

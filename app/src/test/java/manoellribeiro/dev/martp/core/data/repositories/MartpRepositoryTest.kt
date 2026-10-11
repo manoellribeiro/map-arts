@@ -2,9 +2,12 @@ package manoellribeiro.dev.martp.core.data.repositories
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
-import io.mockk.coVerify
+import io.mockk.verify
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
@@ -43,24 +46,24 @@ class MartpRepositoryTest {
     }
 
     @Test
-    fun `fetchUserMapArts should forwards the call to mapArtDao and return the value`() = runTest {
+    fun `observeUserMapArts should forwards the call to mapArtDao and return the value`() = runTest {
 
-        coEvery { mapArtsDao.getAll() } returns arrayListOf(mockk(relaxed = true))
+        every { mapArtsDao.getAll() } returns flowOf(arrayListOf(mockk(relaxed = true)))
 
-        val result = repository.fetchUserMapArts()
+        val result = repository.observeUserMapArts().first()
 
-        coVerify { mapArtsDao.getAll() }
+        verify { mapArtsDao.getAll() }
         assert(result.isNotEmpty())
 
     }
 
     @Test
-    fun `fetchUserMapArts should throw Failure if mapArtDao throws Exception`() = runTest {
+    fun `observeUserMapArts should throw Failure if mapArtDao throws Exception`() = runTest {
 
-        coEvery { mapArtsDao.getAll() } throws Exception()
+        every { mapArtsDao.getAll() } returns flow { throw Exception() }
 
         try {
-            repository.fetchUserMapArts()
+            repository.observeUserMapArts().first()
         } catch (e: Exception) {
             assert(e is Failure)
         }

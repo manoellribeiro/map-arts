@@ -12,6 +12,8 @@ import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -149,12 +151,8 @@ class MartpRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchUserMapArts(): List<MapArtEntity> {
-        try {
-            return mapArtDao.getAll()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
+    fun observeUserMapArts(): Flow<List<MapArtEntity>> {
+        return mapArtDao.getAll().catch { e ->
             throw LocalStorageErrorFailure(e.message)
         }
     }

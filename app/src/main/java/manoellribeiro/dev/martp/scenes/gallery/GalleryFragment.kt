@@ -11,8 +11,13 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.extensions.dp
@@ -37,7 +42,6 @@ class GalleryFragment : Fragment() {
         binding = FragmentGalleryBinding.inflate(layoutInflater)
         setupObservables()
         setupViews()
-        viewModel.getUserMapArts()
         return binding.root
     }
 
@@ -52,13 +56,18 @@ class GalleryFragment : Fragment() {
     }
 
     private fun setupObservables() {
-        viewModel.galleryState.observe(viewLifecycleOwner) { state ->
-            when(state) {
-                GalleryUiState.EmptyList -> setupEmptyListState()
-                is GalleryUiState.Error -> setupErrorState(state.failure)
-                GalleryUiState.Loading -> setupLoadingState()
-                is GalleryUiState.NotEmptyList -> setupNotEmptyListState(state.mapArts)
-            }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.galleryState
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .distinctUntilChanged()
+                .collect { state ->
+                    when(state) {
+                        GalleryUiState.EmptyList -> setupEmptyListState()
+                        is GalleryUiState.Error -> setupErrorState(state.failure)
+                        GalleryUiState.Loading -> setupLoadingState()
+                        is GalleryUiState.NotEmptyList -> setupNotEmptyListState(state.mapArts)
+                    }
+                }
         }
     }
 

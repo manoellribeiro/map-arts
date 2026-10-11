@@ -10,6 +10,7 @@ sealed interface CreateNewMapArtUiState {
     class GeneratedAIText(val text: String): CreateNewMapArtUiState
     object ErrorGeneratingAIText: CreateNewMapArtUiState
 
+    object Idle: CreateNewMapArtUiState
     object Loading: CreateNewMapArtUiState
     object ActionButtonLoading: CreateNewMapArtUiState
     class Error(val failure: Failure): CreateNewMapArtUiState
@@ -18,5 +19,4 @@ sealed interface CreateNewMapArtUiState {
         val title: String,
         val sketchArtType: SketchArtType
     ): CreateNewMapArtUiState
-    class ArtCreatedSuccessfully(val pathToStoreArtImage: String): CreateNewMapArtUiState
 }

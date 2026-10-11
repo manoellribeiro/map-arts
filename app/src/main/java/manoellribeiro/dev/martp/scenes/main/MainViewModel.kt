@@ -38,15 +38,15 @@ class MainViewModel @Inject constructor(
         _galleryState.value = newState
     }
 
-    private val _userInfoState: MutableLiveData<UserInfoUiState> = MutableLiveData<UserInfoUiState>()
-    val userInfoState: LiveData<UserInfoUiState> = _userInfoState
+    private val _userInfoState: MutableStateFlow<UserInfoUiState> = MutableStateFlow(UserInfoUiState.Loading)
+    val userInfoState: StateFlow<UserInfoUiState> = _userInfoState.asStateFlow()
 
     private fun emitNewUserInfoState(newState: UserInfoUiState) {
         _userInfoState.value = newState
     }
 
-    private val _artStyleSettingsState: MutableLiveData<ArtStyleSettingsUiState> = MutableLiveData<ArtStyleSettingsUiState>()
-    val artStyleSettingsState: LiveData<ArtStyleSettingsUiState> = _artStyleSettingsState
+    private val _artStyleSettingsState: MutableStateFlow<ArtStyleSettingsUiState> = MutableStateFlow(ArtStyleSettingsUiState.Loading)
+    val artStyleSettingsState: StateFlow<ArtStyleSettingsUiState> = _artStyleSettingsState.asStateFlow()
 
     private fun emitNewArtStyleSettingsState(newState: ArtStyleSettingsUiState) {
         _artStyleSettingsState.value = newState

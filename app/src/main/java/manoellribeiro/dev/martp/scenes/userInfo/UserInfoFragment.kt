@@ -12,7 +12,12 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.core.components.MartpTextInput
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.extensions.gone
@@ -50,11 +55,16 @@ class UserInfoFragment : Fragment() {
     }
 
     private fun setupObservables() {
-        viewModel.userInfoState.observe(viewLifecycleOwner) { state ->
-            when(state) {
-                is UserInfoUiState.UserFound -> setupUserFoundState(state.user)
-                UserInfoUiState.Loading -> setupLoadingState()
-            }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.userInfoState
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .distinctUntilChanged()
+                .collect { state ->
+                    when(state) {
+                        is UserInfoUiState.UserFound -> setupUserFoundState(state.user)
+                        UserInfoUiState.Loading -> setupLoadingState()
+                    }
+                }
         }
     }
 

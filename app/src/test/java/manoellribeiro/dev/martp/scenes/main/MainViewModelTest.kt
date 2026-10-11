@@ -13,14 +13,14 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
-import manoellribeiro.dev.martp.infra.InstantTaskExecutorRuleForJUnit5
+import manoellribeiro.dev.martp.infra.MainDispatcherExtension
 import manoellribeiro.dev.martp.scenes.gallery.GalleryUiState
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(InstantTaskExecutorRuleForJUnit5::class)
+@ExtendWith(MainDispatcherExtension::class)
 class MainViewModelTest {
 
     private lateinit var viewModel: MainViewModel

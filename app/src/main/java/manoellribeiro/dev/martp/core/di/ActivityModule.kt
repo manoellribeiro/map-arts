@@ -17,7 +17,7 @@ import manoellribeiro.dev.martp.scenes.main.MainViewModel
 object ActivityModule {
 
     @Provides
-    fun providesGalleryViewModel(
+    fun providesMainViewModel(
         repository: MartpRepository
     ): MainViewModel {
         return MainViewModel(

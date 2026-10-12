@@ -12,7 +12,13 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.extensions.dp
 import manoellribeiro.dev.martp.core.extensions.getEnumExtra
@@ -71,16 +77,30 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     }
 
     private fun setupObservables() {
-        viewModel.state.observe(this@CreateNewMapArtActivity) { state ->
-            when(state) {
-                is CreateNewMapArtUiState.Error -> handleStateError(state.failure)
-                is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state.staticMapImagePath, state.title, state.sketchArtType)
-                CreateNewMapArtUiState.Loading -> handleLoadingState()
-                CreateNewMapArtUiState.ActionButtonLoading -> handleActionButtonLoadingState()
-                is CreateNewMapArtUiState.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState(state.pathToStoreArtImage)
-                CreateNewMapArtUiState.ErrorGeneratingAIText -> handleErrorGeneratingAIText()
-                is CreateNewMapArtUiState.GeneratedAIText -> handleGeneratedAIText(state.text)
-                CreateNewMapArtUiState.LoadingAIText -> handleLoadingAIText()
+        lifecycleScope.launch {
+            viewModel.state
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .distinctUntilChanged()
+                .collect { state ->
+                    when(state) {
+                        is CreateNewMapArtUiState.Error -> handleStateError(state.failure)
+                        is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state.staticMapImagePath, state.title, state.sketchArtType)
+                        CreateNewMapArtUiState.Idle -> Unit
+                        CreateNewMapArtUiState.Loading -> handleLoadingState()
+                        CreateNewMapArtUiState.ActionButtonLoading -> handleActionButtonLoadingState()
+                        CreateNewMapArtUiState.ErrorGeneratingAIText -> handleErrorGeneratingAIText()
+                        is CreateNewMapArtUiState.GeneratedAIText -> handleGeneratedAIText(state.text)
+                        CreateNewMapArtUiState.LoadingAIText -> handleLoadingAIText()
+                    }
+                }
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.events.collect { event ->
+                    when(event) {
+                        is CreateNewMapArtEvent.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState(event.pathToStoreArtImage)
+                    }
+                }
             }
         }
     }

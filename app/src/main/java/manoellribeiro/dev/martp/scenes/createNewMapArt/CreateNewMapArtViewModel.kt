@@ -6,15 +6,19 @@ import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.MartpDatabase
@@ -41,8 +45,11 @@ class CreateNewMapArtViewModel @Inject constructor(
     private val promptGenerator: PromptGenerator
 ): ViewModel() {
 
-    private val _state: MutableLiveData<CreateNewMapArtUiState> = MutableLiveData()
-    val state: LiveData<CreateNewMapArtUiState> = _state
+    private val _state: MutableStateFlow<CreateNewMapArtUiState> = MutableStateFlow(CreateNewMapArtUiState.Idle)
+    val state: StateFlow<CreateNewMapArtUiState> = _state.asStateFlow()
+
+    private val _events: Channel<CreateNewMapArtEvent> = Channel(Channel.BUFFERED)
+    val events: Flow<CreateNewMapArtEvent> = _events.receiveAsFlow()
 
     private fun emitNewState(newState: CreateNewMapArtUiState) {
         _state.value = newState
@@ -150,8 +157,8 @@ class CreateNewMapArtViewModel @Inject constructor(
 
                 repository.saveMapArtEntity(newMartp)
 
-                emitNewState(
-                    CreateNewMapArtUiState.ArtCreatedSuccessfully(
+                _events.send(
+                    CreateNewMapArtEvent.ArtCreatedSuccessfully(
                         pathToStoreArtImage = newMartp.imagePathLocation
                     )
                 )

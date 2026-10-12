@@ -1,84 +1,91 @@
 package manoellribeiro.dev.martp.scenes.main
 
-import androidx.lifecycle.Observer
-import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verifySequence
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
-import manoellribeiro.dev.martp.infra.InstantTaskExecutorRuleForJUnit5
+import manoellribeiro.dev.martp.infra.MainDispatcherExtension
 import manoellribeiro.dev.martp.scenes.gallery.GalleryUiState
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(InstantTaskExecutorRuleForJUnit5::class)
+@ExtendWith(MainDispatcherExtension::class)
 class MainViewModelTest {
 
     private lateinit var viewModel: MainViewModel
     private lateinit var repository: MartpRepository
 
-    private lateinit var observer: Observer<GalleryUiState>
-
-
     @BeforeEach
     fun setup() {
         repository = mockk(relaxed = true)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun TestScope.collectGalleryStates(): List<GalleryUiState> {
         viewModel = MainViewModel(
             repository = repository
         )
-        observer =  mockk<Observer<GalleryUiState>>(relaxed = true)
-        viewModel.galleryState.observeForever(observer)
+        val states = mutableListOf<GalleryUiState>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.galleryState.toList(states)
+        }
+        return states
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `if repository returns an empty list should emit EmptyList ui state`() = runTest {
-        coEvery { repository.fetchUserMapArts() } returns arrayListOf()
+        every { repository.observeUserMapArts() } returns flowOf(arrayListOf())
 
-        viewModel.getUserMapArts()
+        val states = collectGalleryStates()
 
         advanceUntilIdle()
 
-        verifySequence {
-            observer.onChanged(GalleryUiState.Loading)
-            observer.onChanged(GalleryUiState.EmptyList)
-        }
+        assertEquals(
+            listOf(GalleryUiState.Loading, GalleryUiState.EmptyList),
+            states
+        )
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `if repository throws an exception should emit Error ui state`() = runTest {
 
-        coEvery { repository.fetchUserMapArts() } throws LocalStorageErrorFailure("error")
+        every { repository.observeUserMapArts() } returns flow { throw LocalStorageErrorFailure("error") }
 
-        viewModel.getUserMapArts()
+        val states = collectGalleryStates()
 
         advanceUntilIdle()
 
-        verifySequence {
-            observer.onChanged(GalleryUiState.Loading)
-            observer.onChanged(any<GalleryUiState.Error>())
-        }
+        assertEquals(2, states.size)
+        assertEquals(GalleryUiState.Loading, states[0])
+        assert(states[1] is GalleryUiState.Error)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `if repository returns not empty list should emit NotEmptyList ui state`() = runTest {
 
-        coEvery { repository.fetchUserMapArts() } returns arrayListOf(mockk(relaxed = true))
+        every { repository.observeUserMapArts() } returns flowOf(arrayListOf(mockk(relaxed = true)))
 
-        viewModel.getUserMapArts()
+        val states = collectGalleryStates()
 
         advanceUntilIdle()
 
-        verifySequence {
-            observer.onChanged(GalleryUiState.Loading)
-            observer.onChanged(any<GalleryUiState.NotEmptyList>())
-        }
+        assertEquals(2, states.size)
+        assertEquals(GalleryUiState.Loading, states[0])
+        assert(states[1] is GalleryUiState.NotEmptyList)
     }
 
 }

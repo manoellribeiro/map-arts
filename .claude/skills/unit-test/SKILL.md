@@ -75,11 +75,27 @@ fakeUserMapArtsChannel.close(LocalStorageErrorFailure("fake error"))
 - Mocks are recreated in `setup()` for every test, so `@AfterEach` is not needed by default
 - Add it only when the test class uses `mockkObject` or `mockkStatic`, because those replace global state that leaks into other test classes
 - Call `unmockkAll()` in it
+- Changing the JVM default locale or time zone is allowed when the result under test depends on it (e.g. `Calendar.formatDateHour`): save the original value and set the new one in `setup()`, and always restore the original in `@AfterEach`
 
 ```kotlin
 @AfterEach
 fun tearDown() {
     unmockkAll()
+}
+```
+
+```kotlin
+private lateinit var originalLocale: Locale
+
+@BeforeEach
+fun setup() {
+    originalLocale = Locale.getDefault()
+    Locale.setDefault(Locale.US)
+}
+
+@AfterEach
+fun tearDown() {
+    Locale.setDefault(originalLocale)
 }
 ```
 
@@ -418,6 +434,7 @@ Before finalizing a test, verify:
 - [ ] The class under test is created in `setup()`, never inside a test method
 - [ ] Mock behaviors are configured inside the test methods, not in `setup()` (except the call the class under test makes when it is created)
 - [ ] Has `@AfterEach` with `unmockkAll()` only if `mockkObject`/`mockkStatic` is used
+- [ ] A changed default locale or time zone is restored in `@AfterEach`
 - [ ] Test name follows `` `if <condition> should <expected behavior>` ``
 - [ ] Test has the `// Given`, `// When`, `// Then` comments
 - [ ] Test uses `runTest` if it involves coroutines, and advances the scheduler before asserting

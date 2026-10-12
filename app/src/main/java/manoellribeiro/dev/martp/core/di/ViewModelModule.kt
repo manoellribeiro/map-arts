@@ -24,6 +24,7 @@ import manoellribeiro.dev.martp.core.services.ConnectivityService
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
+import manoellribeiro.dev.martp.core.services.SdkVersionService
 import manoellribeiro.dev.martp.core.utils.PromptGenerator
 
 @Module
@@ -59,9 +60,15 @@ object ViewModelModule {
     @Provides
     fun providesGetAddressService(
         geocoder: Geocoder,
-        @IoDispatcher ioDispatcher: CoroutineDispatcher
+        @IoDispatcher ioDispatcher: CoroutineDispatcher,
+        sdkVersionService: SdkVersionService
     ): GetAddressService {
-        return GetAddressService(geocoder, ioDispatcher)
+        return GetAddressService(geocoder, ioDispatcher, sdkVersionService)
+    }
+
+    @Provides
+    fun providesSdkVersionService(): SdkVersionService {
+        return SdkVersionService()
     }
 
     @Provides

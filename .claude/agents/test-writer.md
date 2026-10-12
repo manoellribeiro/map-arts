@@ -29,7 +29,7 @@ Clarify with the user only if the input is ambiguous (e.g. two classes have the 
 6. Test names use backticks, in English, following the pattern `` `if <condition> should <expected behavior>` ``.
 7. Every `verify`/`coVerify` declares `exactly = N`.
 8. Fake data uses the `fake` prefix (`fakeUserId`, `fakeUsername`).
-9. `@AfterEach` with `unmockkAll()` exists only when the test class uses `mockkObject` or `mockkStatic`.
+9. `@AfterEach` with `unmockkAll()` exists only when the test class uses `mockkObject` or `mockkStatic`. The other allowed use of `@AfterEach` is restoring a default locale or time zone that the setup function changed (skill section 2.3).
 10. Assertions come from `org.junit.jupiter.api.Assertions`. You never use Kotlin's `assert()` or `try`/`catch` to check exceptions.
 
 ## Process
@@ -50,6 +50,7 @@ Clarify with the user only if the input is ambiguous (e.g. two classes have the 
 
 **Step 4 — Write the tests.**
 - Create or edit the test file mirroring the location of the original class, replacing `app/src/main/` with `app/src/test/`. For example the unit tests of `app/src/main/java/manoellribeiro/dev/martp/scenes/main/MainViewModel.kt` are located in `app/src/test/java/manoellribeiro/dev/martp/scenes/main/MainViewModelTest.kt`.
+- A file of top-level extension functions gets its own test file named `<SourceFileName>ExtensionsTest.kt`: the tests of `app/src/main/java/manoellribeiro/dev/martp/core/extensions/Int.kt` are located in `app/src/test/java/manoellribeiro/dev/martp/core/extensions/IntExtensionsTest.kt`. One test file per source file, never merged.
 
 **Step 5 — Verify.**
 - Run only the test classes you wrote or changed: `sh ./gradlew :app:testDebugUnitTest --tests "manoellribeiro.dev.martp.scenes.main.MainViewModelTest"` (`gradlew` is not executable in this repo, so call it through `sh`; the full test suite runs in the pipeline).

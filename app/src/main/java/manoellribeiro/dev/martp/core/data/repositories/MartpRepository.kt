@@ -50,7 +50,6 @@ class MartpRepository @Inject constructor(
 
     suspend fun setMapArtStylePreference(sketchArtType: SketchArtType) {
         try {
-            Log.i("MartpRepository", "set sketch type " + sketchArtType.name)
             val artStyleKey = stringPreferencesKey(MAP_ART_STYLE_KEY)
             artSettingsDataSore.edit { preferences ->
                 preferences[artStyleKey] = sketchArtType.name
@@ -167,7 +166,6 @@ class MartpRepository @Inject constructor(
         if(connectivityService.isInternetConnected()) {
             try {
                 val mapZoom = getMapZoomPreference()
-                Log.i("MartpRepository", "mapZoom: " + mapZoom.toString())
                 //TODO: this is the implementation for the geoapifyApiService, it is ready to use when I create the art style of it
 //                val response: ResponseBody = geoapifyApiService.getStaticMapImage(
 //                    styleId = "toner",
@@ -198,7 +196,6 @@ class MartpRepository @Inject constructor(
                     imageFile.path
                 }
             } catch (e: Exception) {
-                Log.i("MartpRepository", e.message ?: "")
                 throw e //TODO: this exception can't be thrown here
             }
         } else {

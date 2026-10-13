@@ -2,7 +2,6 @@ package manoellribeiro.dev.martp.core.services
 
 import android.location.Address
 import android.location.Geocoder
-import android.os.Build
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -14,7 +13,8 @@ import javax.inject.Inject
 
 class GetAddressService @Inject constructor  (
     private val geocoder: Geocoder,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val sdkVersionService: SdkVersionService
 ) {
     suspend fun getAddress(
         latitude: Double,
@@ -24,7 +24,7 @@ class GetAddressService @Inject constructor  (
             if(!Geocoder.isPresent()) {
                 return null
             }
-            return if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return if(sdkVersionService.isAtLeastTiramisu()) {
                 suspendCancellableCoroutine { continuation ->
                     geocoder.getFromLocation(latitude, longitude, 1, object :
                         Geocoder.GeocodeListener {

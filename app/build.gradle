@@ -7,6 +7,7 @@ plugins {
     id 'com.google.firebase.crashlytics'
     id 'org.jetbrains.kotlin.plugin.compose'
     id "de.mannodermaus.android-junit5" version "1.14.0.0"
+    id 'jacoco'
 }
 
 android {
@@ -39,6 +40,8 @@ android {
         debug {
             buildConfigField("String", "MAPBOX_API_KEY", "\"${System.getenv("MAPBOX_API_KEY") ?: localProperties.getProperty("MAPBOX_API_KEY")}\"")
             buildConfigField("String", "GEOAPIFY_API_KEY", "\"${System.getenv("GEOAPIFY_API_KEY") ?: localProperties.getProperty("GEOAPIFY_API_KEY")}\"")
+
+            testCoverageEnabled true
         }
 
         release {
@@ -128,4 +131,33 @@ dependencies {
 
 kapt {
     correctErrorTypes true
+}
+
+tasks.register('jacocoUnitTestReport', JacocoReport) {
+    group = 'verification'
+    description = 'Generates the unit test coverage report for the debug variant, limited to the classes we unit test.'
+    dependsOn 'testDebugUnitTest'
+
+    reports {
+        html.required = true
+        xml.required = true
+    }
+
+    // Only these classes count for coverage; everything else (fragments, activities, ui states, di, models...) is left out
+    def coveredClasses = [
+            '**/scenes/**/*ViewModel.class',
+            '**/scenes/**/*ViewModel$*.class',
+            '**/core/data/repositories/**',
+            '**/core/services/**',
+            '**/core/extensions/**',
+            '**/core/utils/**'
+    ]
+
+    classDirectories.setFrom(fileTree(layout.buildDirectory.dir('tmp/kotlin-classes/debug')) {
+        include coveredClasses
+    })
+    sourceDirectories.setFrom(files('src/main/java'))
+    executionData.setFrom(fileTree(layout.buildDirectory) {
+        include 'outputs/unit_test_code_coverage/debugUnitTest/*.exec'
+    })
 }

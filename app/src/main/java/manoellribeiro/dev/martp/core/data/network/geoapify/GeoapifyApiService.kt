@@ -14,7 +14,7 @@ interface GeoapifyApiService {
 
     //@GET("staticmap/{style_id}/static/{lon},{lat},{zoom},0,0/{width}x{height}")
     @GET("staticmap")
-    suspend fun getStaticMapImageAsync(
+    suspend fun getStaticMapImage(
         @Query("style") styleId: String,
         @Query("center") latitude: String,
         @Query("width") mapWidth: Int,

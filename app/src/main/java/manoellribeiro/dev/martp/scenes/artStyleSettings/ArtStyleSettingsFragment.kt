@@ -71,12 +71,12 @@ import manoellribeiro.dev.martp.core.components.compose.theme.TextScreenTitle
 import manoellribeiro.dev.martp.core.components.compose.theme.TextTitle
 import manoellribeiro.dev.martp.core.components.compose.theme.Yellow
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.max
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import manoellribeiro.dev.martp.core.components.compose.theme.Blue
 import manoellribeiro.dev.martp.core.components.compose.theme.DarkD5
@@ -99,7 +99,7 @@ class ArtStyleSettingsFragment : Fragment() {
     ): View {
         val composeView = ComposeView(requireContext())
         composeView.setContent {
-            val uiState by viewModel.artStyleSettingsState.observeAsState()
+            val uiState by viewModel.artStyleSettingsState.collectAsStateWithLifecycle()
             Scaffold(
                 containerColor = LightCream,
                 contentWindowInsets = WindowInsets.safeDrawing,
@@ -120,7 +120,6 @@ class ArtStyleSettingsFragment : Fragment() {
                             SlideComponent(viewModel, (uiState as ArtStyleSettingsUiState.SettingsLoaded).mapZoom)
                             ArtStyleSelectors(viewModel, (uiState as ArtStyleSettingsUiState.SettingsLoaded).mapArtStyle)
                         }
-                        null -> TODO()
                     }
 
                 }

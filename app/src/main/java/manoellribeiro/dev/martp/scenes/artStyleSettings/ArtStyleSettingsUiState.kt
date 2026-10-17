@@ -7,7 +7,8 @@ sealed interface ArtStyleSettingsUiState {
     object Loading: ArtStyleSettingsUiState
     data class SettingsLoaded(
         val mapZoom: Float,
-        val mapArtStyle: SketchArtType
+        val mapArtStyle: SketchArtType,
+        val colorPaletteSelected: String
     ): ArtStyleSettingsUiState
 
 }

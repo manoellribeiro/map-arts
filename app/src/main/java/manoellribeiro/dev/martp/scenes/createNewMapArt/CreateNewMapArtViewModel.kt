@@ -36,6 +36,7 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.math.min
 
 @HiltViewModel
 class CreateNewMapArtViewModel @Inject constructor(
@@ -74,6 +75,9 @@ class CreateNewMapArtViewModel @Inject constructor(
                     val location = async { locationService.getCurrentLocation() }
                     sketchArtType.await() to location.await()
                 }
+                val colorPalette = if(sketchArtType == SketchArtType.COLORFUL_MAP) {
+                    repository.getColorPalettePreference()
+                } else null
                 currentArtLocation = location
                 val horizontalTilesCount = 4
                 val verticalTilesCount = 4
@@ -93,7 +97,7 @@ class CreateNewMapArtViewModel @Inject constructor(
                             longitude = location.longitude,
                             latitude = location.latitude,
                             mapWidth = canvasToDrawArtWidth - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
-                            mapHeight = canvasToDrawArtHeight - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
+                            mapHeight = min(canvasToDrawArtHeight - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(), 1280),
                             //mapWidth = canvasToDrawArtWidth - (horizontalPaddingsNumber * padding) - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(), this is the right one to use when creating arts with tiles
                             //mapHeight = canvasToDrawArtHeight - (verticalPaddingsNumber * padding) - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(), this is the right one to use when creating arts with tiles
                             dir = directory
@@ -103,11 +107,12 @@ class CreateNewMapArtViewModel @Inject constructor(
                 }
                 currentArtAddress = address
                 emitNewState(
-            CreateNewMapArtUiState.ImageDownloaded(
-                            staticMapImagePath = staticImagePath,
-                            title = address?.locality + ", " + address?.countryName + ", " + address?.thoroughfare,
-                            sketchArtType = sketchArtType
-                        )
+                    CreateNewMapArtUiState.ImageDownloaded(
+                        staticMapImagePath = staticImagePath,
+                        title = address?.locality + ", " + address?.countryName + ", " + address?.thoroughfare,
+                        sketchArtType = sketchArtType,
+                        colorPalette = colorPalette
+                    )
                 )
             } catch (failure: Failure) {
                 emitNewState(CreateNewMapArtUiState.Error(failure))

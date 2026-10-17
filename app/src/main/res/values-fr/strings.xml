@@ -59,7 +59,7 @@
     <string name="art_style">Style artistique</string>
     <string name="choose_visual_style">Choisissez le style visuel pour votre œuvre générée</string>
     <string name="color_palette">Palette de couleurs</string>
-    <string name="choose_complete_color_set">Choisissez un ensemble complet de couleurs pour votre œuvre</string>
+    <string name="choose_complete_color_set">Choisissez un ensemble complet de couleurs pour votre œuvre. Chaque couleur représente un élément de votre carte, comme les rues, l\'eau et les zones de bâtiments.</string>
     <string name="map_zoom">Zoom de la carte</string>
     <string name="control_map_zoom">Contrôlez à quelle distance la vue de la carte sera affichée</string>
     <string name="colorful_map">Carte Colorée</string>
@@ -71,4 +71,6 @@
     <string name="water_flow_description">Une carte animée qui se concentre sur le flux de toute eau apparaissant sur votre carte</string>
     <string name="walking_people">Personnes en Marche</string>
     <string name="walking_people_description">Une carte colorée avec une simulation de personnes marchant dans les zones des bâtiments</string>
+    <string name="classic">Classique</string>
+    <string name="classic_description">Le premier style artistique créé dans le projet, généré avec les couleurs fixes de notre logo</string>
 </resources>

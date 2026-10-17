@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -21,18 +20,19 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.extensions.dp
-import manoellribeiro.dev.martp.core.extensions.getEnumExtra
 import manoellribeiro.dev.martp.core.extensions.gone
-import manoellribeiro.dev.martp.core.extensions.orNull
 import manoellribeiro.dev.martp.core.extensions.toBitmap
 import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.services.sensors.GravitySensor
+import manoellribeiro.dev.martp.core.sketches.ColorfulMapSketch
 import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.sketches.PointillismMartpSketch
-import manoellribeiro.dev.martp.core.sketches.WalkingPeopleSketch
+import manoellribeiro.dev.martp.core.sketches.ParticleSystemSketch
 import manoellribeiro.dev.martp.core.sketches.WaterFlowMartpSketch
+import manoellribeiro.dev.martp.core.utils.ColorPaletteProvider
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import processing.android.PFragment
 
@@ -85,7 +85,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 .collect { state ->
                     when(state) {
                         is CreateNewMapArtUiState.Error -> handleStateError(state.failure)
-                        is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state.staticMapImagePath, state.title, state.sketchArtType)
+                        is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state.staticMapImagePath, state.title, state.sketchArtType, state.colorPalette)
                         CreateNewMapArtUiState.Idle -> Unit
                         CreateNewMapArtUiState.Loading -> handleLoadingState()
                         CreateNewMapArtUiState.ActionButtonLoading -> handleActionButtonLoadingState()
@@ -190,7 +190,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     private fun handleImageDownloadedState(
         imagePath: String,
         title: String,
-        artType: SketchArtType
+        artType: SketchArtType,
+        colorPalette: String?
     ) = with(binding) {
         mapArtsContainer.visible()
         loadingIndicatorLAV.gone()
@@ -218,11 +219,19 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 canvasHeight = mapArtsContainer.height.toFloat(),
                 imagePath = imagePath,
             )
-            SketchArtType.WALKING_PEOPLE -> WalkingPeopleSketch(
+            SketchArtType.PARTICLE_SYSTEM -> ParticleSystemSketch(
                 padding = 20,
                 canvasWidth = mapArtsContainer.width.toFloat(),
                 canvasHeight = mapArtsContainer.height.toFloat(),
                 imagePath = imagePath,
+                gravitySensor = GravitySensor(context = this@CreateNewMapArtActivity)
+            )
+            SketchArtType.COLORFUL_MAP -> ColorfulMapSketch(
+                padding = 20,
+                canvasWidth = mapArtsContainer.width.toFloat(),
+                canvasHeight = mapArtsContainer.height.toFloat(),
+                imagePath = imagePath,
+                colorPalette = ColorPaletteProvider.byNameOrDefault(colorPalette)
             )
         }
         val processingFragment = PFragment(sketch)

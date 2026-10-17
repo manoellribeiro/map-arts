@@ -27,6 +27,7 @@ import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.services.ConnectivityService
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
+import manoellribeiro.dev.martp.core.utils.ColorPaletteProvider
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
@@ -46,6 +47,34 @@ class MartpRepository @Inject constructor(
     companion object {
         private const val MAP_ZOOM_KEY = "MAP_ZOOM_KEY"
         private const val MAP_ART_STYLE_KEY = "MAP_ART_STYLE_KEY"
+        private const val SELECTED_COLOR_PALETTE = "SELECTED_COLOR_PALETTE"
+    }
+
+    suspend fun setColorPalettePreference(colorPaletteName: String) {
+        try {
+            val colorPaletteKey = stringPreferencesKey(SELECTED_COLOR_PALETTE)
+            artSettingsDataSore.edit { preferences ->
+                preferences[colorPaletteKey] = colorPaletteName
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            throw LocalStorageErrorFailure(e.message)
+        }
+    }
+
+    suspend fun getColorPalettePreference(): String {
+        val defaultColorPalette = "Martp"
+        try {
+            val colorPaletteKey = stringPreferencesKey(SELECTED_COLOR_PALETTE)
+            return artSettingsDataSore.data.map { preferences ->
+                preferences[colorPaletteKey]
+            }.first() ?: defaultColorPalette
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return defaultColorPalette
+        }
     }
 
     suspend fun setMapArtStylePreference(sketchArtType: SketchArtType) {
@@ -174,7 +203,7 @@ class MartpRepository @Inject constructor(
 //                    mapHeight = mapHeight - MartpSketch.framePadding.toInt() - MartpSketch.frameThickness.toInt(),
 //                    mapZoom = mapZoom
 //                )
-
+                Log.i("MartpRepository", "mapZoom: " + mapZoom)
                 val response: ResponseBody = mapboxApiService.getStaticMapImage(
                     styleId = sketchArtType.mapBoxMapStyle.id,
                     latitude = latitude,

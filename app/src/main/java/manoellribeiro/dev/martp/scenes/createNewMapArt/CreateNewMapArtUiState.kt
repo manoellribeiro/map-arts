@@ -3,6 +3,7 @@ package manoellribeiro.dev.martp.scenes.createNewMapArt
 import android.location.Address
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.scenes.artStyleSettings.ColorPalette
 
 sealed interface CreateNewMapArtUiState {
 
@@ -17,6 +18,7 @@ sealed interface CreateNewMapArtUiState {
     class ImageDownloaded(
         val staticMapImagePath: String,
         val title: String,
-        val sketchArtType: SketchArtType
+        val sketchArtType: SketchArtType,
+        val colorPalette: String?
     ): CreateNewMapArtUiState
 }

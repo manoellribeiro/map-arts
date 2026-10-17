@@ -1,45 +1,37 @@
 package manoellribeiro.dev.martp.scenes.artStyleSettings
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Space
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonColors
@@ -49,6 +41,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -65,26 +58,24 @@ import androidx.fragment.app.Fragment
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.components.compose.theme.DarkD4
 import manoellribeiro.dev.martp.core.components.compose.theme.LightCream
-import manoellribeiro.dev.martp.core.components.compose.theme.TextGraySubTitle
 import manoellribeiro.dev.martp.core.components.compose.theme.TextMiddleScreenInfoText
 import manoellribeiro.dev.martp.core.components.compose.theme.TextScreenTitle
-import manoellribeiro.dev.martp.core.components.compose.theme.TextTitle
 import manoellribeiro.dev.martp.core.components.compose.theme.Yellow
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.max
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import manoellribeiro.dev.martp.core.components.compose.theme.Blue
 import manoellribeiro.dev.martp.core.components.compose.theme.DarkD5
 import manoellribeiro.dev.martp.core.components.compose.theme.LightL1
 import manoellribeiro.dev.martp.core.components.compose.theme.LightL5
 import manoellribeiro.dev.martp.core.components.compose.theme.LightYellow
 import manoellribeiro.dev.martp.core.components.compose.theme.White
+import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.utils.ColorPaletteProvider
 import manoellribeiro.dev.martp.scenes.main.MainViewModel
 import kotlin.getValue
 
@@ -102,11 +93,14 @@ class ArtStyleSettingsFragment : Fragment() {
             val uiState by viewModel.artStyleSettingsState.collectAsStateWithLifecycle()
             Scaffold(
                 containerColor = LightCream,
-                contentWindowInsets = WindowInsets.safeDrawing,
+                // The bottom navigation bar already makes room for the system navigation bar
+                contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
             ) { contentPadding ->
-                Column(modifier = Modifier.padding(contentPadding)) {
+                Column(
+                    modifier = Modifier.padding(contentPadding).verticalScroll(rememberScrollState())
+                ) {
                     Header()
-                    when(uiState) {
+                    when(val state = uiState) {
                         ArtStyleSettingsUiState.Loading -> {
                             Spacer(modifier = Modifier.weight(1F))
                             CircularProgressIndicator(
@@ -117,8 +111,15 @@ class ArtStyleSettingsFragment : Fragment() {
                             Spacer(modifier = Modifier.weight(1F))
                         }
                         is ArtStyleSettingsUiState.SettingsLoaded -> {
-                            SlideComponent(viewModel, (uiState as ArtStyleSettingsUiState.SettingsLoaded).mapZoom)
-                            ArtStyleSelectors(viewModel, (uiState as ArtStyleSettingsUiState.SettingsLoaded).mapArtStyle)
+
+                            val selectedArtStyle = remember { mutableStateOf(state.mapArtStyle) }
+
+                            SlideComponent(viewModel, state.mapZoom, selectedArtStyle)
+                            ArtStyleSelectors(viewModel, selectedArtStyle)
+
+                            if(selectedArtStyle.value == SketchArtType.COLORFUL_MAP) {
+                                ColorPaletteSelectors(viewModel, state.colorPaletteSelected)
+                            }
                         }
                     }
 
@@ -156,41 +157,12 @@ private fun Header() {
                 style = TextScreenTitle,
                 fontSize = 20.sp
             )
-            ResetToDefaultButton()
         }
         Text(
             text = stringResource(R.string.customize_next_art),
             style = TextMiddleScreenInfoText,
-            modifier = Modifier.padding(start = 16.dp, top = 12.dp),
+            modifier = Modifier.padding(start = 16.dp),
             color = DarkD4
-        )
-    }
-}
-@Composable
-private fun ResetToDefaultButton() {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .border(
-                border = ButtonDefaults.outlinedButtonBorder(),
-                shape = RoundedCornerShape(10.dp)
-            )
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color.White)
-            .clickable(true) {
-                Log.i("ChooseArtStyleFragment", "reset button")
-            }
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_reset_to_default),
-            contentDescription = "Reset icon",
-            modifier = Modifier.width(16.dp).height(16.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = stringResource(R.string.reset),
-            style = TextMiddleScreenInfoText,
         )
     }
 }
@@ -199,14 +171,23 @@ private fun ResetToDefaultButton() {
 @Composable
 private fun SlideComponent(
     viewModel: MainViewModel,
-    initialSlideValue: Float
+    initialSlideValue: Float,
+    selectedArtStyle: MutableState<SketchArtType>
 ) {
-    var sliderPosition by remember { mutableFloatStateOf(initialSlideValue) }
+    val artStyle = selectedArtStyle.value
+    // The slider holds its position (0..1) instead of the zoom itself, so switching to an
+    // art style with another zoom range keeps the thumb where it was
+    var sliderPosition by remember {
+        mutableFloatStateOf(artStyle.zoomToSliderPosition(initialSlideValue))
+    }
+    LaunchedEffect(artStyle) {
+        viewModel.setMapZoom(artStyle.sliderPositionToZoom(sliderPosition))
+    }
     Column(
         modifier = Modifier.padding(
             start = 16.dp,
             end = 16.dp,
-            top = 16.dp
+            top = 8.dp
         )
     ) {
         Text(
@@ -223,15 +204,13 @@ private fun SlideComponent(
             value = sliderPosition,
             onValueChange = {
                 sliderPosition = it
-                viewModel.setMapZoom(sliderPosition)
+                viewModel.setMapZoom(artStyle.sliderPositionToZoom(it))
             },
             colors = SliderDefaults.colors(
                 thumbColor = Yellow,
                 activeTrackColor = Yellow,
                 inactiveTrackColor = LightL1
             ),
-            
-            valueRange = 10F..20F
         )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -254,9 +233,8 @@ private fun SlideComponent(
 @Composable
 fun ArtStyleSelectors(
     viewModel: MainViewModel,
-    loadedArtType: SketchArtType
+    selectedArtStyle: MutableState<SketchArtType>
 ) {
-    val selectedArtStyle = remember { mutableStateOf(loadedArtType) }
     Column(
         modifier = Modifier.padding(
             start = 16.dp,
@@ -275,10 +253,18 @@ fun ArtStyleSelectors(
             style = TextMiddleScreenInfoText,
             color = DarkD4
         )
-
-        Column(
-            modifier = Modifier.verticalScroll(rememberScrollState())
-        ) {
+        Column {
+            ArtStyleCardSelector(
+                viewModel = viewModel,
+                currentArtStyleSelected = selectedArtStyle,
+                mapArtStyleModel = MapArtStyleModel(
+                    titleId = R.string.classic,
+                    descriptionId = R.string.classic_description,
+                    drawableImageId = R.drawable.ic_martp_logo,
+                    sketchArtType = SketchArtType.DEFAULT
+                )
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             ArtStyleCardSelector(
                 viewModel = viewModel,
                 currentArtStyleSelected = selectedArtStyle,
@@ -286,7 +272,7 @@ fun ArtStyleSelectors(
                     titleId = R.string.colorful_map,
                     descriptionId = R.string.colorful_map_description,
                     drawableImageId = R.drawable.ic_colorful_map,
-                    sketchArtType = SketchArtType.DEFAULT
+                    sketchArtType = SketchArtType.COLORFUL_MAP
                 )
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -300,29 +286,71 @@ fun ArtStyleSelectors(
                     sketchArtType = SketchArtType.POINTILLISM
                 )
             )
+            //Still work in progress
+//            Spacer(modifier = Modifier.height(8.dp))
+//            ArtStyleCardSelector(
+//                viewModel = viewModel,
+//                currentArtStyleSelected = selectedArtStyle,
+//                mapArtStyleModel = MapArtStyleModel(
+//                    titleId = R.string.water_flow,
+//                    descriptionId = R.string.water_flow_description,
+//                    drawableImageId = R.drawable.ic_water_flow,
+//                    sketchArtType = SketchArtType.WATER_FLOW
+//                )
+//            )
+            //Stil work in progress
+//            Spacer(modifier = Modifier.height(8.dp))
+//            ArtStyleCardSelector(
+//                viewModel = viewModel,
+//                currentArtStyleSelected = selectedArtStyle,
+//                mapArtStyleModel = MapArtStyleModel(
+//                    titleId = R.string.walking_people,
+//                    descriptionId = R.string.walking_people_description,
+//                    drawableImageId = R.drawable.ic_walking_people,
+//                    sketchArtType = SketchArtType.PARTICLE_SYSTEM
+//                )
+//            )
             Spacer(modifier = Modifier.height(8.dp))
-            ArtStyleCardSelector(
+        }
+    }
+}
+
+@Composable
+fun ColorPaletteSelectors(
+    viewModel: MainViewModel,
+    loadedColorPalette: String
+) {
+    val selectedColorPalette = remember {
+        mutableStateOf(ColorPaletteProvider.byNameOrDefault(loadedColorPalette) ?: ColorPaletteProvider.all.first())
+    }
+    Column(
+        modifier = Modifier.padding(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+        )
+    ) {
+
+        Text(
+            text = stringResource(R.string.color_palette),
+            style = TextScreenTitle,
+            fontSize = 18.sp
+        )
+
+        Text(
+            modifier = Modifier.padding(vertical = 4.dp),
+            text = stringResource(R.string.choose_complete_color_set),
+            style = TextMiddleScreenInfoText,
+            color = DarkD4
+        )
+
+        for(colorPalette in ColorPaletteProvider.all) {
+            ColorPaletteCardSelector(
                 viewModel = viewModel,
-                currentArtStyleSelected = selectedArtStyle,
-                mapArtStyleModel = MapArtStyleModel(
-                    titleId = R.string.water_flow,
-                    descriptionId = R.string.water_flow_description,
-                    drawableImageId = R.drawable.ic_water_flow,
-                    sketchArtType = SketchArtType.WATER_FLOW
-                )
+                currentColorPaletteSelected = selectedColorPalette,
+                colorPalette = colorPalette
             )
             Spacer(modifier = Modifier.height(8.dp))
-            ArtStyleCardSelector(
-                viewModel = viewModel,
-                currentArtStyleSelected = selectedArtStyle,
-                mapArtStyleModel = MapArtStyleModel(
-                    titleId = R.string.walking_people,
-                    descriptionId = R.string.walking_people_description,
-                    drawableImageId = R.drawable.ic_walking_people,
-                    sketchArtType = SketchArtType.WALKING_PEOPLE
-                )
-            )
-            Spacer(modifier = Modifier.height(72.dp))
         }
     }
 }
@@ -406,6 +434,81 @@ fun ArtStyleCardSelector(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun ColorPaletteCardSelector(
+    viewModel: MainViewModel,
+    currentColorPaletteSelected: MutableState<ColorPalette>,
+    colorPalette: ColorPalette,
+) {
+    val isSelected = colorPalette.name == currentColorPaletteSelected.value.name
+    Card(
+        onClick = {
+            currentColorPaletteSelected.value = colorPalette
+            viewModel.setColorPalette(colorPalette.name)
+        },
+        colors = CardDefaults.cardColors(
+            containerColor = White,
+        ),
+        border = if(isSelected) BorderStroke(
+            2.dp,
+            Yellow
+        ) else BorderStroke(
+            0.5.dp, LightL5
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        Row (
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 12.dp)
+        ) {
+            Column(
+            ) {
+                Text(
+                    text = colorPalette.name,
+                    style = TextScreenTitle,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                LazyRow (
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    items(colorPalette.colors) { color ->
+                        Box(
+                            modifier =
+                                Modifier
+                                    .clip(CircleShape)
+                                    .background(Color(color))
+                                    .height(24.dp)
+                                    .width(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+
+                }
+            }
+            Spacer(modifier = Modifier.weight(1F))
+            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+                RadioButton(
+                    selected = isSelected,
+                    colors = RadioButtonColors(
+                        selectedColor = Yellow,
+                        unselectedColor = DarkD5,
+                        disabledSelectedColor = White,
+                        disabledUnselectedColor = White
+                    ),
+                    onClick = {
+                        currentColorPaletteSelected.value = colorPalette
+                        viewModel.setColorPalette(colorPalette.name)
+                    }
+                )
+            }
+        }
+
     }
 }
 

@@ -33,6 +33,7 @@ class MainViewModel @Inject constructor(
     private var setUserEmailJob: Job? = null
     private var setMapZoomJob: Job? = null
     private var setMapStyleJob: Job? = null
+    private var setColorPaletteJob: Job? = null
 
     val galleryState: StateFlow<GalleryUiState> = repository.observeUserMapArts()
         .map<List<MapArtEntity>, GalleryUiState> { mapArts ->
@@ -86,10 +87,12 @@ class MainViewModel @Inject constructor(
             emitNewArtStyleSettingsState(ArtStyleSettingsUiState.Loading)
             val mapZoom = repository.getMapZoomPreference()
             val artStyle = repository.getArtStylePreference()
+            val colorPaletteName = repository.getColorPalettePreference()
             emitNewArtStyleSettingsState(
                 ArtStyleSettingsUiState.SettingsLoaded(
                     mapZoom = mapZoom,
-                    mapArtStyle = artStyle
+                    mapArtStyle = artStyle,
+                    colorPaletteSelected = colorPaletteName
                 )
             )
         }
@@ -124,6 +127,14 @@ class MainViewModel @Inject constructor(
         setMapStyleJob = viewModelScope.launch {
             delay(1500.milliseconds)
             repository.setMapArtStylePreference(sketchArtType)
+        }
+    }
+
+    fun setColorPalette(name: String) {
+        setColorPaletteJob?.cancel()
+        setColorPaletteJob = viewModelScope.launch {
+            delay(1500.milliseconds)
+            repository.setColorPalettePreference(name)
         }
     }
 

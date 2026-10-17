@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import manoellribeiro.dev.martp.core.di.IoDispatcher
+import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import kotlin.coroutines.resume
 import javax.inject.Inject
@@ -24,7 +25,7 @@ class GetAddressService @Inject constructor  (
         longitude: Double
     ): Address? {
         try {
-            if(connectivityService.isInternetConnected()) {
+            if(!connectivityService.isInternetConnected()) {
                 throw NoInternetConnectionFailure(originalExceptionMessage = null)
             }
             if(!Geocoder.isPresent()) {
@@ -59,6 +60,8 @@ class GetAddressService @Inject constructor  (
             }
         } catch (e: CancellationException) {
             throw e
+        } catch (failure: Failure) {
+            throw failure
         } catch (e: Exception) {
             return null
         }

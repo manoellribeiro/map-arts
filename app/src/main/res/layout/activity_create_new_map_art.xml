@@ -85,56 +85,52 @@
             tools:text="Salvador - Casa" />
 
         <TextView
-            android:id="@+id/descriptionTV"
+            android:id="@+id/latTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/artTitleTV"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             style="@style/Text.GraySubTitle"
-            tools:visibility="gone"
+            tools:visibility="visible"
             android:layout_marginHorizontal="16dp"
-            tools:text="Uma arte criada a partir da minha casa easdasdasdasdasdadadadsadam salvador no politeama" />
+            tools:text="Latitude: 45.131231231" />
+
+        <TextView
+            android:id="@+id/longTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Text.GraySubTitle"
+            tools:visibility="visible"
+            android:layout_marginHorizontal="16dp"
+            tools:text="Longitude: 45.131231231" />
+
+        <TextView
+            android:id="@+id/colorPaletteTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Text.GraySubTitle"
+            tools:visibility="visible"
+            android:visibility="gone"
+            android:layout_marginHorizontal="16dp"
+            tools:text="Paleta de Cores: Java" />
+
+        <TextView
+            android:id="@+id/mapLayersTitleTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Text.Title"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginStart="16dp"
+            android:layout_marginVertical="8dp"
+            tools:visibility="visible"
+            android:text="@string/color_legend"
+            tools:text="Legenda de cores" />
 
         <LinearLayout
-            android:id="@+id/aiPoweredLL"
-            android:layout_width="wrap_content"
+            android:id="@+id/mapColorsHoldersLL"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginHorizontal="16dp"
-            android:paddingVertical="4dp"
-            android:visibility="gone"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackground"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/aiTextTV"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/green_darker"
-                android:textSize="14sp"
-                android:fontFamily="@font/nunito_extra_bold"
-                android:layout_gravity="center_vertical"
-                android:text="@string/create_description_with_ai"/>
-
-            <ProgressBar
-                android:id="@+id/loadingAIIndicatorPB"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginStart="8dp"
-                android:visibility="gone"
-                android:theme="@style/Theme.GenerateMapArts.ProgressBarTheme"
-                android:layout_gravity="center"/>
-
-            <ImageView
-                android:id="@+id/aiPoweradeIV"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:layout_marginStart="8dp"
-                android:src="@drawable/ic_ai_powerade"
-                />
 
         </LinearLayout>
 

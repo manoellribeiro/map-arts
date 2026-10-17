@@ -73,4 +73,16 @@
     <string name="walking_people_description">Um mapa colorido com uma simulação de pessoas caminhando nas áreas dos prédios</string>
     <string name="classic">Clássico</string>
     <string name="classic_description">O primeiro estilo de arte criado no projeto, é gerado utilizando as cores fixas da nossa logo</string>
+    <string name="latitude_value">Latitude: %s</string>
+    <string name="longitude_value">Longitude: %s</string>
+    <string name="layer_buildings">Edifícios e área construída</string>
+    <string name="layer_water">Água</string>
+    <string name="layer_road_paths">Calçadas</string>
+    <string name="layer_roads_tunnels_bridges">Ruas, túneis e pontes</string>
+    <string name="layer_building_delimitations">Delimitações dos edifícios</string>
+    <string name="layer_roads_bridges_footpaths">Ruas, pontes, calçadas</string>
+    <string name="layer_everything_else">Todo o resto</string>
+    <string name="color_legend">Legenda das cores</string>
+    <string name="layer_land_other">Terreno/Outros</string>
+    <string name="color_palette_value">Paleta de cores: %s</string>
 </resources>

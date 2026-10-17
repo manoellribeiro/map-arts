@@ -73,4 +73,16 @@
     <string name="walking_people_description">Une carte colorée avec une simulation de personnes marchant dans les zones des bâtiments</string>
     <string name="classic">Classique</string>
     <string name="classic_description">Le premier style artistique créé dans le projet, généré avec les couleurs fixes de notre logo</string>
+    <string name="latitude_value">Latitude\u00A0: %s</string>
+    <string name="longitude_value">Longitude\u00A0: %s</string>
+    <string name="layer_buildings">Bâtiments et zones construites</string>
+    <string name="layer_water">Eau</string>
+    <string name="layer_road_paths">Chemins et sentiers</string>
+    <string name="layer_roads_tunnels_bridges">Routes, tunnels et ponts</string>
+    <string name="layer_building_delimitations">Contours des bâtiments</string>
+    <string name="layer_roads_bridges_footpaths">Routes, ponts, chemins</string>
+    <string name="layer_everything_else">Tout le reste</string>
+    <string name="color_legend">Légende des couleurs</string>
+    <string name="layer_land_other">Terrain/Autres</string>
+    <string name="color_palette_value">Palette de couleurs\u00A0: %s</string>
 </resources>

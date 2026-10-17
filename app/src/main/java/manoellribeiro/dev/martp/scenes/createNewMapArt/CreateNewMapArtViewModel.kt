@@ -111,32 +111,13 @@ class CreateNewMapArtViewModel @Inject constructor(
                         staticMapImagePath = staticImagePath,
                         title = address?.locality + ", " + address?.countryName + ", " + address?.thoroughfare,
                         sketchArtType = sketchArtType,
-                        colorPalette = colorPalette
+                        colorPalette = colorPalette,
+                        latitude = location.latitude,
+                        longitude = location.longitude
                     )
                 )
             } catch (failure: Failure) {
                 emitNewState(CreateNewMapArtUiState.Error(failure))
-            }
-        }
-    }
-
-    fun generateAiText() {
-        viewModelScope.launch {
-            try {
-                emitNewState(CreateNewMapArtUiState.LoadingAIText)
-                val text = generateAIContentService.generateTextContent(promptGenerator.generateArtDescriptionPrompt(
-                    countryName = currentArtAddress?.countryName.orEmpty(),
-                    cityName = currentArtAddress?.locality.orEmpty(),
-                    streetName = currentArtAddress?.thoroughfare.orEmpty(),
-                    languageToReturn = Locale.getDefault().displayName
-                ))
-                if(text.isNullOrBlank()) {
-                    emitNewState(CreateNewMapArtUiState.ErrorGeneratingAIText)
-                } else {
-                    emitNewState(CreateNewMapArtUiState.GeneratedAIText(text))
-                }
-            } catch (failure: Failure) {
-                emitNewState(CreateNewMapArtUiState.ErrorGeneratingAIText)
             }
         }
     }

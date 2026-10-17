@@ -7,10 +7,6 @@ import manoellribeiro.dev.martp.scenes.artStyleSettings.ColorPalette
 
 sealed interface CreateNewMapArtUiState {
 
-    object LoadingAIText: CreateNewMapArtUiState
-    class GeneratedAIText(val text: String): CreateNewMapArtUiState
-    object ErrorGeneratingAIText: CreateNewMapArtUiState
-
     object Idle: CreateNewMapArtUiState
     object Loading: CreateNewMapArtUiState
     object ActionButtonLoading: CreateNewMapArtUiState
@@ -19,6 +15,8 @@ sealed interface CreateNewMapArtUiState {
         val staticMapImagePath: String,
         val title: String,
         val sketchArtType: SketchArtType,
+        val latitude: Double,
+        val longitude: Double,
         val colorPalette: String?
     ): CreateNewMapArtUiState
 }

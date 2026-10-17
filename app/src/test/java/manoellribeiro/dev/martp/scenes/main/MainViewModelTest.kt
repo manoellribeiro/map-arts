@@ -243,6 +243,7 @@ class MainViewModelTest {
         // Given
         val fakeMapZoom = 14.5f
         val fakeArtStyle = SketchArtType.POINTILLISM
+        val fakePalette = "fakePalette"
         coEvery { repository.getMapZoomPreference() } returns fakeMapZoom
         coEvery { repository.getArtStylePreference() } returns fakeArtStyle
         val states = collectStates(viewModel.artStyleSettingsState)
@@ -255,7 +256,7 @@ class MainViewModelTest {
         assertEquals(
             listOf(
                 ArtStyleSettingsUiState.Loading,
-                ArtStyleSettingsUiState.SettingsLoaded(mapZoom = fakeMapZoom, mapArtStyle = fakeArtStyle)
+                ArtStyleSettingsUiState.SettingsLoaded(mapZoom = fakeMapZoom, mapArtStyle = fakeArtStyle, colorPaletteSelected = fakePalette)
             ),
             states
         )
@@ -270,6 +271,7 @@ class MainViewModelTest {
         val fakeSecondMapZoom = 17.5f
         val fakeFirstArtStyle = SketchArtType.DEFAULT
         val fakeSecondArtStyle = SketchArtType.POINTILLISM
+        val fakePalette = "fakePalette"
         coEvery { repository.getMapZoomPreference() } returnsMany listOf(fakeFirstMapZoom, fakeSecondMapZoom)
         coEvery { repository.getArtStylePreference() } returnsMany listOf(fakeFirstArtStyle, fakeSecondArtStyle)
         val states = collectStates(viewModel.artStyleSettingsState)
@@ -284,9 +286,9 @@ class MainViewModelTest {
         assertEquals(
             listOf(
                 ArtStyleSettingsUiState.Loading,
-                ArtStyleSettingsUiState.SettingsLoaded(mapZoom = fakeFirstMapZoom, mapArtStyle = fakeFirstArtStyle),
+                ArtStyleSettingsUiState.SettingsLoaded(mapZoom = fakeFirstMapZoom, mapArtStyle = fakeFirstArtStyle, colorPaletteSelected = fakePalette),
                 ArtStyleSettingsUiState.Loading,
-                ArtStyleSettingsUiState.SettingsLoaded(mapZoom = fakeSecondMapZoom, mapArtStyle = fakeSecondArtStyle)
+                ArtStyleSettingsUiState.SettingsLoaded(mapZoom = fakeSecondMapZoom, mapArtStyle = fakeSecondArtStyle, colorPaletteSelected = fakePalette)
             ),
             states
         )

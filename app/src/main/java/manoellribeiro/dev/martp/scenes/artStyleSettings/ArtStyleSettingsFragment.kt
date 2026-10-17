@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -97,32 +99,39 @@ class ArtStyleSettingsFragment : Fragment() {
                 contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
             ) { contentPadding ->
                 Column(
-                    modifier = Modifier.padding(contentPadding).verticalScroll(rememberScrollState())
+                    modifier = Modifier.padding(contentPadding).fillMaxSize()
                 ) {
-                    Header()
                     when(val state = uiState) {
                         ArtStyleSettingsUiState.Loading -> {
-                            Spacer(modifier = Modifier.weight(1F))
-                            CircularProgressIndicator(
-                                modifier = Modifier.width(64.dp).align(Alignment.CenterHorizontally),
-                                color = DarkD4,
-                                trackColor = Blue,
-                            )
-                            Spacer(modifier = Modifier.weight(1F))
+                            Header()
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(64.dp),
+                                    color = DarkD4,
+                                    trackColor = Blue,
+                                )
+                            }
                         }
                         is ArtStyleSettingsUiState.SettingsLoaded -> {
+                            Column(
+                                modifier = Modifier.verticalScroll(rememberScrollState())
+                            ) {
+                                Header()
 
-                            val selectedArtStyle = remember { mutableStateOf(state.mapArtStyle) }
+                                val selectedArtStyle = remember { mutableStateOf(state.mapArtStyle) }
 
-                            SlideComponent(viewModel, state.mapZoom, selectedArtStyle)
-                            ArtStyleSelectors(viewModel, selectedArtStyle)
+                                SlideComponent(viewModel, state.mapZoom, selectedArtStyle)
+                                ArtStyleSelectors(viewModel, selectedArtStyle)
 
-                            if(selectedArtStyle.value == SketchArtType.COLORFUL_MAP) {
-                                ColorPaletteSelectors(viewModel, state.colorPaletteSelected)
+                                if(selectedArtStyle.value == SketchArtType.COLORFUL_MAP) {
+                                    ColorPaletteSelectors(viewModel, state.colorPaletteSelected)
+                                }
                             }
                         }
                     }
-
                 }
             }
         }

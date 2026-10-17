@@ -74,4 +74,16 @@
     <string name="walking_people_description">A colorful map with a simulation of people walking in the building areas</string>
     <string name="classic">Classic</string>
     <string name="classic_description">The first art style created in the project, generated using the fixed colors of our logo</string>
+    <string name="latitude_value">Latitude: %s</string>
+    <string name="longitude_value">Longitude: %s</string>
+    <string name="layer_buildings">Buildings and constructed area</string>
+    <string name="layer_water">Water</string>
+    <string name="layer_road_paths">Footpaths</string>
+    <string name="layer_roads_tunnels_bridges">Roads, tunnels and bridges</string>
+    <string name="layer_building_delimitations">Building delimitations</string>
+    <string name="layer_roads_bridges_footpaths">Roads, bridges, footpaths</string>
+    <string name="layer_everything_else">Everything else</string>
+    <string name="color_legend">Color legend</string>
+    <string name="layer_land_other">Land/Other</string>
+    <string name="color_palette_value">Color Palette: %s</string>
 </resources>

@@ -44,10 +44,12 @@ class GetAddressServiceTest {
     private lateinit var getAddressService: GetAddressService
     private lateinit var geocoder: Geocoder
     private lateinit var sdkVersionService: SdkVersionService
+    private lateinit var connectivityService: ConnectivityService
 
     @BeforeEach
     fun setup() {
         geocoder = mockk()
+        connectivityService = mockk()
         sdkVersionService = mockk()
         // Geocoder.isPresent() is static: its behavior is configured inside each test
         mockkStatic(Geocoder::class)
@@ -55,6 +57,7 @@ class GetAddressServiceTest {
         getAddressService = GetAddressService(
             geocoder = geocoder,
             ioDispatcher = UnconfinedTestDispatcher(),
+            connectivityService = connectivityService,
             sdkVersionService = sdkVersionService
         )
     }

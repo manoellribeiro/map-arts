@@ -1,16 +1,14 @@
 package manoellribeiro.dev.martp.core.sketches
 
-import android.util.Log
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
-import processing.core.PApplet
 import processing.core.PImage
 
 class DefaultMartpSketch(
     private val horizontalTilesCount: Int,
     private val verticalTilesCount: Int,
     private val padding: Int,
-    private val canvasWidth: Float = 640.0F,
-    private val canvasHeight: Float = 640.0F,
+    canvasWidth: Float = 640.0F,
+    canvasHeight: Float = 640.0F,
     private val imagePath: String,
 ) : MartpSketch(
     horizontalTilesCount,

@@ -3,20 +3,20 @@ package manoellribeiro.dev.martp.scenes.createNewMapArt
 import android.location.Address
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.scenes.artStyleSettings.ColorPalette
 
 sealed interface CreateNewMapArtUiState {
 
-    object LoadingAIText: CreateNewMapArtUiState
-    class GeneratedAIText(val text: String): CreateNewMapArtUiState
-    object ErrorGeneratingAIText: CreateNewMapArtUiState
-
     object Idle: CreateNewMapArtUiState
-    object Loading: CreateNewMapArtUiState
+    data class Loading(val loadingMessageId: Int): CreateNewMapArtUiState
     object ActionButtonLoading: CreateNewMapArtUiState
     class Error(val failure: Failure): CreateNewMapArtUiState
     class ImageDownloaded(
         val staticMapImagePath: String,
         val title: String,
-        val sketchArtType: SketchArtType
+        val sketchArtType: SketchArtType,
+        val latitude: Double,
+        val longitude: Double,
+        val colorPalette: String?
     ): CreateNewMapArtUiState
 }

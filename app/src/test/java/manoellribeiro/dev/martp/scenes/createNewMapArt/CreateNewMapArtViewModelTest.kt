@@ -10,7 +10,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
-import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
@@ -20,11 +19,12 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
-import manoellribeiro.dev.martp.core.models.failures.GeneratingAIContentFailure
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.LocationPermissionNotGrantedFailure
+import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
@@ -34,6 +34,7 @@ import manoellribeiro.dev.martp.core.utils.PromptGenerator
 import manoellribeiro.dev.martp.infra.MainDispatcherExtension
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -42,7 +43,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.io.File
 import java.util.Calendar
-import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @ExtendWith(MainDispatcherExtension::class)
@@ -54,6 +54,9 @@ class CreateNewMapArtViewModelTest {
     private lateinit var generateAIContentService: GenerateAIContentService
     private lateinit var promptGenerator: PromptGenerator
     private lateinit var viewModel: CreateNewMapArtViewModel
+
+    // 2 * MartpSketch.frameThickness (30) + 2 * MartpSketch.framePadding (30)
+    private val fakeFrameSize = 120
 
     @BeforeEach
     fun setup() {
@@ -101,16 +104,19 @@ class CreateNewMapArtViewModelTest {
     }
 
     private fun createFakeAddress(
+        thoroughfare: String?,
         locality: String?,
-        countryName: String?,
-        thoroughfare: String?
+        countryName: String?
     ): Address {
         val fakeAddress = mockk<Address>()
+        every { fakeAddress.thoroughfare } returns thoroughfare
         every { fakeAddress.locality } returns locality
         every { fakeAddress.countryName } returns countryName
-        every { fakeAddress.thoroughfare } returns thoroughfare
         return fakeAddress
     }
+
+    private val fakeAccessingLocationLoading = CreateNewMapArtUiState.Loading(R.string.accessing_your_location)
+    private val fakeDownloadingImageLoading = CreateNewMapArtUiState.Loading(R.string.downloading_map_image)
 
     // region initial state
 
@@ -134,15 +140,16 @@ class CreateNewMapArtViewModelTest {
     // region startToGenerateMapArt
 
     @Test
-    fun `if all dependencies succeed should emit Loading then ImageDownloaded ui state`() = runTest {
+    fun `if all dependencies succeed should emit the two Loading messages then ImageDownloaded ui state`() = runTest {
         // Given
-        val fakeDirectory = File("fake-directory")
+        val fakeLatitude = -12.9714
+        val fakeLongitude = -38.5014
         val fakeStaticImagePath = "fake-directory/image.png"
-        val fakeLocation = createFakeLocation(latitude = -12.9714, longitude = -38.5014)
+        val fakeLocation = createFakeLocation(latitude = fakeLatitude, longitude = fakeLongitude)
         val fakeAddress = createFakeAddress(
+            thoroughfare = "Fake Street",
             locality = "Fake City",
-            countryName = "Fake Country",
-            thoroughfare = "Fake Street"
+            countryName = "Fake Country"
         )
         coEvery { repository.getArtStylePreference() } returns SketchArtType.POINTILLISM
         coEvery { locationService.getCurrentLocation() } returns fakeLocation
@@ -154,40 +161,110 @@ class CreateNewMapArtViewModelTest {
 
         // When
         viewModel.startToGenerateMapArt(
-            directory = fakeDirectory,
+            directory = File("fake-directory"),
             canvasToDrawArtWidth = 1000,
-            canvasToDrawArtHeight = 2000
+            canvasToDrawArtHeight = 1000
         )
         advanceUntilIdle()
 
         // Then
-        assertEquals(3, states.size)
+        assertEquals(4, states.size)
         assertSame(CreateNewMapArtUiState.Idle, states[0])
-        assertSame(CreateNewMapArtUiState.Loading, states[1])
+        assertEquals(fakeAccessingLocationLoading, states[1])
+        assertEquals(fakeDownloadingImageLoading, states[2])
         val imageDownloadedState = assertInstanceOf(
             CreateNewMapArtUiState.ImageDownloaded::class.java,
-            states[2]
+            states[3]
         )
         assertEquals(fakeStaticImagePath, imageDownloadedState.staticMapImagePath)
-        assertEquals("Fake City, Fake Country, Fake Street", imageDownloadedState.title)
+        assertEquals("Fake Street, Fake City, Fake Country", imageDownloadedState.title)
         assertEquals(SketchArtType.POINTILLISM, imageDownloadedState.sketchArtType)
+        assertEquals(fakeLatitude, imageDownloadedState.latitude)
+        assertEquals(fakeLongitude, imageDownloadedState.longitude)
     }
 
     @Test
-    fun `if all dependencies succeed should fetch the static map image with the canvas size minus the frame`() = runTest {
+    fun `if the art style is not COLORFUL_MAP should emit ImageDownloaded without color palette and not read it`() = runTest {
+        // Given
+        val fakeLocation = createFakeLocation(latitude = 40.4168, longitude = -3.7038)
+        val fakeAddress = createFakeAddress(
+            thoroughfare = "Fake Default Street",
+            locality = "Fake Default City",
+            countryName = "Fake Default Country"
+        )
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
+        coEvery { locationService.getCurrentLocation() } returns fakeLocation
+        coEvery { getAddressService.getAddress(any(), any()) } returns fakeAddress
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-default-directory/image.png"
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-default-directory"),
+            canvasToDrawArtWidth = 600,
+            canvasToDrawArtHeight = 800
+        )
+        advanceUntilIdle()
+
+        // Then
+        val imageDownloadedState = assertInstanceOf(
+            CreateNewMapArtUiState.ImageDownloaded::class.java,
+            viewModel.state.value
+        )
+        assertNull(imageDownloadedState.colorPalette)
+        coVerify(exactly = 0) { repository.getColorPalettePreference() }
+    }
+
+    @Test
+    fun `if the art style is COLORFUL_MAP should emit ImageDownloaded with the saved color palette`() = runTest {
+        // Given
+        val fakeColorPaletteName = "Fake Colorful Palette"
+        val fakeLocation = createFakeLocation(latitude = 35.6586, longitude = 139.7454)
+        val fakeAddress = createFakeAddress(
+            thoroughfare = "Fake Colorful Street",
+            locality = "Fake Colorful City",
+            countryName = "Fake Colorful Country"
+        )
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.COLORFUL_MAP
+        coEvery { locationService.getCurrentLocation() } returns fakeLocation
+        coEvery { getAddressService.getAddress(any(), any()) } returns fakeAddress
+        coEvery { repository.getColorPalettePreference() } returns fakeColorPaletteName
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-colorful-directory/image.png"
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-colorful-directory"),
+            canvasToDrawArtWidth = 600,
+            canvasToDrawArtHeight = 800
+        )
+        advanceUntilIdle()
+
+        // Then
+        val imageDownloadedState = assertInstanceOf(
+            CreateNewMapArtUiState.ImageDownloaded::class.java,
+            viewModel.state.value
+        )
+        assertEquals(fakeColorPaletteName, imageDownloadedState.colorPalette)
+        assertEquals(SketchArtType.COLORFUL_MAP, imageDownloadedState.sketchArtType)
+        coVerify(exactly = 1) { repository.getColorPalettePreference() }
+    }
+
+    @Test
+    fun `if all dependencies succeed should fetch the address and the static map image with the location and the canvas size minus the frame`() = runTest {
         // Given
         val fakeDirectory = File("fake-frame-directory")
         val fakeLatitude = 48.8584
         val fakeLongitude = 2.2945
         val fakeCanvasWidth = 1000
-        val fakeCanvasHeight = 2000
-        // 2 * MartpSketch.frameThickness (30) + 2 * MartpSketch.framePadding (30)
-        val fakeFrameSize = 120
+        val fakeCanvasHeight = 900
         val fakeLocation = createFakeLocation(latitude = fakeLatitude, longitude = fakeLongitude)
         val fakeAddress = createFakeAddress(
+            thoroughfare = "Fake Frame Street",
             locality = "Fake Frame City",
-            countryName = "Fake Frame Country",
-            thoroughfare = "Fake Frame Street"
+            countryName = "Fake Frame Country"
         )
         coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
         coEvery { locationService.getCurrentLocation() } returns fakeLocation
@@ -221,7 +298,264 @@ class CreateNewMapArtViewModelTest {
     }
 
     @Test
-    fun `if repository throws a Failure when getting the art style should emit Error ui state`() = runTest {
+    fun `if the canvas height minus the frame is above 1280 should fetch the static map image with a height of 1280`() = runTest {
+        // Given
+        val fakeCanvasWidth = 1080
+        val fakeCanvasHeight = 2400
+        val fakeLocation = createFakeLocation(latitude = 51.5007, longitude = -0.1246)
+        val fakeAddress = createFakeAddress(
+            thoroughfare = "Fake Tall Street",
+            locality = "Fake Tall City",
+            countryName = "Fake Tall Country"
+        )
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
+        coEvery { locationService.getCurrentLocation() } returns fakeLocation
+        coEvery { getAddressService.getAddress(any(), any()) } returns fakeAddress
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-tall-directory/image.png"
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-tall-directory"),
+            canvasToDrawArtWidth = fakeCanvasWidth,
+            canvasToDrawArtHeight = fakeCanvasHeight
+        )
+        advanceUntilIdle()
+
+        // Then
+        coVerify(exactly = 1) {
+            repository.fetchStaticMapImage(
+                sketchArtType = any(),
+                latitude = any(),
+                longitude = any(),
+                mapWidth = fakeCanvasWidth - fakeFrameSize,
+                mapHeight = 1280,
+                dir = any()
+            )
+        }
+    }
+
+    @Test
+    fun `if the canvas height minus the frame is exactly 1280 should fetch the static map image with a height of 1280`() = runTest {
+        // Given
+        val fakeCanvasHeight = 1280 + fakeFrameSize
+        val fakeLocation = createFakeLocation(latitude = 52.5163, longitude = 13.3777)
+        val fakeAddress = createFakeAddress(
+            thoroughfare = "Fake Boundary Street",
+            locality = "Fake Boundary City",
+            countryName = "Fake Boundary Country"
+        )
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
+        coEvery { locationService.getCurrentLocation() } returns fakeLocation
+        coEvery { getAddressService.getAddress(any(), any()) } returns fakeAddress
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-boundary-directory/image.png"
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-boundary-directory"),
+            canvasToDrawArtWidth = 720,
+            canvasToDrawArtHeight = fakeCanvasHeight
+        )
+        advanceUntilIdle()
+
+        // Then
+        coVerify(exactly = 1) {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), mapHeight = 1280, dir = any())
+        }
+    }
+
+    @Test
+    fun `if get address service returns null should emit ImageDownloaded with an empty title`() = runTest {
+        // Given
+        val fakeLocation = createFakeLocation(latitude = -33.8568, longitude = 151.2153)
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
+        coEvery { locationService.getCurrentLocation() } returns fakeLocation
+        coEvery { getAddressService.getAddress(any(), any()) } returns null
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-no-address-directory/image.png"
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-no-address-directory"),
+            canvasToDrawArtWidth = 600,
+            canvasToDrawArtHeight = 800
+        )
+        advanceUntilIdle()
+
+        // Then
+        val imageDownloadedState = assertInstanceOf(
+            CreateNewMapArtUiState.ImageDownloaded::class.java,
+            viewModel.state.value
+        )
+        assertEquals("", imageDownloadedState.title)
+    }
+
+    @Test
+    fun `if the address has no thoroughfare, locality or country name should emit ImageDownloaded with an empty title`() = runTest {
+        // Given
+        val fakeLocation = createFakeLocation(latitude = 0.5, longitude = -160.5)
+        val fakeAddress = createFakeAddress(
+            thoroughfare = null,
+            locality = null,
+            countryName = null
+        )
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
+        coEvery { locationService.getCurrentLocation() } returns fakeLocation
+        coEvery { getAddressService.getAddress(any(), any()) } returns fakeAddress
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-ocean-directory/image.png"
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-ocean-directory"),
+            canvasToDrawArtWidth = 600,
+            canvasToDrawArtHeight = 800
+        )
+        advanceUntilIdle()
+
+        // Then
+        val imageDownloadedState = assertInstanceOf(
+            CreateNewMapArtUiState.ImageDownloaded::class.java,
+            viewModel.state.value
+        )
+        assertEquals("", imageDownloadedState.title)
+    }
+
+    @Test
+    fun `if the address has no thoroughfare should emit ImageDownloaded with the locality and the country name as title`() = runTest {
+        // Given
+        val fakeLocation = createFakeLocation(latitude = 64.1466, longitude = -21.9426)
+        val fakeAddress = createFakeAddress(
+            thoroughfare = null,
+            locality = "Fake Streetless City",
+            countryName = "Fake Streetless Country"
+        )
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
+        coEvery { locationService.getCurrentLocation() } returns fakeLocation
+        coEvery { getAddressService.getAddress(any(), any()) } returns fakeAddress
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-streetless-directory/image.png"
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-streetless-directory"),
+            canvasToDrawArtWidth = 600,
+            canvasToDrawArtHeight = 800
+        )
+        advanceUntilIdle()
+
+        // Then
+        val imageDownloadedState = assertInstanceOf(
+            CreateNewMapArtUiState.ImageDownloaded::class.java,
+            viewModel.state.value
+        )
+        assertEquals("Fake Streetless City, Fake Streetless Country", imageDownloadedState.title)
+    }
+
+    @Test
+    fun `if the address has no country name should emit ImageDownloaded with the thoroughfare and the locality as title without a trailing separator`() = runTest {
+        // Given
+        val fakeLocation = createFakeLocation(latitude = 59.3293, longitude = 18.0686)
+        val fakeAddress = createFakeAddress(
+            thoroughfare = "Fake Countryless Street",
+            locality = "Fake Countryless City",
+            countryName = null
+        )
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
+        coEvery { locationService.getCurrentLocation() } returns fakeLocation
+        coEvery { getAddressService.getAddress(any(), any()) } returns fakeAddress
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-countryless-directory/image.png"
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-countryless-directory"),
+            canvasToDrawArtWidth = 600,
+            canvasToDrawArtHeight = 800
+        )
+        advanceUntilIdle()
+
+        // Then
+        val imageDownloadedState = assertInstanceOf(
+            CreateNewMapArtUiState.ImageDownloaded::class.java,
+            viewModel.state.value
+        )
+        assertEquals("Fake Countryless Street, Fake Countryless City", imageDownloadedState.title)
+    }
+
+    @Test
+    fun `if the address has only a thoroughfare should emit ImageDownloaded with only the thoroughfare as title`() = runTest {
+        // Given
+        val fakeLocation = createFakeLocation(latitude = -33.8688, longitude = 151.2093)
+        val fakeAddress = createFakeAddress(
+            thoroughfare = "Fake Lonely Street",
+            locality = null,
+            countryName = null
+        )
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
+        coEvery { locationService.getCurrentLocation() } returns fakeLocation
+        coEvery { getAddressService.getAddress(any(), any()) } returns fakeAddress
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-lonely-street-directory/image.png"
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-lonely-street-directory"),
+            canvasToDrawArtWidth = 600,
+            canvasToDrawArtHeight = 800
+        )
+        advanceUntilIdle()
+
+        // Then
+        val imageDownloadedState = assertInstanceOf(
+            CreateNewMapArtUiState.ImageDownloaded::class.java,
+            viewModel.state.value
+        )
+        assertEquals("Fake Lonely Street", imageDownloadedState.title)
+    }
+
+    @Test
+    fun `if the address has a blank locality should emit ImageDownloaded without an empty part in the title`() = runTest {
+        // Given
+        val fakeLocation = createFakeLocation(latitude = 40.4168, longitude = -3.7038)
+        val fakeAddress = createFakeAddress(
+            thoroughfare = "Fake Blank City Street",
+            locality = " ",
+            countryName = "Fake Blank City Country"
+        )
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
+        coEvery { locationService.getCurrentLocation() } returns fakeLocation
+        coEvery { getAddressService.getAddress(any(), any()) } returns fakeAddress
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-blank-city-directory/image.png"
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-blank-city-directory"),
+            canvasToDrawArtWidth = 600,
+            canvasToDrawArtHeight = 800
+        )
+        advanceUntilIdle()
+
+        // Then
+        val imageDownloadedState = assertInstanceOf(
+            CreateNewMapArtUiState.ImageDownloaded::class.java,
+            viewModel.state.value
+        )
+        assertEquals("Fake Blank City Street, Fake Blank City Country", imageDownloadedState.title)
+    }
+
+    @Test
+    fun `if repository throws a Failure when getting the art style should emit Error ui state without downloading the image`() = runTest {
         // Given
         val fakeFailure = LocalStorageErrorFailure("fake art style error")
         val fakeLocation = createFakeLocation(latitude = 1.5, longitude = 2.5)
@@ -240,7 +574,7 @@ class CreateNewMapArtViewModelTest {
         // Then
         assertEquals(3, states.size)
         assertSame(CreateNewMapArtUiState.Idle, states[0])
-        assertSame(CreateNewMapArtUiState.Loading, states[1])
+        assertEquals(fakeAccessingLocationLoading, states[1])
         val errorState = assertInstanceOf(CreateNewMapArtUiState.Error::class.java, states[2])
         assertSame(fakeFailure, errorState.failure)
         coVerify(exactly = 0) { getAddressService.getAddress(any(), any()) }
@@ -250,7 +584,7 @@ class CreateNewMapArtViewModelTest {
     }
 
     @Test
-    fun `if location service throws a Failure should emit Error ui state`() = runTest {
+    fun `if location service throws a Failure should emit Error ui state without downloading the image`() = runTest {
         // Given
         val fakeFailure = LocationPermissionNotGrantedFailure("fake location error")
         coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
@@ -268,7 +602,7 @@ class CreateNewMapArtViewModelTest {
         // Then
         assertEquals(3, states.size)
         assertSame(CreateNewMapArtUiState.Idle, states[0])
-        assertSame(CreateNewMapArtUiState.Loading, states[1])
+        assertEquals(fakeAccessingLocationLoading, states[1])
         val errorState = assertInstanceOf(CreateNewMapArtUiState.Error::class.java, states[2])
         assertSame(fakeFailure, errorState.failure)
         coVerify(exactly = 0) { getAddressService.getAddress(any(), any()) }
@@ -278,14 +612,44 @@ class CreateNewMapArtViewModelTest {
     }
 
     @Test
-    fun `if repository throws a Failure when fetching the static map image should emit Error ui state`() = runTest {
+    fun `if get address service throws a Failure should emit Error ui state after the downloading Loading message`() = runTest {
         // Given
-        val fakeFailure = NoInternetConnectionFailure("fake no internet error")
+        val fakeFailure = NoInternetConnectionFailure("fake address no internet error")
         val fakeLocation = createFakeLocation(latitude = 3.5, longitude = 4.5)
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
+        coEvery { locationService.getCurrentLocation() } returns fakeLocation
+        coEvery { getAddressService.getAddress(any(), any()) } throws fakeFailure
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-address-error-directory/image.png"
+        val states = collectStates()
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-address-error-directory"),
+            canvasToDrawArtWidth = 500,
+            canvasToDrawArtHeight = 500
+        )
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(4, states.size)
+        assertSame(CreateNewMapArtUiState.Idle, states[0])
+        assertEquals(fakeAccessingLocationLoading, states[1])
+        assertEquals(fakeDownloadingImageLoading, states[2])
+        val errorState = assertInstanceOf(CreateNewMapArtUiState.Error::class.java, states[3])
+        assertSame(fakeFailure, errorState.failure)
+    }
+
+    @Test
+    fun `if repository throws a Failure when fetching the static map image should emit Error ui state after the downloading Loading message`() = runTest {
+        // Given
+        val fakeFailure = MapboxApiErrorFailure("fake mapbox error")
+        val fakeLocation = createFakeLocation(latitude = 5.5, longitude = 6.5)
         val fakeAddress = createFakeAddress(
+            thoroughfare = "Fake Offline Street",
             locality = "Fake Offline City",
-            countryName = "Fake Offline Country",
-            thoroughfare = "Fake Offline Street"
+            countryName = "Fake Offline Country"
         )
         coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
         coEvery { locationService.getCurrentLocation() } returns fakeLocation
@@ -304,11 +668,60 @@ class CreateNewMapArtViewModelTest {
         advanceUntilIdle()
 
         // Then
-        assertEquals(3, states.size)
+        assertEquals(4, states.size)
         assertSame(CreateNewMapArtUiState.Idle, states[0])
-        assertSame(CreateNewMapArtUiState.Loading, states[1])
-        val errorState = assertInstanceOf(CreateNewMapArtUiState.Error::class.java, states[2])
+        assertEquals(fakeAccessingLocationLoading, states[1])
+        assertEquals(fakeDownloadingImageLoading, states[2])
+        val errorState = assertInstanceOf(CreateNewMapArtUiState.Error::class.java, states[3])
         assertSame(fakeFailure, errorState.failure)
+    }
+
+    @Test
+    fun `if startToGenerateMapArt is called again after an Error should emit ImageDownloaded ui state`() = runTest {
+        // Given
+        val fakeFailure = LocationPermissionNotGrantedFailure("fake first location error")
+        val fakeStaticImagePath = "fake-retry-after-error-directory/image.png"
+        val fakeLocation = createFakeLocation(latitude = 7.5, longitude = 8.5)
+        val fakeAddress = createFakeAddress(
+            thoroughfare = "Fake Retry Street",
+            locality = "Fake Retry City",
+            countryName = "Fake Retry Country"
+        )
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
+        coEvery { locationService.getCurrentLocation() } throws fakeFailure andThen fakeLocation
+        coEvery { getAddressService.getAddress(any(), any()) } returns fakeAddress
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns fakeStaticImagePath
+        val states = collectStates()
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-retry-after-error-directory"),
+            canvasToDrawArtWidth = 500,
+            canvasToDrawArtHeight = 500
+        )
+        advanceUntilIdle()
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-retry-after-error-directory"),
+            canvasToDrawArtWidth = 500,
+            canvasToDrawArtHeight = 500
+        )
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(6, states.size)
+        assertSame(CreateNewMapArtUiState.Idle, states[0])
+        assertEquals(fakeAccessingLocationLoading, states[1])
+        assertInstanceOf(CreateNewMapArtUiState.Error::class.java, states[2])
+        assertEquals(fakeAccessingLocationLoading, states[3])
+        assertEquals(fakeDownloadingImageLoading, states[4])
+        val imageDownloadedState = assertInstanceOf(
+            CreateNewMapArtUiState.ImageDownloaded::class.java,
+            states[5]
+        )
+        assertEquals(fakeStaticImagePath, imageDownloadedState.staticMapImagePath)
+        coVerify(exactly = 2) { locationService.getCurrentLocation() }
     }
 
     @Test
@@ -317,11 +730,11 @@ class CreateNewMapArtViewModelTest {
         val fakeFirstDirectory = File("fake-first-directory")
         val fakeLastDirectory = File("fake-last-directory")
         val fakeLastStaticImagePath = "fake-last-directory/image.png"
-        val fakeLocation = createFakeLocation(latitude = 5.5, longitude = 6.5)
+        val fakeLocation = createFakeLocation(latitude = 9.5, longitude = 10.5)
         val fakeAddress = createFakeAddress(
-            locality = "Fake Retry City",
-            countryName = "Fake Retry Country",
-            thoroughfare = "Fake Retry Street"
+            thoroughfare = "Fake Cancel Street",
+            locality = "Fake Cancel City",
+            countryName = "Fake Cancel Country"
         )
         coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
         coEvery { locationService.getCurrentLocation() } coAnswers {
@@ -350,230 +763,23 @@ class CreateNewMapArtViewModelTest {
 
         // Then
         coVerify(exactly = 2) { locationService.getCurrentLocation() }
+        coVerify(exactly = 1) { getAddressService.getAddress(any(), any()) }
         coVerify(exactly = 0) {
             repository.fetchStaticMapImage(any(), any(), any(), any(), any(), fakeFirstDirectory)
         }
         coVerify(exactly = 1) {
             repository.fetchStaticMapImage(any(), any(), any(), any(), any(), fakeLastDirectory)
         }
-        assertEquals(3, states.size)
+        // The second Loading(accessing_your_location) is equal to the first one, so the StateFlow does not emit it again
+        assertEquals(4, states.size)
         assertSame(CreateNewMapArtUiState.Idle, states[0])
-        assertSame(CreateNewMapArtUiState.Loading, states[1])
+        assertEquals(fakeAccessingLocationLoading, states[1])
+        assertEquals(fakeDownloadingImageLoading, states[2])
         val imageDownloadedState = assertInstanceOf(
             CreateNewMapArtUiState.ImageDownloaded::class.java,
-            states[2]
+            states[3]
         )
         assertEquals(fakeLastStaticImagePath, imageDownloadedState.staticMapImagePath)
-    }
-
-    // endregion
-
-    // region generateAiText
-
-    @Test
-    fun `if AI service returns a text should emit LoadingAIText then GeneratedAIText ui state`() = runTest {
-        // Given
-        val fakePrompt = "fake prompt"
-        val fakeAiText = "Fake AI description of the place"
-        every {
-            promptGenerator.generateArtDescriptionPrompt(any(), any(), any(), any())
-        } returns fakePrompt
-        coEvery { generateAIContentService.generateTextContent(any()) } returns fakeAiText
-        val states = collectStates()
-
-        // When
-        viewModel.generateAiText()
-        advanceUntilIdle()
-
-        // Then
-        assertEquals(3, states.size)
-        assertSame(CreateNewMapArtUiState.Idle, states[0])
-        assertSame(CreateNewMapArtUiState.LoadingAIText, states[1])
-        val generatedState = assertInstanceOf(
-            CreateNewMapArtUiState.GeneratedAIText::class.java,
-            states[2]
-        )
-        assertEquals(fakeAiText, generatedState.text)
-        coVerify(exactly = 1) { generateAIContentService.generateTextContent(fakePrompt) }
-    }
-
-    @Test
-    fun `if no map art was generated before should generate the prompt with empty address texts`() = runTest {
-        // Given
-        every {
-            promptGenerator.generateArtDescriptionPrompt(any(), any(), any(), any())
-        } returns "fake empty address prompt"
-        coEvery { generateAIContentService.generateTextContent(any()) } returns "Fake AI text"
-
-        // When
-        viewModel.generateAiText()
-        advanceUntilIdle()
-
-        // Then
-        verify(exactly = 1) {
-            promptGenerator.generateArtDescriptionPrompt(
-                countryName = "",
-                cityName = "",
-                streetName = "",
-                languageToReturn = Locale.getDefault().displayName
-            )
-        }
-    }
-
-    @Test
-    fun `if a map art was generated before should generate the prompt with the art address`() = runTest {
-        // Given
-        val fakeLocation = createFakeLocation(latitude = 7.5, longitude = 8.5)
-        val fakeAddress = createFakeAddress(
-            locality = "Fake Prompt City",
-            countryName = "Fake Prompt Country",
-            thoroughfare = "Fake Prompt Street"
-        )
-        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
-        coEvery { locationService.getCurrentLocation() } returns fakeLocation
-        coEvery { getAddressService.getAddress(any(), any()) } returns fakeAddress
-        coEvery {
-            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
-        } returns "fake-prompt-directory/image.png"
-        every {
-            promptGenerator.generateArtDescriptionPrompt(any(), any(), any(), any())
-        } returns "fake address prompt"
-        coEvery { generateAIContentService.generateTextContent(any()) } returns "Fake AI text"
-        viewModel.startToGenerateMapArt(
-            directory = File("fake-prompt-directory"),
-            canvasToDrawArtWidth = 500,
-            canvasToDrawArtHeight = 500
-        )
-        advanceUntilIdle()
-
-        // When
-        viewModel.generateAiText()
-        advanceUntilIdle()
-
-        // Then
-        verify(exactly = 1) {
-            promptGenerator.generateArtDescriptionPrompt(
-                countryName = "Fake Prompt Country",
-                cityName = "Fake Prompt City",
-                streetName = "Fake Prompt Street",
-                languageToReturn = Locale.getDefault().displayName
-            )
-        }
-    }
-
-    @Test
-    fun `if the art address has null fields should generate the prompt with empty texts for them`() = runTest {
-        // Given
-        val fakeLocation = createFakeLocation(latitude = 9.5, longitude = 10.5)
-        val fakeAddress = createFakeAddress(
-            locality = null,
-            countryName = "Fake Lonely Country",
-            thoroughfare = null
-        )
-        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
-        coEvery { locationService.getCurrentLocation() } returns fakeLocation
-        coEvery { getAddressService.getAddress(any(), any()) } returns fakeAddress
-        coEvery {
-            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
-        } returns "fake-lonely-directory/image.png"
-        every {
-            promptGenerator.generateArtDescriptionPrompt(any(), any(), any(), any())
-        } returns "fake lonely prompt"
-        coEvery { generateAIContentService.generateTextContent(any()) } returns "Fake AI text"
-        viewModel.startToGenerateMapArt(
-            directory = File("fake-lonely-directory"),
-            canvasToDrawArtWidth = 500,
-            canvasToDrawArtHeight = 500
-        )
-        advanceUntilIdle()
-
-        // When
-        viewModel.generateAiText()
-        advanceUntilIdle()
-
-        // Then
-        verify(exactly = 1) {
-            promptGenerator.generateArtDescriptionPrompt(
-                countryName = "Fake Lonely Country",
-                cityName = "",
-                streetName = "",
-                languageToReturn = Locale.getDefault().displayName
-            )
-        }
-    }
-
-    @Test
-    fun `if AI service returns null should emit ErrorGeneratingAIText ui state`() = runTest {
-        // Given
-        every {
-            promptGenerator.generateArtDescriptionPrompt(any(), any(), any(), any())
-        } returns "fake null text prompt"
-        coEvery { generateAIContentService.generateTextContent(any()) } returns null
-        val states = collectStates()
-
-        // When
-        viewModel.generateAiText()
-        advanceUntilIdle()
-
-        // Then
-        assertEquals(
-            listOf(
-                CreateNewMapArtUiState.Idle,
-                CreateNewMapArtUiState.LoadingAIText,
-                CreateNewMapArtUiState.ErrorGeneratingAIText
-            ),
-            states
-        )
-    }
-
-    @Test
-    fun `if AI service returns a blank text should emit ErrorGeneratingAIText ui state`() = runTest {
-        // Given
-        every {
-            promptGenerator.generateArtDescriptionPrompt(any(), any(), any(), any())
-        } returns "fake blank text prompt"
-        coEvery { generateAIContentService.generateTextContent(any()) } returns "   "
-        val states = collectStates()
-
-        // When
-        viewModel.generateAiText()
-        advanceUntilIdle()
-
-        // Then
-        assertEquals(
-            listOf(
-                CreateNewMapArtUiState.Idle,
-                CreateNewMapArtUiState.LoadingAIText,
-                CreateNewMapArtUiState.ErrorGeneratingAIText
-            ),
-            states
-        )
-    }
-
-    @Test
-    fun `if AI service throws a Failure should emit ErrorGeneratingAIText ui state`() = runTest {
-        // Given
-        every {
-            promptGenerator.generateArtDescriptionPrompt(any(), any(), any(), any())
-        } returns "fake failure prompt"
-        coEvery {
-            generateAIContentService.generateTextContent(any())
-        } throws GeneratingAIContentFailure("fake AI error")
-        val states = collectStates()
-
-        // When
-        viewModel.generateAiText()
-        advanceUntilIdle()
-
-        // Then
-        assertEquals(
-            listOf(
-                CreateNewMapArtUiState.Idle,
-                CreateNewMapArtUiState.LoadingAIText,
-                CreateNewMapArtUiState.ErrorGeneratingAIText
-            ),
-            states
-        )
     }
 
     // endregion
@@ -624,9 +830,9 @@ class CreateNewMapArtViewModelTest {
         val fakeLongitude = -43.2105
         val fakeLocation = createFakeLocation(latitude = fakeLatitude, longitude = fakeLongitude)
         val fakeAddress = createFakeAddress(
+            thoroughfare = "Fake Located Street",
             locality = "Fake Located City",
-            countryName = "Fake Located Country",
-            thoroughfare = "Fake Located Street"
+            countryName = "Fake Located Country"
         )
         val mapArtSlot = slot<MapArtEntity>()
         coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
@@ -730,7 +936,7 @@ class CreateNewMapArtViewModelTest {
         // Then
         coVerify(exactly = 2) { repository.saveMapArtEntity(any()) }
         assertEquals(2, fakeSavedMapArts.size)
-        assertTrue(fakeSavedMapArts[0].id != fakeSavedMapArts[1].id)
+        assertNotEquals(fakeSavedMapArts[0].id, fakeSavedMapArts[1].id)
         assertEquals(2, events.size)
     }
 

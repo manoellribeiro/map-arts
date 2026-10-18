@@ -59,7 +59,7 @@
     <string name="art_style">Style artistique</string>
     <string name="choose_visual_style">Choisissez le style visuel pour votre œuvre générée</string>
     <string name="color_palette">Palette de couleurs</string>
-    <string name="choose_complete_color_set">Choisissez un ensemble complet de couleurs pour votre œuvre</string>
+    <string name="choose_complete_color_set">Choisissez un ensemble complet de couleurs pour votre œuvre. Chaque couleur représente un élément de votre carte, comme les rues, l\'eau et les zones de bâtiments.</string>
     <string name="map_zoom">Zoom de la carte</string>
     <string name="control_map_zoom">Contrôlez à quelle distance la vue de la carte sera affichée</string>
     <string name="colorful_map">Carte Colorée</string>
@@ -67,4 +67,25 @@
     <string name="pointillism_colorful_description">Une carte colorée, mais avec un rendu artistique en pointillé</string>
     <string name="geo_realistic">Géo Réaliste</string>
     <string name="geo_realistic_description">Un moyen rapide d\'obtenir une image satellite de votre position actuelle</string>
+    <string name="water_flow">Flux d\'Eau</string>
+    <string name="water_flow_description">Une carte animée qui se concentre sur le flux de toute eau apparaissant sur votre carte</string>
+    <string name="walking_people">Personnes en Marche</string>
+    <string name="walking_people_description">Une carte colorée avec une simulation de personnes marchant dans les zones des bâtiments</string>
+    <string name="classic">Classique</string>
+    <string name="classic_description">Le premier style artistique créé dans le projet, généré avec les couleurs fixes de notre logo</string>
+    <string name="latitude_value">Latitude\u00A0: %s</string>
+    <string name="longitude_value">Longitude\u00A0: %s</string>
+    <string name="layer_buildings">Bâtiments et zones construites</string>
+    <string name="layer_water">Eau</string>
+    <string name="layer_road_paths">Chemins et sentiers</string>
+    <string name="layer_roads_tunnels_bridges">Routes, tunnels et ponts</string>
+    <string name="layer_building_delimitations">Contours des bâtiments</string>
+    <string name="layer_roads_bridges_footpaths">Routes, ponts, chemins</string>
+    <string name="layer_everything_else">Tout le reste</string>
+    <string name="color_legend">Légende des couleurs</string>
+    <string name="layer_land_other">Terrain/Autres</string>
+    <string name="color_palette_value">Palette de couleurs\u00A0: %s</string>
+    <string name="accessing_your_location">Accès à votre position…</string>
+    <string name="downloading_map_image">Téléchargement de l’image de la carte…</string>
+    <string name="error_downloading_location_image">Une erreur s’est produite lors du téléchargement de l’image de votre position, veuillez réessayer.</string>
 </resources>

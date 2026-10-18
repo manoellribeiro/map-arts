@@ -20,6 +20,7 @@ import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
+import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.services.ConnectivityService
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
@@ -39,7 +40,8 @@ object ViewModelModule {
         geoapifyApiService: GeoapifyApiService,
         connectivityService: ConnectivityService,
         artSettingsDataStore: DataStore<Preferences>,
-        @IoDispatcher ioDispatcher: CoroutineDispatcher
+        @IoDispatcher ioDispatcher: CoroutineDispatcher,
+        errorLogger: ErrorLogger
     ): MartpRepository {
         return MartpRepository(
             mapArtDao = mapArtsDao,
@@ -48,22 +50,28 @@ object ViewModelModule {
             userInfoDao = userInfoDao,
             artSettingsDataSore = artSettingsDataStore,
             geoapifyApiService = geoapifyApiService,
-            ioDispatcher = ioDispatcher
+            ioDispatcher = ioDispatcher,
+            errorLogger = errorLogger
         )
     }
 
     @Provides
-    fun providesLocationService(fusedLocationProviderClient: FusedLocationProviderClient): LocationService {
-        return LocationService(fusedLocationProviderClient)
+    fun providesLocationService(
+        fusedLocationProviderClient: FusedLocationProviderClient,
+        errorLogger: ErrorLogger
+    ): LocationService {
+        return LocationService(fusedLocationProviderClient, errorLogger)
     }
 
     @Provides
     fun providesGetAddressService(
         geocoder: Geocoder,
+        connectivityService: ConnectivityService,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
-        sdkVersionService: SdkVersionService
+        sdkVersionService: SdkVersionService,
+        errorLogger: ErrorLogger
     ): GetAddressService {
-        return GetAddressService(geocoder, ioDispatcher, sdkVersionService)
+        return GetAddressService(geocoder, connectivityService, ioDispatcher, sdkVersionService, errorLogger)
     }
 
     @Provides
@@ -72,8 +80,11 @@ object ViewModelModule {
     }
 
     @Provides
-    fun providesGenerateAIContentService(generativeModel: GenerativeModel): GenerateAIContentService {
-        return GenerateAIContentService(generativeModel)
+    fun providesGenerateAIContentService(
+        generativeModel: GenerativeModel,
+        errorLogger: ErrorLogger
+    ): GenerateAIContentService {
+        return GenerateAIContentService(generativeModel, errorLogger)
     }
 
     @Provides

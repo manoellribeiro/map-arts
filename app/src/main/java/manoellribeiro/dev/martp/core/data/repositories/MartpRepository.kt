@@ -22,11 +22,14 @@ import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.di.IoDispatcher
+import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
+import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.services.ConnectivityService
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
+import manoellribeiro.dev.martp.core.utils.ColorPaletteProvider
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
@@ -40,12 +43,43 @@ class MartpRepository @Inject constructor(
     private val mapArtDao: MapArtsDao,
     private val userInfoDao: UserInfoDao,
     private val artSettingsDataSore: DataStore<Preferences>,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val errorLogger: ErrorLogger
 ) {
 
     companion object {
         private const val MAP_ZOOM_KEY = "MAP_ZOOM_KEY"
         private const val MAP_ART_STYLE_KEY = "MAP_ART_STYLE_KEY"
+        private const val SELECTED_COLOR_PALETTE = "SELECTED_COLOR_PALETTE"
+    }
+
+    suspend fun setColorPalettePreference(colorPaletteName: String) {
+        try {
+            val colorPaletteKey = stringPreferencesKey(SELECTED_COLOR_PALETTE)
+            artSettingsDataSore.edit { preferences ->
+                preferences[colorPaletteKey] = colorPaletteName
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.setColorPalettePreference")
+            throw LocalStorageErrorFailure(e.message)
+        }
+    }
+
+    suspend fun getColorPalettePreference(): String {
+        val defaultColorPalette = "Martp"
+        try {
+            val colorPaletteKey = stringPreferencesKey(SELECTED_COLOR_PALETTE)
+            return artSettingsDataSore.data.map { preferences ->
+                preferences[colorPaletteKey]
+            }.first() ?: defaultColorPalette
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.getColorPalettePreference")
+            return defaultColorPalette
+        }
     }
 
     suspend fun setMapArtStylePreference(sketchArtType: SketchArtType) {
@@ -57,6 +91,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.setMapArtStylePreference")
             throw LocalStorageErrorFailure(e.message)
         }
     }
@@ -73,6 +108,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.getArtStylePreference")
             return defaultArtStyle
         }
     }
@@ -86,6 +122,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.setMapZoomPreference")
             throw LocalStorageErrorFailure(e.message)
         }
     }
@@ -100,6 +137,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.getMapZoomPreference")
             return defaultZoom
         }
     }
@@ -110,7 +148,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            //Log, but don't do nothing
+            errorLogger.logNonFatal(e, "MartpRepository.setUserName")
         }
     }
 
@@ -120,7 +158,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            //Log, but don't do nothing
+            errorLogger.logNonFatal(e, "MartpRepository.setUserEmail")
         }
     }
 
@@ -141,16 +179,18 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.fetchCurrentUserInfo")
             return UserInfoEntity(
                 id = UUID.randomUUID().toString(),
                 username = null,
                 email = null
-            ) //todo: think how to handle this error
+            )
         }
     }
 
     fun observeUserMapArts(): Flow<List<MapArtEntity>> {
         return mapArtDao.getAll().catch { e ->
+            errorLogger.logNonFatal(e, "MartpRepository.observeUserMapArts")
             throw LocalStorageErrorFailure(e.message)
         }
     }
@@ -174,7 +214,6 @@ class MartpRepository @Inject constructor(
 //                    mapHeight = mapHeight - MartpSketch.framePadding.toInt() - MartpSketch.frameThickness.toInt(),
 //                    mapZoom = mapZoom
 //                )
-
                 val response: ResponseBody = mapboxApiService.getStaticMapImage(
                     styleId = sketchArtType.mapBoxMapStyle.id,
                     latitude = latitude,
@@ -189,14 +228,17 @@ class MartpRepository @Inject constructor(
 
                     imageFile.createNewFile()
 
-                    val fileOutputStream = FileOutputStream(imageFile)
-                    fileOutputStream.write(response.bytes())
-                    fileOutputStream.close()
+                    FileOutputStream(imageFile).use { fileOutputStream ->
+                        fileOutputStream.write(response.bytes())
+                    }
 
                     imageFile.path
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                throw e //TODO: this exception can't be thrown here
+                errorLogger.logNonFatal(e, "MartpRepository.fetchStaticMapImage")
+                throw MapboxApiErrorFailure(originalExceptionMessage = e.message)
             }
         } else {
             throw NoInternetConnectionFailure(originalExceptionMessage = null)
@@ -209,6 +251,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.saveMapArtEntity")
             throw LocalStorageErrorFailure(originalExceptionMessage = e.message)
         }
     }

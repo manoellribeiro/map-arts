@@ -59,7 +59,7 @@
     <string name="art_style">Kunststil</string>
     <string name="choose_visual_style">Wähle den visuellen Stil für dein generiertes Kunstwerk</string>
     <string name="color_palette">Farbpalette</string>
-    <string name="choose_complete_color_set">Wähle ein komplettes Farbset für dein Kunstwerk</string>
+    <string name="choose_complete_color_set">Wähle ein komplettes Farbset für dein Kunstwerk. Jede Farbe steht für ein Element deiner Karte, wie Straßen, Gewässer und Gebäudeflächen.</string>
     <string name="map_zoom">Karten-Zoom</string>
     <string name="control_map_zoom">Lege fest, wie nah oder fern die Kartenansicht sein wird</string>
     <string name="colorful_map">Bunte Karte</string>
@@ -67,4 +67,25 @@
     <string name="pointillism_colorful_description">Eine bunte Karte, aber mit künstlerischer Punktmuster-Darstellung</string>
     <string name="geo_realistic">Geo-Realistisch</string>
     <string name="geo_realistic_description">Ein schneller Weg zu einem Satellitenbild deines aktuellen Standorts</string>
+    <string name="water_flow">Wasserfluss</string>
+    <string name="water_flow_description">Eine animierte Karte, die den Fluss aller Gewässer zeigt, die auf deiner Karte erscheinen</string>
+    <string name="walking_people">Gehende Menschen</string>
+    <string name="walking_people_description">Eine bunte Karte mit einer Simulation von Menschen, die in den Gebäudeflächen gehen</string>
+    <string name="classic">Klassisch</string>
+    <string name="classic_description">Der erste Kunststil des Projekts, erstellt mit den festen Farben unseres Logos</string>
+    <string name="latitude_value">Breitengrad: %s</string>
+    <string name="longitude_value">Längengrad: %s</string>
+    <string name="layer_buildings">Gebäude und bebaute Flächen</string>
+    <string name="layer_water">Wasser</string>
+    <string name="layer_road_paths">Wege und Pfade</string>
+    <string name="layer_roads_tunnels_bridges">Straßen, Tunnel und Brücken</string>
+    <string name="layer_building_delimitations">Gebäudeumrisse</string>
+    <string name="layer_roads_bridges_footpaths">Straßen, Brücken, Fußwege</string>
+    <string name="layer_everything_else">Alles andere</string>
+    <string name="color_legend">Farblegende</string>
+    <string name="layer_land_other">Land/Sonstiges</string>
+    <string name="color_palette_value">Farbpalette: %s</string>
+    <string name="accessing_your_location">Dein Standort wird abgerufen…</string>
+    <string name="downloading_map_image">Kartenbild wird heruntergeladen…</string>
+    <string name="error_downloading_location_image">Beim Herunterladen des Bildes deines Standorts ist ein Fehler aufgetreten, bitte versuche es erneut.</string>
 </resources>

@@ -434,4 +434,240 @@ class IntExtensionsTest {
         // Then
         assertEquals(0, result)
     }
+
+    // redValue
+
+    @Test
+    fun `if color has a red channel should return it on redValue`() {
+        // Given
+        val fakeColor = 0xFF4E3C41.toInt()
+
+        // When
+        val result = fakeColor.redValue()
+
+        // Then
+        assertEquals(0x4E, result)
+    }
+
+    @Test
+    fun `if color has no alpha channel should return the red channel on redValue`() {
+        // Given
+        val fakeColor = 0x00AB1234
+
+        // When
+        val result = fakeColor.redValue()
+
+        // Then
+        assertEquals(0xAB, result)
+    }
+
+    @Test
+    fun `if color is black should return zero on redValue`() {
+        // Given
+        val fakeColor = 0xFF000000.toInt()
+
+        // When
+        val result = fakeColor.redValue()
+
+        // Then
+        assertEquals(0, result)
+    }
+
+    // greenValue
+
+    @Test
+    fun `if color has a green channel should return it on greenValue`() {
+        // Given
+        val fakeColor = 0xFF4E3C41.toInt()
+
+        // When
+        val result = fakeColor.greenValue()
+
+        // Then
+        assertEquals(0x3C, result)
+    }
+
+    @Test
+    fun `if color is white should return 255 on greenValue`() {
+        // Given
+        val fakeColor = 0xFFFFFFFF.toInt()
+
+        // When
+        val result = fakeColor.greenValue()
+
+        // Then
+        assertEquals(255, result)
+    }
+
+    // blueValue
+
+    @Test
+    fun `if color has a blue channel should return it on blueValue`() {
+        // Given
+        val fakeColor = 0xFF4E3C41.toInt()
+
+        // When
+        val result = fakeColor.blueValue()
+
+        // Then
+        assertEquals(0x41, result)
+    }
+
+    @Test
+    fun `if color is pure red should return zero on blueValue`() {
+        // Given
+        val fakeColor = 0xFFFF0000.toInt()
+
+        // When
+        val result = fakeColor.blueValue()
+
+        // Then
+        assertEquals(0, result)
+    }
+
+    // isRgbColor
+
+    @Test
+    fun `if color has exactly the compared rgb values should return true on isRgbColor`() {
+        // Given
+        val fakeColor = 0xFF64C832.toInt()
+
+        // When
+        val result = fakeColor.isRgbColor(
+            redValueToCompare = 100,
+            greenValueToCompare = 200,
+            blueValueToCompare = 50
+        )
+
+        // Then
+        assertTrue(result)
+    }
+
+    @Test
+    fun `if every channel is 2 above the compared values should return true on isRgbColor`() {
+        // Given
+        val fakeColor = 0xFF66CA34.toInt()
+
+        // When
+        val result = fakeColor.isRgbColor(
+            redValueToCompare = 100,
+            greenValueToCompare = 200,
+            blueValueToCompare = 50
+        )
+
+        // Then
+        assertTrue(result)
+    }
+
+    @Test
+    fun `if every channel is 2 below the compared values should return true on isRgbColor`() {
+        // Given
+        val fakeColor = 0xFF62C630.toInt()
+
+        // When
+        val result = fakeColor.isRgbColor(
+            redValueToCompare = 100,
+            greenValueToCompare = 200,
+            blueValueToCompare = 50
+        )
+
+        // Then
+        assertTrue(result)
+    }
+
+    @Test
+    fun `if the red channel is 3 above the compared value should return false on isRgbColor`() {
+        // Given
+        val fakeColor = 0xFF67C832.toInt()
+
+        // When
+        val result = fakeColor.isRgbColor(
+            redValueToCompare = 100,
+            greenValueToCompare = 200,
+            blueValueToCompare = 50
+        )
+
+        // Then
+        assertFalse(result)
+    }
+
+    @Test
+    fun `if the green channel is 3 below the compared value should return false on isRgbColor`() {
+        // Given
+        val fakeColor = 0xFF64C532.toInt()
+
+        // When
+        val result = fakeColor.isRgbColor(
+            redValueToCompare = 100,
+            greenValueToCompare = 200,
+            blueValueToCompare = 50
+        )
+
+        // Then
+        assertFalse(result)
+    }
+
+    @Test
+    fun `if the blue channel is 3 above the compared value should return false on isRgbColor`() {
+        // Given
+        val fakeColor = 0xFF64C835.toInt()
+
+        // When
+        val result = fakeColor.isRgbColor(
+            redValueToCompare = 100,
+            greenValueToCompare = 200,
+            blueValueToCompare = 50
+        )
+
+        // Then
+        assertFalse(result)
+    }
+
+    @Test
+    fun `if colors differ only in the alpha channel should return true on isRgbColor`() {
+        // Given
+        val fakeTransparentColor = 0x0064C832
+
+        // When
+        val result = fakeTransparentColor.isRgbColor(
+            redValueToCompare = 100,
+            greenValueToCompare = 200,
+            blueValueToCompare = 50
+        )
+
+        // Then
+        assertTrue(result)
+    }
+
+    @Test
+    fun `if color is black and compared with zero values should return true on isRgbColor`() {
+        // Given
+        val fakeColor = 0xFF000000.toInt()
+
+        // When
+        val result = fakeColor.isRgbColor(
+            redValueToCompare = 0,
+            greenValueToCompare = 0,
+            blueValueToCompare = 0
+        )
+
+        // Then
+        assertTrue(result)
+    }
+
+    @Test
+    fun `if color is white and compared with 255 values should return true on isRgbColor`() {
+        // Given
+        val fakeColor = 0xFFFFFFFF.toInt()
+
+        // When
+        val result = fakeColor.isRgbColor(
+            redValueToCompare = 255,
+            greenValueToCompare = 255,
+            blueValueToCompare = 255
+        )
+
+        // Then
+        assertTrue(result)
+    }
 }

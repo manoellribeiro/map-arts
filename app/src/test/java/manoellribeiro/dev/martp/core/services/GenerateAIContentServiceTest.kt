@@ -5,10 +5,14 @@ import com.google.firebase.ai.type.GenerateContentResponse
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.verify
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import manoellribeiro.dev.martp.R
+import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.failures.GeneratingAIContentFailure
 import manoellribeiro.dev.martp.infra.MainDispatcherExtension
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -25,13 +29,18 @@ class GenerateAIContentServiceTest {
     private lateinit var generateAIContentService: GenerateAIContentService
     private lateinit var generativeModel: GenerativeModel
     private lateinit var fakeResponse: GenerateContentResponse
+    private lateinit var errorLogger: ErrorLogger
 
     @BeforeEach
     fun setup() {
         generativeModel = mockk()
         fakeResponse = mockk()
+        errorLogger = mockk()
 
-        generateAIContentService = GenerateAIContentService(generativeModel = generativeModel)
+        generateAIContentService = GenerateAIContentService(
+            generativeModel = generativeModel,
+            errorLogger = errorLogger
+        )
     }
 
     @Test
@@ -71,6 +80,7 @@ class GenerateAIContentServiceTest {
         val fakePrompt = "fake prompt that fails"
         val fakeErrorMessage = "fake generative model error"
         coEvery { generativeModel.generateContent(fakePrompt) } throws IllegalStateException(fakeErrorMessage)
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<GeneratingAIContentFailure> {
@@ -81,6 +91,7 @@ class GenerateAIContentServiceTest {
         assertEquals(fakeErrorMessage, failure.message)
         assertEquals(R.string.generate_ai_content_failure_message, failure.messageToBeDisplayedToUserId)
         coVerify(exactly = 1) { generativeModel.generateContent(fakePrompt) }
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "GenerateAIContentService.generateTextContent") }
     }
 
     @Test
@@ -88,6 +99,7 @@ class GenerateAIContentServiceTest {
         // Given
         val fakePrompt = "fake prompt that fails without message"
         coEvery { generativeModel.generateContent(fakePrompt) } throws IllegalStateException()
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<GeneratingAIContentFailure> {
@@ -96,6 +108,7 @@ class GenerateAIContentServiceTest {
 
         // Then
         assertNull(failure.message)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "GenerateAIContentService.generateTextContent") }
     }
 
     @Test
@@ -105,6 +118,7 @@ class GenerateAIContentServiceTest {
         val fakeErrorMessage = "fake response text error"
         every { fakeResponse.text } throws IllegalStateException(fakeErrorMessage)
         coEvery { generativeModel.generateContent(fakePrompt) } returns fakeResponse
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<GeneratingAIContentFailure> {
@@ -113,6 +127,7 @@ class GenerateAIContentServiceTest {
 
         // Then
         assertEquals(fakeErrorMessage, failure.message)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "GenerateAIContentService.generateTextContent") }
     }
 
     @Test
@@ -129,5 +144,6 @@ class GenerateAIContentServiceTest {
 
         // Then
         assertSame(fakeCancellationException, thrownException)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
     }
 }

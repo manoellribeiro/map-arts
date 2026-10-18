@@ -85,15 +85,17 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/mapArtsRV"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginTop="16dp"
+            android:paddingBottom="16dp"
             android:clipToPadding="false"
             android:overScrollMode="never"
-            android:paddingBottom="250dp"
             android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/galleryTV"
+
             tools:itemCount="5"
             tools:listitem="@layout/item_gallery_art"
             tools:visibility="gone" />

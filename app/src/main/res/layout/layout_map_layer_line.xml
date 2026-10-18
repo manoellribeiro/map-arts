@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:paddingBottom="8dp"
+    android:paddingHorizontal="16dp"
+    android:gravity="center_vertical"
+    android:layout_height="wrap_content">
+
+    <View
+        android:id="@+id/colorHolderV"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:background="@drawable/background_map_layer_color_holder"/>
+
+    <TextView
+        android:id="@+id/layerNameTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Text.GraySubTitle"
+        tools:visibility="visible"
+        android:layout_marginHorizontal="8dp"
+        tools:text="Streets" />
+
+</LinearLayout>

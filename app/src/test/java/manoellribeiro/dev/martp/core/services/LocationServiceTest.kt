@@ -7,7 +7,9 @@ import com.google.android.gms.tasks.CancellationToken
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import manoellribeiro.dev.martp.R
+import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.failures.LocationDisabledFailure
 import manoellribeiro.dev.martp.core.models.failures.LocationPermissionNotGrantedFailure
 import manoellribeiro.dev.martp.core.models.failures.UnknownErrorFailure
@@ -36,13 +39,18 @@ class LocationServiceTest {
     private lateinit var locationService: LocationService
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var fakeLocationTask: Task<Location>
+    private lateinit var errorLogger: ErrorLogger
 
     @BeforeEach
     fun setup() {
         fusedLocationClient = mockk()
         fakeLocationTask = mockk()
+        errorLogger = mockk()
 
-        locationService = LocationService(fusedLocationClient = fusedLocationClient)
+        locationService = LocationService(
+            fusedLocationClient = fusedLocationClient,
+            errorLogger = errorLogger
+        )
     }
 
     // Makes the task call its complete listener as soon as the listener is registered
@@ -93,6 +101,7 @@ class LocationServiceTest {
             fusedLocationClient.getCurrentLocation(any<Int>(), any<CancellationToken>())
         } returns fakeLocationTask
         completeFakeLocationTaskWhenListenerIsAdded()
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<LocationDisabledFailure> {
@@ -101,18 +110,21 @@ class LocationServiceTest {
 
         // Then
         assertNull(failure.message)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "LocationService.getCurrentLocation") }
     }
 
     @Test
     fun `if location task fails with a SecurityException should throw a LocationPermissionNotGrantedFailure with its message`() = runTest {
         // Given
         val fakeErrorMessage = "fake missing location permission in task"
+        val fakeTaskException = SecurityException(fakeErrorMessage)
         every { fakeLocationTask.isSuccessful } returns false
-        every { fakeLocationTask.exception } returns SecurityException(fakeErrorMessage)
+        every { fakeLocationTask.exception } returns fakeTaskException
         every {
             fusedLocationClient.getCurrentLocation(any<Int>(), any<CancellationToken>())
         } returns fakeLocationTask
         completeFakeLocationTaskWhenListenerIsAdded()
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<LocationPermissionNotGrantedFailure> {
@@ -125,15 +137,39 @@ class LocationServiceTest {
             R.string.location_permission_not_granted_failure_error,
             failure.messageToBeDisplayedToUserId
         )
+        verify(exactly = 1) { errorLogger.logNonFatal(fakeTaskException, "LocationService.getCurrentLocation") }
+    }
+
+    @Test
+    fun `if location task fails without an exception should throw a LocationPermissionNotGrantedFailure with null message`() = runTest {
+        // Given
+        every { fakeLocationTask.isSuccessful } returns false
+        every { fakeLocationTask.exception } returns null
+        every {
+            fusedLocationClient.getCurrentLocation(any<Int>(), any<CancellationToken>())
+        } returns fakeLocationTask
+        completeFakeLocationTaskWhenListenerIsAdded()
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val failure = assertThrows<LocationPermissionNotGrantedFailure> {
+            locationService.getCurrentLocation()
+        }
+
+        // Then
+        assertNull(failure.message)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "LocationService.getCurrentLocation") }
     }
 
     @Test
     fun `if location client throws a SecurityException should throw a LocationPermissionNotGrantedFailure with its message`() = runTest {
         // Given
         val fakeErrorMessage = "fake missing location permission"
+        val fakeSecurityException = SecurityException(fakeErrorMessage)
         every {
             fusedLocationClient.getCurrentLocation(any<Int>(), any<CancellationToken>())
-        } throws SecurityException(fakeErrorMessage)
+        } throws fakeSecurityException
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<LocationPermissionNotGrantedFailure> {
@@ -146,6 +182,7 @@ class LocationServiceTest {
             R.string.location_permission_not_granted_failure_error,
             failure.messageToBeDisplayedToUserId
         )
+        verify(exactly = 1) { errorLogger.logNonFatal(fakeSecurityException, "LocationService.getCurrentLocation") }
     }
 
     @Test
@@ -155,6 +192,7 @@ class LocationServiceTest {
         every {
             fusedLocationClient.getCurrentLocation(any<Int>(), any<CancellationToken>())
         } throws IllegalStateException(fakeErrorMessage)
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<UnknownErrorFailure> {
@@ -164,6 +202,7 @@ class LocationServiceTest {
         // Then
         assertEquals(fakeErrorMessage, failure.message)
         assertEquals(R.string.unknown_error_failure, failure.messageToBeDisplayedToUserId)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "LocationService.getCurrentLocation") }
     }
 
     @Test
@@ -187,5 +226,6 @@ class LocationServiceTest {
         // Then
         assertTrue(job.isCancelled)
         assertTrue(cancellationTokenSlot.captured.isCancellationRequested)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
     }
 }

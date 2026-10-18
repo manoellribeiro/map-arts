@@ -1,15 +1,11 @@
 package manoellribeiro.dev.martp.scenes.createNewMapArt
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.location.Address
-import android.location.Geocoder
 import android.location.Location
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -25,6 +21,7 @@ import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.Failure
+import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
@@ -32,9 +29,9 @@ import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.utils.PromptGenerator
 import java.io.File
 import java.util.Calendar
-import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.math.min
 
 @HiltViewModel
 class CreateNewMapArtViewModel @Inject constructor(
@@ -67,7 +64,7 @@ class CreateNewMapArtViewModel @Inject constructor(
         generateMapArtJob?.cancel()
         generateMapArtJob = viewModelScope.launch {
             try {
-                emitNewState(CreateNewMapArtUiState.Loading)
+                emitNewState(CreateNewMapArtUiState.Loading(R.string.accessing_your_location))
                 val (sketchArtType, location) = coroutineScope {
                     val sketchArtType = async { repository.getArtStylePreference() }
                     val location = async { locationService.getCurrentLocation() }
@@ -79,12 +76,18 @@ class CreateNewMapArtViewModel @Inject constructor(
                 val horizontalPaddingsNumber = horizontalTilesCount + 1
                 val verticalPaddingsNumber = verticalTilesCount + 1
                 val padding = 20
-                val (address, staticImagePath) = coroutineScope {
+                emitNewState(CreateNewMapArtUiState.Loading(R.string.downloading_map_image))
+                val (address, staticImagePath, colorPalette) = coroutineScope {
                     val address = async {
                         getAddressService.getAddress(
                             location.latitude,
                             location.longitude
                         )
+                    }
+                    val colorPalette = async {
+                        if(sketchArtType == SketchArtType.COLORFUL_MAP) {
+                            repository.getColorPalettePreference()
+                        } else null
                     }
                     val staticImagePath = async {
                         repository.fetchStaticMapImage(
@@ -92,21 +95,24 @@ class CreateNewMapArtViewModel @Inject constructor(
                             longitude = location.longitude,
                             latitude = location.latitude,
                             mapWidth = canvasToDrawArtWidth - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
-                            mapHeight = canvasToDrawArtHeight - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
+                            mapHeight = min(canvasToDrawArtHeight - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(), 1280),
                             //mapWidth = canvasToDrawArtWidth - (horizontalPaddingsNumber * padding) - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(), this is the right one to use when creating arts with tiles
                             //mapHeight = canvasToDrawArtHeight - (verticalPaddingsNumber * padding) - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(), this is the right one to use when creating arts with tiles
                             dir = directory
                         )
                     }
-                    address.await() to staticImagePath.await()
+                    Triple(address.await(), staticImagePath.await(), colorPalette.await())
                 }
                 currentArtAddress = address
                 emitNewState(
-            CreateNewMapArtUiState.ImageDownloaded(
-                            staticMapImagePath = staticImagePath,
-                            title = address?.locality + ", " + address?.countryName + ", " + address?.thoroughfare,
-                            sketchArtType = sketchArtType
-                        )
+                    CreateNewMapArtUiState.ImageDownloaded(
+                        staticMapImagePath = staticImagePath,
+                        title = buildTitleWithAddress(address),
+                        sketchArtType = sketchArtType,
+                        colorPalette = colorPalette,
+                        latitude = location.latitude,
+                        longitude = location.longitude
+                    )
                 )
             } catch (failure: Failure) {
                 emitNewState(CreateNewMapArtUiState.Error(failure))
@@ -114,25 +120,10 @@ class CreateNewMapArtViewModel @Inject constructor(
         }
     }
 
-    fun generateAiText() {
-        viewModelScope.launch {
-            try {
-                emitNewState(CreateNewMapArtUiState.LoadingAIText)
-                val text = generateAIContentService.generateTextContent(promptGenerator.generateArtDescriptionPrompt(
-                    countryName = currentArtAddress?.countryName.orEmpty(),
-                    cityName = currentArtAddress?.locality.orEmpty(),
-                    streetName = currentArtAddress?.thoroughfare.orEmpty(),
-                    languageToReturn = Locale.getDefault().displayName
-                ))
-                if(text.isNullOrBlank()) {
-                    emitNewState(CreateNewMapArtUiState.ErrorGeneratingAIText)
-                } else {
-                    emitNewState(CreateNewMapArtUiState.GeneratedAIText(text))
-                }
-            } catch (failure: Failure) {
-                emitNewState(CreateNewMapArtUiState.ErrorGeneratingAIText)
-            }
-        }
+    private fun buildTitleWithAddress(address: Address?): String {
+        return listOfNotNull(address?.thoroughfare, address?.locality, address?.countryName)
+            .filter { it.isNotBlank() }
+            .joinToString(", ")
     }
 
     fun saveArtToLocalDatabase(
@@ -164,10 +155,6 @@ class CreateNewMapArtViewModel @Inject constructor(
                 )
             } catch (failure: Failure) {
                 emitNewState(CreateNewMapArtUiState.Error(failure))
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Log.i("CreateNewMapArtViewMode", e.message ?: "")
             }
         }
     }

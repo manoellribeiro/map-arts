@@ -9,11 +9,15 @@ import com.google.firebase.Firebase
 import com.google.firebase.ai.GenerativeModel
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import manoellribeiro.dev.martp.core.logging.CrashlyticsErrorLogger
+import manoellribeiro.dev.martp.core.logging.ErrorLogger
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -45,6 +49,12 @@ object AndroidServicesModule {
         @ApplicationContext context: Context
     ): GenerativeModel {
         return Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel("gemini-3-flash-preview")
+    }
+
+    @Singleton
+    @Provides
+    fun providesErrorLogger(): ErrorLogger {
+        return CrashlyticsErrorLogger(FirebaseCrashlytics.getInstance())
     }
 
 }

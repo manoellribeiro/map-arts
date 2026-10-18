@@ -59,7 +59,7 @@
     <string name="art_style">Estilo de Arte</string>
     <string name="choose_visual_style">Escolha o estilo visual para sua arte gerada</string>
     <string name="color_palette">Paleta de Cores</string>
-    <string name="choose_complete_color_set">Escolha um conjunto completo de cores para sua arte</string>
+    <string name="choose_complete_color_set">Escolha um conjunto completo de cores para sua arte. Cada cor representa um elemento do seu mapa, como ruas, água e áreas de prédios.</string>
     <string name="map_zoom">Zoom do Mapa</string>
     <string name="control_map_zoom">Controle o quão perto ou longe a visualização do mapa ficará</string>
     <string name="colorful_map">Mapa Colorido</string>
@@ -67,4 +67,25 @@
     <string name="pointillism_colorful_description">Um mapa colorido, mas com renderização artística em padrão de pontos</string>
     <string name="geo_realistic">Geo Realista</string>
     <string name="geo_realistic_description">Uma forma rápida de obter uma imagem de satélite da sua localização atual</string>
+    <string name="water_flow">Fluxo de Água</string>
+    <string name="water_flow_description">Um mapa animado que foca em mostrar o fluxo de qualquer água que apareça no seu mapa</string>
+    <string name="walking_people">Pessoas Caminhando</string>
+    <string name="walking_people_description">Um mapa colorido com uma simulação de pessoas caminhando nas áreas dos prédios</string>
+    <string name="classic">Clássico</string>
+    <string name="classic_description">O primeiro estilo de arte criado no projeto, é gerado utilizando as cores fixas da nossa logo</string>
+    <string name="latitude_value">Latitude: %s</string>
+    <string name="longitude_value">Longitude: %s</string>
+    <string name="layer_buildings">Edifícios e área construída</string>
+    <string name="layer_water">Água</string>
+    <string name="layer_road_paths">Calçadas</string>
+    <string name="layer_roads_tunnels_bridges">Ruas, túneis e pontes</string>
+    <string name="layer_building_delimitations">Delimitações dos edifícios</string>
+    <string name="layer_roads_bridges_footpaths">Ruas, pontes, calçadas</string>
+    <string name="layer_everything_else">Todo o resto</string>
+    <string name="color_legend">Legenda das cores</string>
+    <string name="layer_land_other">Terreno/Outros</string>
+    <string name="color_palette_value">Paleta de cores: %s</string>
+    <string name="accessing_your_location">Acessando sua localização…</string>
+    <string name="downloading_map_image">Baixando a imagem do mapa…</string>
+    <string name="error_downloading_location_image">Um erro aconteceu ao baixar a imagem da sua localização, tente novamente.</string>
 </resources>

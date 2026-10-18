@@ -7,8 +7,8 @@ abstract class MartpSketch(
     private val horizontalTilesCount: Int,
     private val verticalTilesCount: Int,
     private val padding: Int,
-    private val canvasWidth: Float = 640.0F,
-    private val canvasHeight: Float = 640.0F,
+    val canvasWidth: Float = 640.0F,
+    val canvasHeight: Float = 640.0F,
     private val imagePath: String,
 ): PApplet() {
 

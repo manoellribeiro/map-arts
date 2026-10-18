@@ -22,6 +22,7 @@ import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.di.IoDispatcher
+import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
@@ -42,7 +43,8 @@ class MartpRepository @Inject constructor(
     private val mapArtDao: MapArtsDao,
     private val userInfoDao: UserInfoDao,
     private val artSettingsDataSore: DataStore<Preferences>,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val errorLogger: ErrorLogger
 ) {
 
     companion object {
@@ -60,6 +62,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.setColorPalettePreference")
             throw LocalStorageErrorFailure(e.message)
         }
     }
@@ -74,6 +77,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.getColorPalettePreference")
             return defaultColorPalette
         }
     }
@@ -87,6 +91,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.setMapArtStylePreference")
             throw LocalStorageErrorFailure(e.message)
         }
     }
@@ -103,6 +108,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.getArtStylePreference")
             return defaultArtStyle
         }
     }
@@ -116,6 +122,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.setMapZoomPreference")
             throw LocalStorageErrorFailure(e.message)
         }
     }
@@ -130,6 +137,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.getMapZoomPreference")
             return defaultZoom
         }
     }
@@ -140,7 +148,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            //Log, but don't do nothing
+            errorLogger.logNonFatal(e, "MartpRepository.setUserName")
         }
     }
 
@@ -150,7 +158,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            //Log, but don't do nothing
+            errorLogger.logNonFatal(e, "MartpRepository.setUserEmail")
         }
     }
 
@@ -171,16 +179,18 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.fetchCurrentUserInfo")
             return UserInfoEntity(
                 id = UUID.randomUUID().toString(),
                 username = null,
                 email = null
-            ) //todo: think how to handle this error
+            )
         }
     }
 
     fun observeUserMapArts(): Flow<List<MapArtEntity>> {
         return mapArtDao.getAll().catch { e ->
+            errorLogger.logNonFatal(e, "MartpRepository.observeUserMapArts")
             throw LocalStorageErrorFailure(e.message)
         }
     }
@@ -218,13 +228,16 @@ class MartpRepository @Inject constructor(
 
                     imageFile.createNewFile()
 
-                    val fileOutputStream = FileOutputStream(imageFile)
-                    fileOutputStream.write(response.bytes())
-                    fileOutputStream.close()
+                    FileOutputStream(imageFile).use { fileOutputStream ->
+                        fileOutputStream.write(response.bytes())
+                    }
 
                     imageFile.path
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
+                errorLogger.logNonFatal(e, "MartpRepository.fetchStaticMapImage")
                 throw MapboxApiErrorFailure(originalExceptionMessage = e.message)
             }
         } else {
@@ -238,6 +251,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.saveMapArtEntity")
             throw LocalStorageErrorFailure(originalExceptionMessage = e.message)
         }
     }

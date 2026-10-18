@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import manoellribeiro.dev.martp.core.di.IoDispatcher
+import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import kotlin.coroutines.resume
@@ -18,7 +19,8 @@ class GetAddressService @Inject constructor  (
     private val geocoder: Geocoder,
     private val connectivityService: ConnectivityService,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val sdkVersionService: SdkVersionService
+    private val sdkVersionService: SdkVersionService,
+    private val errorLogger: ErrorLogger
 ) {
     suspend fun getAddress(
         latitude: Double,
@@ -36,6 +38,10 @@ class GetAddressService @Inject constructor  (
                     geocoder.getFromLocation(latitude, longitude, 1, object :
                         Geocoder.GeocodeListener {
                         override fun onError(errorMessage: String?) {
+                            errorLogger.logNonFatal(
+                                IllegalStateException("Geocoder error: $errorMessage"),
+                                "GetAddressService.getAddress"
+                            )
                             continuation.resume(null)
                         }
                         override fun onGeocode(addresses: List<Address?>) {
@@ -63,6 +69,7 @@ class GetAddressService @Inject constructor  (
         } catch (failure: Failure) {
             throw failure
         } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "GetAddressService.getAddress")
             return null
         }
     }

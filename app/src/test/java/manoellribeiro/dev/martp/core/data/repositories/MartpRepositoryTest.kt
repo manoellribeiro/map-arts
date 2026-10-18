@@ -28,7 +28,9 @@ import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
+import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
+import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.services.ConnectivityService
@@ -61,6 +63,7 @@ class MartpRepositoryTest {
     private lateinit var connectivityService: ConnectivityService
     private lateinit var userInfoDao: UserInfoDao
     private lateinit var artSettingsDataSore: DataStore<Preferences>
+    private lateinit var errorLogger: ErrorLogger
 
     // Same names as the private constants of MartpRepository
     private val fakeMapArtStyleKey = stringPreferencesKey("MAP_ART_STYLE_KEY")
@@ -74,6 +77,7 @@ class MartpRepositoryTest {
         connectivityService = mockk()
         userInfoDao = mockk()
         artSettingsDataSore = mockk()
+        errorLogger = mockk()
 
         repository = MartpRepository(
             mapboxApiService = mapboxApiService,
@@ -82,7 +86,8 @@ class MartpRepositoryTest {
             mapArtDao = mapArtsDao,
             userInfoDao = userInfoDao,
             artSettingsDataSore = artSettingsDataSore,
-            ioDispatcher = UnconfinedTestDispatcher()
+            ioDispatcher = UnconfinedTestDispatcher(),
+            errorLogger = errorLogger
         )
     }
 
@@ -146,6 +151,7 @@ class MartpRepositoryTest {
         // Given
         val fakeErrorMessage = "fake art style write error"
         coEvery { artSettingsDataSore.updateData(any()) } throws IOException(fakeErrorMessage)
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<LocalStorageErrorFailure> {
@@ -154,6 +160,7 @@ class MartpRepositoryTest {
 
         // Then
         assertEquals(fakeErrorMessage, failure.message)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.setMapArtStylePreference") }
     }
 
     @Test
@@ -169,6 +176,7 @@ class MartpRepositoryTest {
 
         // Then
         assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
     }
 
     // endregion
@@ -205,24 +213,28 @@ class MartpRepositoryTest {
         // Given
         val fakeUnknownArtStyleName = "FAKE_UNKNOWN_ART_STYLE"
         every { artSettingsDataSore.data } returns flowOf(preferencesOf(fakeMapArtStyleKey to fakeUnknownArtStyleName))
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val result = repository.getArtStylePreference()
 
         // Then
         assertEquals(SketchArtType.DEFAULT, result)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalArgumentException>(), "MartpRepository.getArtStylePreference") }
     }
 
     @Test
     fun `if data store throws an exception when reading the art style should return the DEFAULT SketchArtType`() = runTest {
         // Given
         every { artSettingsDataSore.data } returns flow { throw IOException("fake art style read error") }
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val result = repository.getArtStylePreference()
 
         // Then
         assertEquals(SketchArtType.DEFAULT, result)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.getArtStylePreference") }
     }
 
     @Test
@@ -238,6 +250,7 @@ class MartpRepositoryTest {
 
         // Then
         assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
     }
 
     // endregion
@@ -290,6 +303,7 @@ class MartpRepositoryTest {
         // Given
         val fakeErrorMessage = "fake map zoom write error"
         coEvery { artSettingsDataSore.updateData(any()) } throws IOException(fakeErrorMessage)
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<LocalStorageErrorFailure> {
@@ -298,6 +312,7 @@ class MartpRepositoryTest {
 
         // Then
         assertEquals(fakeErrorMessage, failure.message)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.setMapZoomPreference") }
     }
 
     @Test
@@ -313,6 +328,7 @@ class MartpRepositoryTest {
 
         // Then
         assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
     }
 
     // endregion
@@ -349,12 +365,14 @@ class MartpRepositoryTest {
     fun `if data store throws an exception when reading the map zoom should return the default zoom of 15`() = runTest {
         // Given
         every { artSettingsDataSore.data } returns flow { throw IOException("fake map zoom read error") }
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val result = repository.getMapZoomPreference()
 
         // Then
         assertEquals(15f, result)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.getMapZoomPreference") }
     }
 
     @Test
@@ -370,6 +388,7 @@ class MartpRepositoryTest {
 
         // Then
         assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
     }
 
     // endregion
@@ -396,6 +415,7 @@ class MartpRepositoryTest {
         val fakeUsername = "Fake Failing Username"
         val fakeUserId = "fake-user-id-for-failing-username"
         coEvery { userInfoDao.setUserName(any(), any()) } throws IllegalStateException("fake username error")
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         assertDoesNotThrow {
@@ -404,6 +424,7 @@ class MartpRepositoryTest {
 
         // Then
         coVerify(exactly = 1) { userInfoDao.setUserName(id = fakeUserId, username = fakeUsername) }
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "MartpRepository.setUserName") }
     }
 
     @Test
@@ -419,6 +440,7 @@ class MartpRepositoryTest {
 
         // Then
         assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
     }
 
     // endregion
@@ -445,6 +467,7 @@ class MartpRepositoryTest {
         val fakeEmail = "fake.failing.user@example.com"
         val fakeUserId = "fake-user-id-for-failing-email"
         coEvery { userInfoDao.setUserEmail(any(), any()) } throws IllegalStateException("fake email error")
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         assertDoesNotThrow {
@@ -453,6 +476,7 @@ class MartpRepositoryTest {
 
         // Then
         coVerify(exactly = 1) { userInfoDao.setUserEmail(id = fakeUserId, email = fakeEmail) }
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "MartpRepository.setUserEmail") }
     }
 
     @Test
@@ -468,6 +492,7 @@ class MartpRepositoryTest {
 
         // Then
         assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
     }
 
     // endregion
@@ -512,6 +537,23 @@ class MartpRepositoryTest {
     }
 
     @Test
+    fun `if userInfoDao throws an exception when getting the user should return a new user without username and email`() = runTest {
+        // Given
+        coEvery { userInfoDao.getUser() } throws IllegalStateException("fake get user error")
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val result = repository.fetchCurrentUserInfo()
+
+        // Then
+        assertNull(result.username)
+        assertNull(result.email)
+        assertEquals(result.id, UUID.fromString(result.id).toString())
+        coVerify(exactly = 0) { userInfoDao.insert(any()) }
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "MartpRepository.fetchCurrentUserInfo") }
+    }
+
+    @Test
     fun `if getting the user is cancelled should rethrow the CancellationException`() = runTest {
         // Given
         val fakeCancellation = CancellationException("fake get user cancellation")
@@ -525,6 +567,7 @@ class MartpRepositoryTest {
         // Then
         assertSame(fakeCancellation, thrown)
         coVerify(exactly = 0) { userInfoDao.insert(any()) }
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
     }
 
     // endregion
@@ -565,6 +608,7 @@ class MartpRepositoryTest {
         // Given
         val fakeErrorMessage = "fake get all map arts error"
         every { mapArtsDao.getAll() } returns flow { throw IllegalStateException(fakeErrorMessage) }
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<LocalStorageErrorFailure> {
@@ -573,6 +617,7 @@ class MartpRepositoryTest {
 
         // Then
         assertEquals(fakeErrorMessage, failure.message)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "MartpRepository.observeUserMapArts") }
     }
 
     // endregion
@@ -602,6 +647,7 @@ class MartpRepositoryTest {
         assertNull(failure.message)
         assertFalse(File(fakeDir, "image.png").exists())
         coVerify(exactly = 0) { mapboxApiService.getStaticMapImage(any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
     }
 
     @Test
@@ -709,6 +755,37 @@ class MartpRepositoryTest {
     }
 
     @Test
+    fun `if mapbox throws an exception should throw MapboxApiErrorFailure with the original message`(
+        @TempDir fakeDir: File
+    ) = runTest {
+        // Given
+        val fakeErrorMessage = "fake mapbox network error"
+        every { connectivityService.isInternetConnected() } returns true
+        every { artSettingsDataSore.data } returns flowOf(emptyPreferences())
+        coEvery {
+            mapboxApiService.getStaticMapImage(any(), any(), any(), any(), any(), any())
+        } throws IOException(fakeErrorMessage)
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val failure = assertThrows<MapboxApiErrorFailure> {
+            repository.fetchStaticMapImage(
+                sketchArtType = SketchArtType.DEFAULT,
+                latitude = 51.5007,
+                longitude = -0.1246,
+                mapWidth = 400,
+                mapHeight = 600,
+                dir = fakeDir
+            )
+        }
+
+        // Then
+        assertEquals(fakeErrorMessage, failure.message)
+        assertFalse(File(fakeDir, "image.png").exists())
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.fetchStaticMapImage") }
+    }
+
+    @Test
     fun `if fetching the static map image is cancelled should rethrow the CancellationException`(
         @TempDir fakeDir: File
     ) = runTest {
@@ -734,6 +811,7 @@ class MartpRepositoryTest {
 
         // Then
         assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
     }
 
     // endregion
@@ -760,6 +838,7 @@ class MartpRepositoryTest {
         // Given
         val fakeErrorMessage = "fake insert map art error"
         coEvery { mapArtsDao.insert(any()) } throws IllegalStateException(fakeErrorMessage)
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<LocalStorageErrorFailure> {
@@ -768,12 +847,14 @@ class MartpRepositoryTest {
 
         // Then
         assertEquals(fakeErrorMessage, failure.message)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "MartpRepository.saveMapArtEntity") }
     }
 
     @Test
     fun `if mapArtDao throws an exception without message when inserting should throw LocalStorageErrorFailure with null message`() = runTest {
         // Given
         coEvery { mapArtsDao.insert(any()) } throws IllegalStateException()
+        every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<LocalStorageErrorFailure> {
@@ -782,6 +863,7 @@ class MartpRepositoryTest {
 
         // Then
         assertNull(failure.message)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "MartpRepository.saveMapArtEntity") }
     }
 
     @Test
@@ -797,6 +879,7 @@ class MartpRepositoryTest {
 
         // Then
         assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
     }
 
     // endregion

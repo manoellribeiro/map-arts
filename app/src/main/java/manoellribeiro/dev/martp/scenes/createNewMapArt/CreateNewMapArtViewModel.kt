@@ -1,15 +1,11 @@
 package manoellribeiro.dev.martp.scenes.createNewMapArt
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.location.Address
-import android.location.Geocoder
 import android.location.Location
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -24,7 +20,6 @@ import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
-import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
@@ -34,7 +29,6 @@ import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.utils.PromptGenerator
 import java.io.File
 import java.util.Calendar
-import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.math.min
@@ -127,11 +121,9 @@ class CreateNewMapArtViewModel @Inject constructor(
     }
 
     private fun buildTitleWithAddress(address: Address?): String {
-        var title = ""
-        address?.thoroughfare.executeIfNotNull { title = title + address?.thoroughfare + ", " }
-        address?.locality.executeIfNotNull { title = title + address?.locality + ", " }
-        address?.countryName.executeIfNotNull { title += address?.countryName }
-        return title
+        return listOfNotNull(address?.thoroughfare, address?.locality, address?.countryName)
+            .filter { it.isNotBlank() }
+            .joinToString(", ")
     }
 
     fun saveArtToLocalDatabase(
@@ -163,10 +155,6 @@ class CreateNewMapArtViewModel @Inject constructor(
                 )
             } catch (failure: Failure) {
                 emitNewState(CreateNewMapArtUiState.Error(failure))
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Log.i("CreateNewMapArtViewMode", e.message ?: "")
             }
         }
     }

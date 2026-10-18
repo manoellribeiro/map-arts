@@ -236,6 +236,7 @@ class MainViewModelTest {
         assertEquals(ArtStyleSettingsUiState.Loading, viewModel.artStyleSettingsState.value)
         coVerify(exactly = 0) { repository.getMapZoomPreference() }
         coVerify(exactly = 0) { repository.getArtStylePreference() }
+        coVerify(exactly = 0) { repository.getColorPalettePreference() }
     }
 
     @Test
@@ -243,9 +244,10 @@ class MainViewModelTest {
         // Given
         val fakeMapZoom = 14.5f
         val fakeArtStyle = SketchArtType.POINTILLISM
-        val fakePalette = "fakePalette"
+        val fakeColorPaletteName = "Fake Settings Palette"
         coEvery { repository.getMapZoomPreference() } returns fakeMapZoom
         coEvery { repository.getArtStylePreference() } returns fakeArtStyle
+        coEvery { repository.getColorPalettePreference() } returns fakeColorPaletteName
         val states = collectStates(viewModel.artStyleSettingsState)
 
         // When
@@ -256,12 +258,17 @@ class MainViewModelTest {
         assertEquals(
             listOf(
                 ArtStyleSettingsUiState.Loading,
-                ArtStyleSettingsUiState.SettingsLoaded(mapZoom = fakeMapZoom, mapArtStyle = fakeArtStyle, colorPaletteSelected = fakePalette)
+                ArtStyleSettingsUiState.SettingsLoaded(
+                    mapZoom = fakeMapZoom,
+                    mapArtStyle = fakeArtStyle,
+                    colorPaletteSelected = fakeColorPaletteName
+                )
             ),
             states
         )
         coVerify(exactly = 1) { repository.getMapZoomPreference() }
         coVerify(exactly = 1) { repository.getArtStylePreference() }
+        coVerify(exactly = 1) { repository.getColorPalettePreference() }
     }
 
     @Test
@@ -271,9 +278,11 @@ class MainViewModelTest {
         val fakeSecondMapZoom = 17.5f
         val fakeFirstArtStyle = SketchArtType.DEFAULT
         val fakeSecondArtStyle = SketchArtType.POINTILLISM
-        val fakePalette = "fakePalette"
+        val fakeFirstColorPaletteName = "Fake First Palette"
+        val fakeSecondColorPaletteName = "Fake Second Palette"
         coEvery { repository.getMapZoomPreference() } returnsMany listOf(fakeFirstMapZoom, fakeSecondMapZoom)
         coEvery { repository.getArtStylePreference() } returnsMany listOf(fakeFirstArtStyle, fakeSecondArtStyle)
+        coEvery { repository.getColorPalettePreference() } returnsMany listOf(fakeFirstColorPaletteName, fakeSecondColorPaletteName)
         val states = collectStates(viewModel.artStyleSettingsState)
         viewModel.getArtStyleSettings()
         advanceUntilIdle()
@@ -286,14 +295,23 @@ class MainViewModelTest {
         assertEquals(
             listOf(
                 ArtStyleSettingsUiState.Loading,
-                ArtStyleSettingsUiState.SettingsLoaded(mapZoom = fakeFirstMapZoom, mapArtStyle = fakeFirstArtStyle, colorPaletteSelected = fakePalette),
+                ArtStyleSettingsUiState.SettingsLoaded(
+                    mapZoom = fakeFirstMapZoom,
+                    mapArtStyle = fakeFirstArtStyle,
+                    colorPaletteSelected = fakeFirstColorPaletteName
+                ),
                 ArtStyleSettingsUiState.Loading,
-                ArtStyleSettingsUiState.SettingsLoaded(mapZoom = fakeSecondMapZoom, mapArtStyle = fakeSecondArtStyle, colorPaletteSelected = fakePalette)
+                ArtStyleSettingsUiState.SettingsLoaded(
+                    mapZoom = fakeSecondMapZoom,
+                    mapArtStyle = fakeSecondArtStyle,
+                    colorPaletteSelected = fakeSecondColorPaletteName
+                )
             ),
             states
         )
         coVerify(exactly = 2) { repository.getMapZoomPreference() }
         coVerify(exactly = 2) { repository.getArtStylePreference() }
+        coVerify(exactly = 2) { repository.getColorPalettePreference() }
     }
 
     // endregion
@@ -622,6 +640,96 @@ class MainViewModelTest {
 
         // Then
         coVerify(exactly = 1) { repository.setMapZoomPreference(fakeMapZoom) }
+        coVerify(exactly = 1) { repository.setMapArtStylePreference(fakeArtStyle) }
+    }
+
+    // endregion
+
+    // region setColorPalette
+
+    @Test
+    fun `if the color palette debounce has not ended should not save the color palette`() = runTest {
+        // Given
+        val fakeColorPaletteName = "Fake Pending Palette"
+        coEvery { repository.setColorPalettePreference(any()) } just runs
+
+        // When
+        viewModel.setColorPalette(fakeColorPaletteName)
+        advanceTimeBy(1499)
+        runCurrent()
+
+        // Then
+        coVerify(exactly = 0) { repository.setColorPalettePreference(any()) }
+    }
+
+    @Test
+    fun `if the color palette debounce of 1500 milliseconds has ended should save the color palette`() = runTest {
+        // Given
+        val fakeColorPaletteName = "Fake Saved Palette"
+        coEvery { repository.setColorPalettePreference(any()) } just runs
+
+        // When
+        viewModel.setColorPalette(fakeColorPaletteName)
+        advanceTimeBy(1500)
+        runCurrent()
+
+        // Then
+        coVerify(exactly = 1) { repository.setColorPalettePreference(fakeColorPaletteName) }
+        coVerify(exactly = 0) { repository.setMapArtStylePreference(any()) }
+        coVerify(exactly = 0) { repository.setMapZoomPreference(any()) }
+    }
+
+    @Test
+    fun `if setColorPalette is called twice before the debounce ends should save only the last color palette`() = runTest {
+        // Given
+        val fakeFirstColorPaletteName = "Fake First Debounced Palette"
+        val fakeLastColorPaletteName = "Fake Last Debounced Palette"
+        coEvery { repository.setColorPalettePreference(any()) } just runs
+
+        // When
+        viewModel.setColorPalette(fakeFirstColorPaletteName)
+        advanceTimeBy(1499)
+        viewModel.setColorPalette(fakeLastColorPaletteName)
+        advanceUntilIdle()
+
+        // Then
+        coVerify(exactly = 0) { repository.setColorPalettePreference(fakeFirstColorPaletteName) }
+        coVerify(exactly = 1) { repository.setColorPalettePreference(fakeLastColorPaletteName) }
+    }
+
+    @Test
+    fun `if setColorPalette is called again after the debounce ended should save both color palettes`() = runTest {
+        // Given
+        val fakeFirstColorPaletteName = "Fake Earlier Palette"
+        val fakeLastColorPaletteName = "Fake Later Palette"
+        coEvery { repository.setColorPalettePreference(any()) } just runs
+
+        // When
+        viewModel.setColorPalette(fakeFirstColorPaletteName)
+        advanceUntilIdle()
+        viewModel.setColorPalette(fakeLastColorPaletteName)
+        advanceUntilIdle()
+
+        // Then
+        coVerify(exactly = 1) { repository.setColorPalettePreference(fakeFirstColorPaletteName) }
+        coVerify(exactly = 1) { repository.setColorPalettePreference(fakeLastColorPaletteName) }
+    }
+
+    @Test
+    fun `if setColorPalette and setMapStyle are called before the debounce ends should save both the color palette and the map style`() = runTest {
+        // Given
+        val fakeColorPaletteName = "Fake Independent Palette"
+        val fakeArtStyle = SketchArtType.COLORFUL_MAP
+        coEvery { repository.setColorPalettePreference(any()) } just runs
+        coEvery { repository.setMapArtStylePreference(any()) } just runs
+
+        // When
+        viewModel.setColorPalette(fakeColorPaletteName)
+        viewModel.setMapStyle(fakeArtStyle)
+        advanceUntilIdle()
+
+        // Then
+        coVerify(exactly = 1) { repository.setColorPalettePreference(fakeColorPaletteName) }
         coVerify(exactly = 1) { repository.setMapArtStylePreference(fakeArtStyle) }
     }
 

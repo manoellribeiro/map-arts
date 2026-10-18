@@ -68,6 +68,7 @@ class MartpRepositoryTest {
     // Same names as the private constants of MartpRepository
     private val fakeMapArtStyleKey = stringPreferencesKey("MAP_ART_STYLE_KEY")
     private val fakeMapZoomKey = floatPreferencesKey("MAP_ZOOM_KEY")
+    private val fakeColorPaletteKey = stringPreferencesKey("SELECTED_COLOR_PALETTE")
 
     @BeforeEach
     fun setup() {
@@ -103,6 +104,148 @@ class MartpRepositoryTest {
         dateInMillis = 1_700_000_000_000L,
         imagePathLocation = "/fake/path/image.png"
     )
+
+    // region setColorPalettePreference
+
+    @Test
+    fun `if data store is empty should save the color palette name in the color palette key`() = runTest {
+        // Given
+        val fakeColorPaletteName = "Fake Hokusai Palette"
+        val fakeCurrentPreferences = emptyPreferences()
+        val transformSlot = slot<suspend (Preferences) -> Preferences>()
+        coEvery { artSettingsDataSore.updateData(capture(transformSlot)) } coAnswers {
+            transformSlot.captured(fakeCurrentPreferences)
+        }
+
+        // When
+        repository.setColorPalettePreference(fakeColorPaletteName)
+
+        // Then
+        val updatedPreferences = transformSlot.captured(fakeCurrentPreferences)
+        assertEquals(fakeColorPaletteName, updatedPreferences[fakeColorPaletteKey])
+        coVerify(exactly = 1) { artSettingsDataSore.updateData(any()) }
+    }
+
+    @Test
+    fun `if data store already has preferences should replace the color palette and keep the art style and the map zoom`() = runTest {
+        // Given
+        val fakeNewColorPaletteName = "Fake New Palette"
+        val fakeMapZoom = 16.25f
+        val fakeCurrentPreferences = preferencesOf(
+            fakeColorPaletteKey to "Fake Old Palette",
+            fakeMapArtStyleKey to "COLORFUL_MAP",
+            fakeMapZoomKey to fakeMapZoom
+        )
+        val transformSlot = slot<suspend (Preferences) -> Preferences>()
+        coEvery { artSettingsDataSore.updateData(capture(transformSlot)) } coAnswers {
+            transformSlot.captured(fakeCurrentPreferences)
+        }
+
+        // When
+        repository.setColorPalettePreference(fakeNewColorPaletteName)
+
+        // Then
+        val updatedPreferences = transformSlot.captured(fakeCurrentPreferences)
+        assertEquals(fakeNewColorPaletteName, updatedPreferences[fakeColorPaletteKey])
+        assertEquals("COLORFUL_MAP", updatedPreferences[fakeMapArtStyleKey])
+        assertEquals(fakeMapZoom, updatedPreferences[fakeMapZoomKey])
+    }
+
+    @Test
+    fun `if data store throws an exception when saving the color palette should throw LocalStorageErrorFailure`() = runTest {
+        // Given
+        val fakeErrorMessage = "fake color palette write error"
+        coEvery { artSettingsDataSore.updateData(any()) } throws IOException(fakeErrorMessage)
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val failure = assertThrows<LocalStorageErrorFailure> {
+            repository.setColorPalettePreference("Fake Failing Palette")
+        }
+
+        // Then
+        assertEquals(fakeErrorMessage, failure.message)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.setColorPalettePreference") }
+    }
+
+    @Test
+    fun `if saving the color palette is cancelled should rethrow the CancellationException`() = runTest {
+        // Given
+        val fakeCancellation = CancellationException("fake color palette cancellation")
+        coEvery { artSettingsDataSore.updateData(any()) } throws fakeCancellation
+
+        // When
+        val thrown = assertThrows<CancellationException> {
+            repository.setColorPalettePreference("Fake Cancelled Palette")
+        }
+
+        // Then
+        assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    // endregion
+
+    // region getColorPalettePreference
+
+    @Test
+    fun `if data store has a saved color palette should return its name`() = runTest {
+        // Given
+        val fakeColorPaletteName = "Fake Saved Palette"
+        every { artSettingsDataSore.data } returns flowOf(preferencesOf(fakeColorPaletteKey to fakeColorPaletteName))
+
+        // When
+        val result = repository.getColorPalettePreference()
+
+        // Then
+        assertEquals(fakeColorPaletteName, result)
+        verify(exactly = 1) { artSettingsDataSore.data }
+    }
+
+    @Test
+    fun `if data store has no saved color palette should return the default Martp color palette`() = runTest {
+        // Given
+        every { artSettingsDataSore.data } returns flowOf(emptyPreferences())
+
+        // When
+        val result = repository.getColorPalettePreference()
+
+        // Then
+        assertEquals("Martp", result)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    @Test
+    fun `if data store throws an exception when reading the color palette should return the default Martp color palette`() = runTest {
+        // Given
+        every { artSettingsDataSore.data } returns flow { throw IOException("fake color palette read error") }
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val result = repository.getColorPalettePreference()
+
+        // Then
+        assertEquals("Martp", result)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.getColorPalettePreference") }
+    }
+
+    @Test
+    fun `if reading the color palette is cancelled should rethrow the CancellationException`() = runTest {
+        // Given
+        val fakeCancellation = CancellationException("fake color palette read cancellation")
+        every { artSettingsDataSore.data } returns flow { throw fakeCancellation }
+
+        // When
+        val thrown = assertThrows<CancellationException> {
+            repository.getColorPalettePreference()
+        }
+
+        // Then
+        assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    // endregion
 
     // region setMapArtStylePreference
 

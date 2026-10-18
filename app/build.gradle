@@ -150,7 +150,9 @@ tasks.register('jacocoUnitTestReport', JacocoReport) {
             '**/core/data/repositories/**',
             '**/core/services/**',
             '**/core/extensions/**',
-            '**/core/utils/**'
+            '**/core/utils/**',
+            '**/core/logging/**',
+            '**/core/models/failures/SketchArtType*.class'
     ]
 
     classDirectories.setFrom(fileTree(layout.buildDirectory.dir('tmp/kotlin-classes/debug')) {

@@ -23,6 +23,7 @@ import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.di.IoDispatcher
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
+import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.services.ConnectivityService
@@ -203,7 +204,6 @@ class MartpRepository @Inject constructor(
 //                    mapHeight = mapHeight - MartpSketch.framePadding.toInt() - MartpSketch.frameThickness.toInt(),
 //                    mapZoom = mapZoom
 //                )
-                Log.i("MartpRepository", "mapZoom: " + mapZoom)
                 val response: ResponseBody = mapboxApiService.getStaticMapImage(
                     styleId = sketchArtType.mapBoxMapStyle.id,
                     latitude = latitude,
@@ -225,7 +225,7 @@ class MartpRepository @Inject constructor(
                     imageFile.path
                 }
             } catch (e: Exception) {
-                throw e //TODO: this exception can't be thrown here
+                throw MapboxApiErrorFailure(originalExceptionMessage = e.message)
             }
         } else {
             throw NoInternetConnectionFailure(originalExceptionMessage = null)

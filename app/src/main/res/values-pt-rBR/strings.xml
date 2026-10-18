@@ -87,4 +87,5 @@
     <string name="color_palette_value">Paleta de cores: %s</string>
     <string name="accessing_your_location">Acessando sua localização…</string>
     <string name="downloading_map_image">Baixando a imagem do mapa…</string>
+    <string name="error_downloading_location_image">Um erro aconteceu ao baixar a imagem da sua localização, tente novamente.</string>
 </resources>

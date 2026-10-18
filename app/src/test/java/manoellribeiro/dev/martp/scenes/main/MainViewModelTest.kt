@@ -23,7 +23,7 @@ import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.infra.MainDispatcherExtension
 import manoellribeiro.dev.martp.scenes.artStyleSettings.ArtStyleSettingsUiState
 import manoellribeiro.dev.martp.scenes.gallery.GalleryUiState
@@ -85,7 +85,11 @@ class MainViewModelTest {
             latitude = 12.5f,
             longitude = -38.5f,
             dateInMillis = 123456789L,
-            imagePathLocation = "fake/path/image.png"
+            imagePathLocation = "fake/path/image.png",
+            originalMapImageLocation = "fake/path/map-arts/fake-map-art-id.png",
+            sketchArtType = SketchArtType.COLORFUL_MAP,
+            colorPalette = "fake palette",
+            colorsLayers = null
         )
     }
 

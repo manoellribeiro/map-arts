@@ -1,8 +1,6 @@
 package manoellribeiro.dev.martp.core.sketches
 
-import android.util.Log
-import androidx.compose.runtime.currentRecomposeScope
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import processing.core.PImage
 
 class WaterFlowMartpSketch(

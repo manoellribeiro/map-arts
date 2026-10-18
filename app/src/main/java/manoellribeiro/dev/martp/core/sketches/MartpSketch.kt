@@ -1,7 +1,8 @@
 package manoellribeiro.dev.martp.core.sketches
 
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import processing.core.PApplet
+import processing.core.PGraphics
 
 abstract class MartpSketch(
     private val horizontalTilesCount: Int,
@@ -52,14 +53,18 @@ abstract class MartpSketch(
                 blueValue in rangeOfStreetColorsForRGB
     }
 
-    protected fun drawArtFrame() {
-        noStroke()
+    /**
+     * Draws the frame on the screen by default, or on [target] when the art is being composed
+     * in an offscreen buffer.
+     */
+    protected fun drawArtFrame(target: PGraphics = g) {
+        target.noStroke()
         val frameGray = color(51, 51, 51)
-        fill(frameGray)
-        rect(0F, 0F, canvasWidth, canvasHeight)
+        target.fill(frameGray)
+        target.rect(0F, 0F, canvasWidth, canvasHeight)
         val white = color(255, 255, 255)
-        fill(white)
-        rect(
+        target.fill(white)
+        target.rect(
             frameThickness,
             frameThickness,
             canvasWidth - (2 * frameThickness),

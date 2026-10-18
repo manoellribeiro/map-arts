@@ -12,6 +12,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import manoellribeiro.dev.martp.core.data.local.MartpDatabase
+import manoellribeiro.dev.martp.core.data.local.MartpDatabase.Companion.MIGRATION_1_2
+import manoellribeiro.dev.martp.core.data.local.MartpDatabase.Companion.MIGRATION_2_3
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
 import javax.inject.Singleton
@@ -46,7 +48,10 @@ object DatabaseModule {
         return Room.databaseBuilder(
             applicationContext,
             MartpDatabase::class.java, MartpDatabase.databaseName
-        ).addMigrations(MartpDatabase.MIGRATION_1_2).build()
+        ).addMigrations(
+            MIGRATION_1_2,
+            MIGRATION_2_3
+        ).build()
     }
 
 }

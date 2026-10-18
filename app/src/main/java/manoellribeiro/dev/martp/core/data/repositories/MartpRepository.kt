@@ -1,14 +1,11 @@
 package manoellribeiro.dev.martp.core.data.repositories
 
-import android.graphics.Bitmap
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
-import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +13,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
@@ -23,13 +21,12 @@ import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.di.IoDispatcher
 import manoellribeiro.dev.martp.core.logging.ErrorLogger
+import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.services.ConnectivityService
-import manoellribeiro.dev.martp.core.sketches.MartpSketch
-import manoellribeiro.dev.martp.core.utils.ColorPaletteProvider
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
@@ -245,7 +242,68 @@ class MartpRepository @Inject constructor(
         }
     }
 
-    suspend fun saveMapArtEntity(mapArtEntity: MapArtEntity) {
+    /**
+     * Moves the static map image into the arts directory, named with the art id, and saves the
+     * entity pointing to it. If the entity can't be saved the moved image is deleted, because
+     * without the database row nobody would ever reach it again.
+     */
+    suspend fun saveMapArt(
+        mapArtEntity: MapArtEntity,
+        staticImagePath: String,
+        dir: File
+    ) {
+        val originalMapImagePath = moveStaticMapImageToArtsDirectory(
+            staticImagePath = staticImagePath,
+            artId = mapArtEntity.id,
+            dir = dir
+        )
+        try {
+            saveMapArtEntity(mapArtEntity.copy(originalMapImageLocation = originalMapImagePath))
+        } catch (failure: Failure) {
+            deleteMapArtImage(originalMapImagePath)
+            throw failure
+        }
+    }
+
+    private suspend fun moveStaticMapImageToArtsDirectory(
+        staticImagePath: String,
+        artId: String,
+        dir: File
+    ): String {
+        try {
+            return withContext(ioDispatcher) {
+                val staticImage = File(staticImagePath)
+                val artsDirectory = File(dir, MartpDatabase.artsDirectoryName).apply { mkdirs() }
+                val artImage = File(artsDirectory, "$artId.png")
+
+                if (!staticImage.renameTo(artImage)) {
+                    staticImage.copyTo(artImage, overwrite = true)
+                    staticImage.delete()
+                }
+
+                artImage.path
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.moveStaticMapImageToArtsDirectory")
+            throw LocalStorageErrorFailure(originalExceptionMessage = e.message)
+        }
+    }
+
+    private suspend fun deleteMapArtImage(imagePath: String) {
+        try {
+            withContext(ioDispatcher) {
+                File(imagePath).delete()
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.deleteMapArtImage")
+        }
+    }
+
+    private suspend fun saveMapArtEntity(mapArtEntity: MapArtEntity) {
         try {
             mapArtDao.insert(mapArtEntity)
         } catch (e: CancellationException) {

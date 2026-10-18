@@ -16,18 +16,17 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.extensions.dp
 import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
 import manoellribeiro.dev.martp.core.extensions.gone
 import manoellribeiro.dev.martp.core.extensions.toBitmap
 import manoellribeiro.dev.martp.core.extensions.visible
+import manoellribeiro.dev.martp.core.models.MapLayersColors
 import manoellribeiro.dev.martp.core.models.failures.Failure
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.services.sensors.GravitySensor
 import manoellribeiro.dev.martp.core.sketches.ColorfulMapSketch
 import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
@@ -100,7 +99,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.events.collect { event ->
                     when(event) {
-                        is CreateNewMapArtEvent.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState(event.pathToStoreArtImage)
+                        is CreateNewMapArtEvent.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState()
                     }
                 }
             }
@@ -116,8 +115,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         )
     }
 
-    private fun handleArtCreatedSuccessfullyState(pathToStoreArtImage: String) {
-        sketch?.save(pathToStoreArtImage)
+    private fun handleArtCreatedSuccessfullyState() {
         finish()
     }
 
@@ -191,7 +189,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         }
     }
 
-    private fun setColorsLayersForColorfulMap(colorLayerHolder: ColorfulMapSketch.ColorLayerHolder) {
+    private fun setColorsLayersForColorfulMap(colorLayerHolder: MapLayersColors) {
+        viewModel.currentMapLayersColors = colorLayerHolder
         binding.mapColorsHoldersLL.removeAllViews()
         addColorLayer(colorLayerHolder.buildingColor, R.string.layer_buildings)
         addColorLayer(colorLayerHolder.buildingStrokeColor, R.string.layer_building_delimitations)
@@ -282,17 +281,14 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         actionMB.isClickable = true
         actionMB.title = getString(R.string.save_art)
         actionMB.setOnClickListener {
-            saveArtToLocalDatabase()
+            viewModel.saveArtToLocalDatabase(
+                title = cityCountryTV.text.toString(),
+                staticImagePath = state.staticMapImagePath,
+                sketchArtType = state.sketchArtType,
+                colorPalette = ColorPaletteProvider.byNameOrDefault(state.colorPalette),
+                directory = this@CreateNewMapArtActivity.filesDir
+            )
         }
-    }
-
-    private fun saveArtToLocalDatabase() = with(binding) {
-        viewModel.saveArtToLocalDatabase(
-            title = cityCountryTV.text.toString(),
-            description = "", //todo: dropar essa coluna do banco
-            directory = this@CreateNewMapArtActivity.filesDir,
-            newArtBitMap = mapArtsContainer.toBitmap()
-        )
     }
 
     private fun typingAnimation(

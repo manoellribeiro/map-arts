@@ -75,8 +75,7 @@ import manoellribeiro.dev.martp.core.components.compose.theme.LightL1
 import manoellribeiro.dev.martp.core.components.compose.theme.LightL5
 import manoellribeiro.dev.martp.core.components.compose.theme.LightYellow
 import manoellribeiro.dev.martp.core.components.compose.theme.White
-import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.utils.ColorPaletteProvider
 import manoellribeiro.dev.martp.scenes.main.MainViewModel
 import kotlin.getValue

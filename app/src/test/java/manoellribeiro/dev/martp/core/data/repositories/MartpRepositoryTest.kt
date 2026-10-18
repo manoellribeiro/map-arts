@@ -32,7 +32,7 @@ import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.services.ConnectivityService
 import manoellribeiro.dev.martp.infra.MainDispatcherExtension
 import okhttp3.ResponseBody
@@ -101,7 +101,11 @@ class MartpRepositoryTest {
         latitude = -12.97f,
         longitude = -38.5f,
         dateInMillis = 1_700_000_000_000L,
-        imagePathLocation = "/fake/path/image.png"
+        imagePathLocation = "/fake/path/image.png",
+        originalMapImageLocation = "/fake/path/map-arts/fake-map-art-id.png",
+        sketchArtType = SketchArtType.COLORFUL_MAP,
+        colorPalette = "fake palette",
+        colorsLayers = null
     )
 
     // region setMapArtStylePreference
@@ -816,33 +820,102 @@ class MartpRepositoryTest {
 
     // endregion
 
-    // region saveMapArtEntity
+    // region saveMapArt
+
+    private fun createFakeStaticImage(dir: File, bytes: ByteArray = byteArrayOf(3, 1, 4, 1, 5)): File {
+        return File(dir, "image.png").apply { writeBytes(bytes) }
+    }
 
     @Test
-    fun `if mapArtDao inserts the map art should forward the same entity`() = runTest {
+    fun `if mapArtDao inserts the map art should move the static image to the arts directory named with the art id`(
+        @TempDir fakeDir: File
+    ) = runTest {
         // Given
+        val fakeImageBytes = byteArrayOf(2, 7, 1, 8)
+        val fakeStaticImage = createFakeStaticImage(fakeDir, fakeImageBytes)
+        val fakeMapArt = createFakeMapArt(id = "fake-map-art-id-to-move")
+        coEvery { mapArtsDao.insert(any()) } just runs
+
+        // When
+        repository.saveMapArt(fakeMapArt, fakeStaticImage.path, fakeDir)
+
+        // Then
+        val expectedArtImage = File(File(fakeDir, "map-arts"), "fake-map-art-id-to-move.png")
+        assertArrayEquals(fakeImageBytes, expectedArtImage.readBytes())
+        assertFalse(fakeStaticImage.exists())
+    }
+
+    @Test
+    fun `if mapArtDao inserts the map art should save the entity with the moved image path`(
+        @TempDir fakeDir: File
+    ) = runTest {
+        // Given
+        val fakeStaticImage = createFakeStaticImage(fakeDir)
         val fakeMapArt = createFakeMapArt(id = "fake-map-art-id-to-save")
         val mapArtSlot = slot<MapArtEntity>()
         coEvery { mapArtsDao.insert(capture(mapArtSlot)) } just runs
 
         // When
-        repository.saveMapArtEntity(fakeMapArt)
+        repository.saveMapArt(fakeMapArt, fakeStaticImage.path, fakeDir)
 
         // Then
-        assertEquals(fakeMapArt, mapArtSlot.captured)
+        val expectedArtImagePath = File(File(fakeDir, "map-arts"), "fake-map-art-id-to-save.png").path
+        assertEquals(fakeMapArt.copy(originalMapImageLocation = expectedArtImagePath), mapArtSlot.captured)
         coVerify(exactly = 1) { mapArtsDao.insert(any()) }
     }
 
     @Test
-    fun `if mapArtDao throws an exception when inserting should throw LocalStorageErrorFailure with the original message`() = runTest {
+    fun `if the arts directory already has images should keep them when saving a new map art`(
+        @TempDir fakeDir: File
+    ) = runTest {
+        // Given
+        val fakeArtsDirectory = File(fakeDir, "map-arts").apply { mkdirs() }
+        val fakeExistingArtImage = File(fakeArtsDirectory, "fake-existing-art-id.png").apply { writeBytes(byteArrayOf(7, 7)) }
+        val fakeStaticImage = createFakeStaticImage(fakeDir)
+        coEvery { mapArtsDao.insert(any()) } just runs
+
+        // When
+        repository.saveMapArt(createFakeMapArt(id = "fake-new-art-id"), fakeStaticImage.path, fakeDir)
+
+        // Then
+        assertArrayEquals(byteArrayOf(7, 7), fakeExistingArtImage.readBytes())
+        assertTrue(File(fakeArtsDirectory, "fake-new-art-id.png").exists())
+    }
+
+    @Test
+    fun `if the static image does not exist should throw LocalStorageErrorFailure without inserting the map art`(
+        @TempDir fakeDir: File
+    ) = runTest {
+        // Given
+        val fakeMissingStaticImagePath = File(fakeDir, "fake-missing-image.png").path
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        assertThrows<LocalStorageErrorFailure> {
+            repository.saveMapArt(createFakeMapArt(id = "fake-art-id-without-image"), fakeMissingStaticImagePath, fakeDir)
+        }
+
+        // Then
+        assertFalse(File(File(fakeDir, "map-arts"), "fake-art-id-without-image.png").exists())
+        coVerify(exactly = 0) { mapArtsDao.insert(any()) }
+        verify(exactly = 1) {
+            errorLogger.logNonFatal(any(), "MartpRepository.moveStaticMapImageToArtsDirectory")
+        }
+    }
+
+    @Test
+    fun `if mapArtDao throws an exception when inserting should throw LocalStorageErrorFailure with the original message`(
+        @TempDir fakeDir: File
+    ) = runTest {
         // Given
         val fakeErrorMessage = "fake insert map art error"
+        val fakeStaticImage = createFakeStaticImage(fakeDir)
         coEvery { mapArtsDao.insert(any()) } throws IllegalStateException(fakeErrorMessage)
         every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<LocalStorageErrorFailure> {
-            repository.saveMapArtEntity(createFakeMapArt())
+            repository.saveMapArt(createFakeMapArt(), fakeStaticImage.path, fakeDir)
         }
 
         // Then
@@ -851,34 +924,59 @@ class MartpRepositoryTest {
     }
 
     @Test
-    fun `if mapArtDao throws an exception without message when inserting should throw LocalStorageErrorFailure with null message`() = runTest {
+    fun `if mapArtDao throws an exception without message when inserting should throw LocalStorageErrorFailure with null message`(
+        @TempDir fakeDir: File
+    ) = runTest {
         // Given
+        val fakeStaticImage = createFakeStaticImage(fakeDir)
         coEvery { mapArtsDao.insert(any()) } throws IllegalStateException()
         every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
         val failure = assertThrows<LocalStorageErrorFailure> {
-            repository.saveMapArtEntity(createFakeMapArt())
+            repository.saveMapArt(createFakeMapArt(), fakeStaticImage.path, fakeDir)
         }
 
         // Then
         assertNull(failure.message)
-        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "MartpRepository.saveMapArtEntity") }
     }
 
     @Test
-    fun `if inserting the map art is cancelled should rethrow the CancellationException`() = runTest {
+    fun `if mapArtDao throws an exception when inserting should delete the moved image`(
+        @TempDir fakeDir: File
+    ) = runTest {
+        // Given
+        val fakeStaticImage = createFakeStaticImage(fakeDir)
+        coEvery { mapArtsDao.insert(any()) } throws IllegalStateException("fake insert error to clean up")
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        assertThrows<LocalStorageErrorFailure> {
+            repository.saveMapArt(createFakeMapArt(id = "fake-art-id-to-clean-up"), fakeStaticImage.path, fakeDir)
+        }
+
+        // Then
+        assertFalse(File(File(fakeDir, "map-arts"), "fake-art-id-to-clean-up.png").exists())
+        assertFalse(fakeStaticImage.exists())
+    }
+
+    @Test
+    fun `if inserting the map art is cancelled should rethrow the CancellationException and keep the moved image`(
+        @TempDir fakeDir: File
+    ) = runTest {
         // Given
         val fakeCancellation = CancellationException("fake insert map art cancellation")
+        val fakeStaticImage = createFakeStaticImage(fakeDir)
         coEvery { mapArtsDao.insert(any()) } throws fakeCancellation
 
         // When
         val thrown = assertThrows<CancellationException> {
-            repository.saveMapArtEntity(createFakeMapArt())
+            repository.saveMapArt(createFakeMapArt(id = "fake-cancelled-art-id"), fakeStaticImage.path, fakeDir)
         }
 
         // Then
         assertSame(fakeCancellation, thrown)
+        assertTrue(File(File(fakeDir, "map-arts"), "fake-cancelled-art-id.png").exists())
         verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
     }
 

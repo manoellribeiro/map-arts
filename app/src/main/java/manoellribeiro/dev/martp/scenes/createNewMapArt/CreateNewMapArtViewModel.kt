@@ -1,9 +1,7 @@
 package manoellribeiro.dev.martp.scenes.createNewMapArt
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.location.Address
-import android.location.Geocoder
 import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -21,20 +19,20 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
-import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
+import manoellribeiro.dev.martp.core.models.MapLayersColors
 import manoellribeiro.dev.martp.core.models.failures.Failure
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.utils.PromptGenerator
+import manoellribeiro.dev.martp.scenes.artStyleSettings.ColorPalette
 import java.io.File
 import java.util.Calendar
-import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.math.min
@@ -134,10 +132,13 @@ class CreateNewMapArtViewModel @Inject constructor(
         return title
     }
 
+    var currentMapLayersColors: MapLayersColors? = null
+
     fun saveArtToLocalDatabase(
         title: String,
-        description: String?,
-        newArtBitMap: Bitmap,
+        staticImagePath: String,
+        sketchArtType: SketchArtType,
+        colorPalette: ColorPalette,
         directory: File
     ) {
         viewModelScope.launch {
@@ -147,20 +148,22 @@ class CreateNewMapArtViewModel @Inject constructor(
                 val newMartp = MapArtEntity(
                     id = artId,
                     title = title,
-                    description = description,
                     latitude = currentArtLocation?.latitude?.toFloat() ?: 0F ,
                     longitude = currentArtLocation?.longitude?.toFloat() ?:0F ,
                     dateInMillis = Calendar.getInstance().timeInMillis,
-                    imagePathLocation = directory.path + MartpDatabase.artsDirectoryName + artId + ".png"
+                    originalMapImageLocation = null,
+                    sketchArtType = sketchArtType,
+                    colorPalette = colorPalette.name,
+                    colorsLayers = currentMapLayersColors
                 )
 
-                repository.saveMapArtEntity(newMartp)
-
-                _events.send(
-                    CreateNewMapArtEvent.ArtCreatedSuccessfully(
-                        pathToStoreArtImage = newMartp.imagePathLocation
-                    )
+                repository.saveMapArt(
+                    mapArtEntity = newMartp,
+                    staticImagePath = staticImagePath,
+                    dir = directory
                 )
+
+                _events.send(CreateNewMapArtEvent.ArtCreatedSuccessfully)
             } catch (failure: Failure) {
                 emitNewState(CreateNewMapArtUiState.Error(failure))
             } catch (e: CancellationException) {

@@ -1,5 +1,6 @@
 package manoellribeiro.dev.martp.core.models.failures
 
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

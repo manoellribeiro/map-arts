@@ -86,4 +86,6 @@
     <string name="color_legend">Color legend</string>
     <string name="layer_land_other">Land/Other</string>
     <string name="color_palette_value">Color Palette: %s</string>
+    <string name="accessing_your_location">Accessing your location…</string>
+    <string name="downloading_map_image">Downloading the map image…</string>
 </resources>

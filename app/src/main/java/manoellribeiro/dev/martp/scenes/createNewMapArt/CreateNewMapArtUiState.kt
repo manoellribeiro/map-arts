@@ -8,7 +8,7 @@ import manoellribeiro.dev.martp.scenes.artStyleSettings.ColorPalette
 sealed interface CreateNewMapArtUiState {
 
     object Idle: CreateNewMapArtUiState
-    object Loading: CreateNewMapArtUiState
+    data class Loading(val loadingMessageId: Int): CreateNewMapArtUiState
     object ActionButtonLoading: CreateNewMapArtUiState
     class Error(val failure: Failure): CreateNewMapArtUiState
     class ImageDownloaded(

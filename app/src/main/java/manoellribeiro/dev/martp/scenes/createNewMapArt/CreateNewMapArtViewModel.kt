@@ -69,27 +69,30 @@ class CreateNewMapArtViewModel @Inject constructor(
         generateMapArtJob?.cancel()
         generateMapArtJob = viewModelScope.launch {
             try {
-                emitNewState(CreateNewMapArtUiState.Loading)
+                emitNewState(CreateNewMapArtUiState.Loading(R.string.accessing_your_location))
                 val (sketchArtType, location) = coroutineScope {
                     val sketchArtType = async { repository.getArtStylePreference() }
                     val location = async { locationService.getCurrentLocation() }
                     sketchArtType.await() to location.await()
                 }
-                val colorPalette = if(sketchArtType == SketchArtType.COLORFUL_MAP) {
-                    repository.getColorPalettePreference()
-                } else null
                 currentArtLocation = location
                 val horizontalTilesCount = 4
                 val verticalTilesCount = 4
                 val horizontalPaddingsNumber = horizontalTilesCount + 1
                 val verticalPaddingsNumber = verticalTilesCount + 1
                 val padding = 20
-                val (address, staticImagePath) = coroutineScope {
+                emitNewState(CreateNewMapArtUiState.Loading(R.string.downloading_map_image))
+                val (address, staticImagePath, colorPalette) = coroutineScope {
                     val address = async {
                         getAddressService.getAddress(
                             location.latitude,
                             location.longitude
                         )
+                    }
+                    val colorPalette = async {
+                        if(sketchArtType == SketchArtType.COLORFUL_MAP) {
+                            repository.getColorPalettePreference()
+                        } else null
                     }
                     val staticImagePath = async {
                         repository.fetchStaticMapImage(
@@ -103,7 +106,7 @@ class CreateNewMapArtViewModel @Inject constructor(
                             dir = directory
                         )
                     }
-                    address.await() to staticImagePath.await()
+                    Triple(address.await(), staticImagePath.await(), colorPalette.await())
                 }
                 currentArtAddress = address
                 emitNewState(

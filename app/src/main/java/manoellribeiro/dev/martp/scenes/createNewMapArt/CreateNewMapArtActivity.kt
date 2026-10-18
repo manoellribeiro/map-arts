@@ -91,7 +91,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                         is CreateNewMapArtUiState.Error -> handleStateError(state.failure)
                         is CreateNewMapArtUiState.ImageDownloaded -> handleImageDownloadedState(state)
                         CreateNewMapArtUiState.Idle -> Unit
-                        CreateNewMapArtUiState.Loading -> handleLoadingState()
+                        is CreateNewMapArtUiState.Loading -> handleLoadingState(state.loadingMessageId)
                         CreateNewMapArtUiState.ActionButtonLoading -> handleActionButtonLoadingState()
                     }
                 }
@@ -145,9 +145,12 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         longTV.gone()
         mapColorsHoldersLL.gone()
         mapLayersTitleTV.gone()
+        loadingMessageTV.gone()
     }
 
-    private fun handleLoadingState() = with(binding) {
+    private fun handleLoadingState(
+        loadingMessageId: Int
+    ) = with(binding) {
         titleTV.text = getString(R.string.we_are_generating_your_art)
         stateErrorS.visible()
         errorImageIV.gone()
@@ -155,6 +158,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         actionMB.gone()
         mapArtsContainer.gone()
         loadingIndicatorLAV.visible()
+        loadingMessageTV.visible()
+        loadingMessageTV.text = getString(loadingMessageId)
         titleTV.visible()
         cityCountryTV.gone()
         latTV.gone()
@@ -201,6 +206,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     ) = with(binding) {
         mapArtsContainer.visible()
         loadingIndicatorLAV.gone()
+        loadingMessageTV.gone()
         titleTV.visible()
         mapLayersTitleTV.visible()
         mapColorsHoldersLL.visible()

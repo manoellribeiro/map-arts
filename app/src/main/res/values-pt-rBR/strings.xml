@@ -85,4 +85,6 @@
     <string name="color_legend">Legenda das cores</string>
     <string name="layer_land_other">Terreno/Outros</string>
     <string name="color_palette_value">Paleta de cores: %s</string>
+    <string name="accessing_your_location">Acessando sua localização…</string>
+    <string name="downloading_map_image">Baixando a imagem do mapa…</string>
 </resources>

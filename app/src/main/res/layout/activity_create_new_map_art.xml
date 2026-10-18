@@ -135,8 +135,8 @@
         </LinearLayout>
 
         <com.airbnb.lottie.LottieAnimationView
-            android:layout_width="200dp"
-            android:layout_height="200dp"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             android:id="@+id/loadingIndicatorLAV"
             app:lottie_rawRes="@raw/loading_globe"
             app:lottie_loop="true"
@@ -144,6 +144,16 @@
             tools:visibility="gone"
             android:layout_gravity="center"
             app:lottie_autoPlay="true"/>
+
+        <TextView
+            android:id="@+id/loadingMessageTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Text.GraySubTitle"
+            tools:visibility="visible"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            tools:text="Acessando sua localização..." />
 
         <Space
             android:layout_width="match_parent"

@@ -264,12 +264,16 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         }
         val processingFragment = PFragment(sketch)
         processingFragment.setView(mapArtsContainer, this@CreateNewMapArtActivity)
-        cityCountryTV.visible()
         latTV.visible()
         longTV.visible()
         latTV.text = getString(R.string.latitude_value, state.latitude.toString())
         longTV.text = getString(R.string.longitude_value, state.longitude.toString())
-        cityCountryTV.text = state.title
+        if(state.title.isEmpty()) {
+            cityCountryTV.gone()
+        } else {
+            cityCountryTV.visible()
+            cityCountryTV.text = state.title
+        }
         stateErrorS.gone()
         errorImageIV.gone()
         errorTextTV.gone()

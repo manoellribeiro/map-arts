@@ -24,6 +24,7 @@ import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
+import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.failures.SketchArtType
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
@@ -112,7 +113,7 @@ class CreateNewMapArtViewModel @Inject constructor(
                 emitNewState(
                     CreateNewMapArtUiState.ImageDownloaded(
                         staticMapImagePath = staticImagePath,
-                        title = address?.locality + ", " + address?.countryName + ", " + address?.thoroughfare,
+                        title = buildTitleWithAddress(address),
                         sketchArtType = sketchArtType,
                         colorPalette = colorPalette,
                         latitude = location.latitude,
@@ -123,6 +124,14 @@ class CreateNewMapArtViewModel @Inject constructor(
                 emitNewState(CreateNewMapArtUiState.Error(failure))
             }
         }
+    }
+
+    private fun buildTitleWithAddress(address: Address?): String {
+        var title = ""
+        address?.thoroughfare.executeIfNotNull { title = title + address?.thoroughfare + ", " }
+        address?.locality.executeIfNotNull { title = title + address?.locality + ", " }
+        address?.countryName.executeIfNotNull { title += address?.countryName }
+        return title
     }
 
     fun saveArtToLocalDatabase(

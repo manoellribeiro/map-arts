@@ -32,7 +32,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.RadioButton
@@ -176,22 +175,12 @@ private fun Header() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SlideComponent(
     viewModel: MainViewModel,
     initialSlideValue: Float,
     selectedArtStyle: MutableState<SketchArtType>
 ) {
-    val artStyle = selectedArtStyle.value
-    // The slider holds its position (0..1) instead of the zoom itself, so switching to an
-    // art style with another zoom range keeps the thumb where it was
-    var sliderPosition by remember {
-        mutableFloatStateOf(artStyle.zoomToSliderPosition(initialSlideValue))
-    }
-    LaunchedEffect(artStyle) {
-        viewModel.setMapZoom(artStyle.sliderPositionToZoom(sliderPosition))
-    }
     Column(
         modifier = Modifier.padding(
             start = 16.dp,
@@ -209,17 +198,10 @@ private fun SlideComponent(
             style = TextMiddleScreenInfoText,
             color = DarkD4
         )
-        Slider(
-            value = sliderPosition,
-            onValueChange = {
-                sliderPosition = it
-                viewModel.setMapZoom(artStyle.sliderPositionToZoom(it))
-            },
-            colors = SliderDefaults.colors(
-                thumbColor = Yellow,
-                activeTrackColor = Yellow,
-                inactiveTrackColor = LightL1
-            ),
+        ZoomSlider(
+            viewModel = viewModel,
+            initialSlideValue = initialSlideValue,
+            artStyle = selectedArtStyle.value
         )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -237,6 +219,36 @@ private fun SlideComponent(
             )
         }
     }
+}
+
+// The slider position is read only here, so dragging recomposes this small scope instead of the whole SlideComponent
+@Composable
+private fun ZoomSlider(
+    viewModel: MainViewModel,
+    initialSlideValue: Float,
+    artStyle: SketchArtType
+) {
+    // The slider holds its position (0..1) instead of the zoom itself, so switching to an
+    // art style with another zoom range keeps the thumb where it was
+    var sliderPosition by remember {
+        mutableFloatStateOf(artStyle.zoomToSliderPosition(initialSlideValue))
+    }
+    LaunchedEffect(artStyle) {
+        viewModel.setMapZoom(artStyle.sliderPositionToZoom(sliderPosition))
+    }
+    Slider(
+        value = sliderPosition,
+        onValueChange = { sliderPosition = it },
+        // Saves the zoom once, when the user releases the thumb, instead of on every drag event
+        onValueChangeFinished = {
+            viewModel.setMapZoom(artStyle.sliderPositionToZoom(sliderPosition))
+        },
+        colors = SliderDefaults.colors(
+            thumbColor = Yellow,
+            activeTrackColor = Yellow,
+            inactiveTrackColor = LightL1
+        ),
+    )
 }
 
 @Composable

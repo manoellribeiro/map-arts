@@ -40,7 +40,6 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -118,13 +117,25 @@ class ArtStyleSettingsFragment : Fragment() {
                                 Header()
 
                                 var selectedArtStyle by remember { mutableStateOf(state.mapArtStyle) }
+                                // The slider holds its position (0..1) instead of the zoom itself, so switching to an
+                                // art style with another zoom range keeps the thumb where it was
+                                var zoomSliderPosition by remember {
+                                    mutableFloatStateOf(state.mapArtStyle.zoomToSliderPosition(state.mapZoom))
+                                }
 
-                                SlideComponent(viewModel, state.mapZoom, selectedArtStyle)
+                                SlideComponent(
+                                    sliderPosition = { zoomSliderPosition },
+                                    onSliderPositionChange = { zoomSliderPosition = it },
+                                    onSliderPositionChangeFinished = {
+                                        viewModel.setMapZoom(selectedArtStyle.sliderPositionToZoom(zoomSliderPosition))
+                                    }
+                                )
                                 ArtStyleSelectors(
                                     selectedArtStyle = selectedArtStyle,
                                     onArtStyleSelected = { artStyle ->
                                         selectedArtStyle = artStyle
                                         viewModel.setMapStyle(artStyle)
+                                        viewModel.setMapZoom(artStyle.sliderPositionToZoom(zoomSliderPosition))
                                     }
                                 )
 
@@ -180,9 +191,9 @@ private fun Header() {
 
 @Composable
 private fun SlideComponent(
-    viewModel: MainViewModel,
-    initialSlideValue: Float,
-    artStyle: SketchArtType
+    sliderPosition: () -> Float,
+    onSliderPositionChange: (Float) -> Unit,
+    onSliderPositionChangeFinished: () -> Unit
 ) {
     Column(
         modifier = Modifier.padding(
@@ -202,9 +213,9 @@ private fun SlideComponent(
             color = DarkD4
         )
         ZoomSlider(
-            viewModel = viewModel,
-            initialSlideValue = initialSlideValue,
-            artStyle = artStyle
+            sliderPosition = sliderPosition,
+            onSliderPositionChange = onSliderPositionChange,
+            onSliderPositionChangeFinished = onSliderPositionChangeFinished
         )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -224,28 +235,16 @@ private fun SlideComponent(
     }
 }
 
-// The slider position is read only here, so dragging recomposes this small scope instead of the whole SlideComponent
 @Composable
 private fun ZoomSlider(
-    viewModel: MainViewModel,
-    initialSlideValue: Float,
-    artStyle: SketchArtType
+    sliderPosition: () -> Float,
+    onSliderPositionChange: (Float) -> Unit,
+    onSliderPositionChangeFinished: () -> Unit
 ) {
-    // The slider holds its position (0..1) instead of the zoom itself, so switching to an
-    // art style with another zoom range keeps the thumb where it was
-    var sliderPosition by remember {
-        mutableFloatStateOf(artStyle.zoomToSliderPosition(initialSlideValue))
-    }
-    LaunchedEffect(artStyle) {
-        viewModel.setMapZoom(artStyle.sliderPositionToZoom(sliderPosition))
-    }
     Slider(
-        value = sliderPosition,
-        onValueChange = { sliderPosition = it },
-        // Saves the zoom once, when the user releases the thumb, instead of on every drag event
-        onValueChangeFinished = {
-            viewModel.setMapZoom(artStyle.sliderPositionToZoom(sliderPosition))
-        },
+        value = sliderPosition(),
+        onValueChange = onSliderPositionChange,
+        onValueChangeFinished = onSliderPositionChangeFinished,
         colors = SliderDefaults.colors(
             thumbColor = Yellow,
             activeTrackColor = Yellow,

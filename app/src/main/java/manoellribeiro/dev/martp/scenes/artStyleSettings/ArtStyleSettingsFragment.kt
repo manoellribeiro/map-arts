@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -493,10 +491,11 @@ fun ColorPaletteCardSelector(
                     fontSize = 14.sp,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                LazyRow (
+                Row(
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(colorPalette.colors) { color ->
+                    for(color in colorPalette.colors) {
                         Box(
                             modifier =
                                 Modifier
@@ -505,9 +504,7 @@ fun ColorPaletteCardSelector(
                                     .height(24.dp)
                                     .width(24.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
                     }
-
                 }
             }
             Spacer(modifier = Modifier.weight(1F))

@@ -36,6 +36,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -224,7 +225,12 @@ private fun SlideComponent(
         ZoomSlider(
             sliderPosition = sliderPosition,
             onSliderPositionChange = onSliderPositionChange,
-            onSliderPositionChangeFinished = onSliderPositionChangeFinished
+            onSliderPositionChangeFinished = onSliderPositionChangeFinished,
+            colors = SliderDefaults.colors(
+                thumbColor = Yellow,
+                activeTrackColor = Yellow,
+                inactiveTrackColor = LightL1
+            )
         )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -248,19 +254,51 @@ private fun SlideComponent(
 private fun ZoomSlider(
     sliderPosition: () -> Float,
     onSliderPositionChange: (Float) -> Unit,
-    onSliderPositionChangeFinished: () -> Unit
+    onSliderPositionChangeFinished: () -> Unit,
+    colors: SliderColors
 ) {
     Slider(
         value = sliderPosition(),
         onValueChange = onSliderPositionChange,
         onValueChangeFinished = onSliderPositionChangeFinished,
-        colors = SliderDefaults.colors(
-            thumbColor = Yellow,
-            activeTrackColor = Yellow,
-            inactiveTrackColor = LightL1
-        ),
+        colors = colors,
     )
 }
+
+private val artStyleModels = listOf(
+    MapArtStyleModel(
+        titleId = R.string.classic,
+        descriptionId = R.string.classic_description,
+        drawableImageId = R.drawable.ic_martp_logo,
+        sketchArtType = SketchArtType.DEFAULT
+    ),
+    MapArtStyleModel(
+        titleId = R.string.colorful_map,
+        descriptionId = R.string.colorful_map_description,
+        drawableImageId = R.drawable.ic_colorful_map,
+        sketchArtType = SketchArtType.COLORFUL_MAP
+    ),
+    MapArtStyleModel(
+        titleId = R.string.pointillism,
+        descriptionId = R.string.pointillism_colorful_description,
+        drawableImageId = R.drawable.ic_pointllism,
+        sketchArtType = SketchArtType.POINTILLISM
+    ),
+    //Still work in progress
+//    MapArtStyleModel(
+//        titleId = R.string.water_flow,
+//        descriptionId = R.string.water_flow_description,
+//        drawableImageId = R.drawable.ic_water_flow,
+//        sketchArtType = SketchArtType.WATER_FLOW
+//    ),
+    //Still work in progress
+//    MapArtStyleModel(
+//        titleId = R.string.walking_people,
+//        descriptionId = R.string.walking_people_description,
+//        drawableImageId = R.drawable.ic_walking_people,
+//        sketchArtType = SketchArtType.PARTICLE_SYSTEM
+//    ),
+)
 
 @Composable
 fun ArtStyleSelectors(
@@ -286,63 +324,14 @@ fun ArtStyleSelectors(
             color = DarkD4
         )
         Column {
-            ArtStyleCardSelector(
-                isSelected = selectedArtStyle == SketchArtType.DEFAULT,
-                onSelect = onArtStyleSelected,
-                mapArtStyleModel = MapArtStyleModel(
-                    titleId = R.string.classic,
-                    descriptionId = R.string.classic_description,
-                    drawableImageId = R.drawable.ic_martp_logo,
-                    sketchArtType = SketchArtType.DEFAULT
+            for(artStyleModel in artStyleModels) {
+                ArtStyleCardSelector(
+                    isSelected = selectedArtStyle == artStyleModel.sketchArtType,
+                    onSelect = onArtStyleSelected,
+                    mapArtStyleModel = artStyleModel
                 )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            ArtStyleCardSelector(
-                isSelected = selectedArtStyle == SketchArtType.COLORFUL_MAP,
-                onSelect = onArtStyleSelected,
-                mapArtStyleModel = MapArtStyleModel(
-                    titleId = R.string.colorful_map,
-                    descriptionId = R.string.colorful_map_description,
-                    drawableImageId = R.drawable.ic_colorful_map,
-                    sketchArtType = SketchArtType.COLORFUL_MAP
-                )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            ArtStyleCardSelector(
-                isSelected = selectedArtStyle == SketchArtType.POINTILLISM,
-                onSelect = onArtStyleSelected,
-                mapArtStyleModel = MapArtStyleModel(
-                    titleId = R.string.pointillism,
-                    descriptionId = R.string.pointillism_colorful_description,
-                    drawableImageId = R.drawable.ic_pointllism,
-                    sketchArtType = SketchArtType.POINTILLISM
-                )
-            )
-            //Still work in progress
-//            Spacer(modifier = Modifier.height(8.dp))
-//            ArtStyleCardSelector(
-//                viewModel = viewModel,
-//                currentArtStyleSelected = selectedArtStyle,
-//                mapArtStyleModel = MapArtStyleModel(
-//                    titleId = R.string.water_flow,
-//                    descriptionId = R.string.water_flow_description,
-//                    drawableImageId = R.drawable.ic_water_flow,
-//                    sketchArtType = SketchArtType.WATER_FLOW
-//                )
-//            )
-            //Stil work in progress
-//            Spacer(modifier = Modifier.height(8.dp))
-//            ArtStyleCardSelector(
-//                viewModel = viewModel,
-//                currentArtStyleSelected = selectedArtStyle,
-//                mapArtStyleModel = MapArtStyleModel(
-//                    titleId = R.string.walking_people,
-//                    descriptionId = R.string.walking_people_description,
-//                    drawableImageId = R.drawable.ic_walking_people,
-//                    sketchArtType = SketchArtType.PARTICLE_SYSTEM
-//                )
-//            )
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 }
@@ -384,6 +373,8 @@ fun ColorPaletteSelectors(
     }
 }
 
+private val artStyleIconShape = RoundedCornerShape(8.dp)
+
 @Composable
 fun ArtStyleCardSelector(
     mapArtStyleModel: MapArtStyleModel,
@@ -413,7 +404,7 @@ fun ArtStyleCardSelector(
             Box(
                 modifier =
                         Modifier
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(artStyleIconShape)
                             .background(if(isSelected) LightYellow else LightL1)
                             .height(44.dp)
                             .width(44.dp)

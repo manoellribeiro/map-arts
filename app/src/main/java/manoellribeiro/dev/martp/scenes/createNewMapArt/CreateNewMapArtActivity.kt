@@ -145,6 +145,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         longTV.gone()
         mapColorsHoldersLL.gone()
         mapLayersTitleTV.gone()
+        mapLayersSubTitleTV.gone()
         loadingMessageTV.gone()
     }
 
@@ -156,6 +157,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         errorImageIV.gone()
         errorTextTV.gone()
         actionMB.gone()
+        mapLayersSubTitleTV.gone()
         mapArtsContainer.gone()
         loadingIndicatorLAV.visible()
         loadingMessageTV.visible()
@@ -248,6 +250,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             )
             SketchArtType.COLORFUL_MAP -> {
                 colorPaletteTV.visible()
+                mapLayersSubTitleTV.visible()
                 colorPaletteTV.text = getString(R.string.color_palette_value, state.colorPalette)
                 ColorfulMapSketch(
                     padding = 20,

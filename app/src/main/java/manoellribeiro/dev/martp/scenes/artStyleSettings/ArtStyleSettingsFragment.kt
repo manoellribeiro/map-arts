@@ -263,16 +263,16 @@ private fun ZoomSlider(
 
 private val artStyleModels = listOf(
     MapArtStyleModel(
-        titleId = R.string.classic,
-        descriptionId = R.string.classic_description,
-        drawableImageId = R.drawable.ic_martp_logo,
-        sketchArtType = SketchArtType.DEFAULT
-    ),
-    MapArtStyleModel(
         titleId = R.string.colorful_map,
         descriptionId = R.string.colorful_map_description,
         drawableImageId = R.drawable.ic_colorful_map,
         sketchArtType = SketchArtType.COLORFUL_MAP
+    ),
+    MapArtStyleModel(
+        titleId = R.string.classic,
+        descriptionId = R.string.classic_description,
+        drawableImageId = R.drawable.ic_martp_logo,
+        sketchArtType = SketchArtType.DEFAULT
     ),
     MapArtStyleModel(
         titleId = R.string.pointillism,

@@ -36,8 +36,9 @@ class MainViewModel @Inject constructor(
     private var setColorPaletteJob: Job? = null
 
     val galleryState: StateFlow<GalleryUiState> = repository.observeUserMapArts()
-        .map<List<MapArtEntity>, GalleryUiState> { mapArts ->
+        .map { mapArts ->
             if(mapArts.isNotEmpty()) {
+                Log.i("MainViewModel", "Chamou aqui viu")
                 GalleryUiState.NotEmptyList(mapArts)
             } else {
                 GalleryUiState.EmptyList

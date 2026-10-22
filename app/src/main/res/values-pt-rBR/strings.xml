@@ -88,4 +88,6 @@
     <string name="accessing_your_location">Acessando sua localização…</string>
     <string name="downloading_map_image">Baixando a imagem do mapa…</string>
     <string name="error_downloading_location_image">Um erro aconteceu ao baixar a imagem da sua localização, tente novamente.</string>
+    <string name="tap_map_to_shuffle_colors">Você pode tocar no mapa para embaralhar as cores até encontrar a melhor combinação.</string>
+    <string name="unknown_location">Localização desconhecida</string>
 </resources>

@@ -97,7 +97,7 @@ class MartpRepository @Inject constructor(
     }
 
     suspend fun getArtStylePreference(): SketchArtType {
-        val defaultArtStyle = SketchArtType.DEFAULT
+        val defaultArtStyle = SketchArtType.COLORFUL_MAP
         try {
             val artStyleKey = stringPreferencesKey(MAP_ART_STYLE_KEY)
             return SketchArtType.valueOf(
@@ -128,7 +128,7 @@ class MartpRepository @Inject constructor(
     }
 
     suspend fun getMapZoomPreference(): Float {
-        val defaultZoom = 15F
+        val defaultZoom = 16.5F
         try {
             val mapZoomKey = floatPreferencesKey(MAP_ZOOM_KEY)
             return artSettingsDataSore.data.map { preferences ->

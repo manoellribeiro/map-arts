@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.extensions.formatDateHour
 import manoellribeiro.dev.martp.core.extensions.gone
@@ -34,7 +35,9 @@ class MapArtsRecyclerViewAdapter(
         with(holder.binding) {
             val artBitmap = BitmapFactory.decodeFile(mapArt.imagePathLocation)
             artMiniatureIV.setImageBitmap(artBitmap)
-            artTitleTV.text = mapArt.title
+
+
+            artTitleTV.text = mapArt.title.ifEmpty { holder.binding.root.context.getString(R.string.unknown_location) }
             shareFAB.setOnClickListener {
                 onShareButtonClickListener.invoke(mapArt.imagePathLocation)
             }

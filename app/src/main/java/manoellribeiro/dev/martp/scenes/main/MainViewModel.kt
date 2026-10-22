@@ -1,6 +1,5 @@
 package manoellribeiro.dev.martp.scenes.main
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,7 +35,7 @@ class MainViewModel @Inject constructor(
     private var setColorPaletteJob: Job? = null
 
     val galleryState: StateFlow<GalleryUiState> = repository.observeUserMapArts()
-        .map<List<MapArtEntity>, GalleryUiState> { mapArts ->
+        .map { mapArts ->
             if(mapArts.isNotEmpty()) {
                 GalleryUiState.NotEmptyList(mapArts)
             } else {

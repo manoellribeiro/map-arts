@@ -88,4 +88,6 @@
     <string name="accessing_your_location">Accès à votre position…</string>
     <string name="downloading_map_image">Téléchargement de l’image de la carte…</string>
     <string name="error_downloading_location_image">Une erreur s’est produite lors du téléchargement de l’image de votre position, veuillez réessayer.</string>
+    <string name="tap_map_to_shuffle_colors">Vous pouvez toucher la carte pour mélanger les couleurs jusqu\'à trouver la meilleure combinaison.</string>
+    <string name="unknown_location">Position inconnue</string>
 </resources>

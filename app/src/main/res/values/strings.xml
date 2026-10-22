@@ -89,4 +89,6 @@
     <string name="accessing_your_location">Accessing your location…</string>
     <string name="downloading_map_image">Downloading the map image…</string>
     <string name="error_downloading_location_image">An error occurred while downloading the image of your location, please try again.</string>
+    <string name="tap_map_to_shuffle_colors">You can tap on the map to shuffle the colors until you find the best match.</string>
+    <string name="unknown_location">Unknown Location</string>
 </resources>

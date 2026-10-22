@@ -121,13 +121,24 @@
             android:maxLines="1"
             android:ellipsize="end"
             android:layout_marginStart="16dp"
-            android:layout_marginVertical="8dp"
+            android:layout_marginTop="8dp"
             tools:visibility="visible"
             android:text="@string/color_legend"
             tools:text="Legenda de cores" />
 
+        <TextView
+            android:id="@+id/mapLayersSubTitleTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Text.GraySubTitle"
+            tools:visibility="visible"
+            android:visibility="gone"
+            android:layout_marginHorizontal="16dp"
+            android:text="@string/tap_map_to_shuffle_colors" />
+
         <LinearLayout
             android:id="@+id/mapColorsHoldersLL"
+            android:layout_marginTop="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">

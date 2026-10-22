@@ -43,7 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -120,12 +119,18 @@ class ArtStyleSettingsFragment : Fragment() {
                             ) {
                                 Header()
 
-                                val selectedArtStyle = remember { mutableStateOf(state.mapArtStyle) }
+                                var selectedArtStyle by remember { mutableStateOf(state.mapArtStyle) }
 
                                 SlideComponent(viewModel, state.mapZoom, selectedArtStyle)
-                                ArtStyleSelectors(viewModel, selectedArtStyle)
+                                ArtStyleSelectors(
+                                    selectedArtStyle = selectedArtStyle,
+                                    onArtStyleSelected = { artStyle ->
+                                        selectedArtStyle = artStyle
+                                        viewModel.setMapStyle(artStyle)
+                                    }
+                                )
 
-                                if(selectedArtStyle.value == SketchArtType.COLORFUL_MAP) {
+                                if(selectedArtStyle == SketchArtType.COLORFUL_MAP) {
                                     ColorPaletteSelectors(viewModel, state.colorPaletteSelected)
                                 }
                             }
@@ -179,7 +184,7 @@ private fun Header() {
 private fun SlideComponent(
     viewModel: MainViewModel,
     initialSlideValue: Float,
-    selectedArtStyle: MutableState<SketchArtType>
+    artStyle: SketchArtType
 ) {
     Column(
         modifier = Modifier.padding(
@@ -201,7 +206,7 @@ private fun SlideComponent(
         ZoomSlider(
             viewModel = viewModel,
             initialSlideValue = initialSlideValue,
-            artStyle = selectedArtStyle.value
+            artStyle = artStyle
         )
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -253,8 +258,8 @@ private fun ZoomSlider(
 
 @Composable
 fun ArtStyleSelectors(
-    viewModel: MainViewModel,
-    selectedArtStyle: MutableState<SketchArtType>
+    selectedArtStyle: SketchArtType,
+    onArtStyleSelected: (SketchArtType) -> Unit
 ) {
     Column(
         modifier = Modifier.padding(
@@ -276,8 +281,8 @@ fun ArtStyleSelectors(
         )
         Column {
             ArtStyleCardSelector(
-                viewModel = viewModel,
-                currentArtStyleSelected = selectedArtStyle,
+                isSelected = selectedArtStyle == SketchArtType.DEFAULT,
+                onSelect = onArtStyleSelected,
                 mapArtStyleModel = MapArtStyleModel(
                     titleId = R.string.classic,
                     descriptionId = R.string.classic_description,
@@ -287,8 +292,8 @@ fun ArtStyleSelectors(
             )
             Spacer(modifier = Modifier.height(8.dp))
             ArtStyleCardSelector(
-                viewModel = viewModel,
-                currentArtStyleSelected = selectedArtStyle,
+                isSelected = selectedArtStyle == SketchArtType.COLORFUL_MAP,
+                onSelect = onArtStyleSelected,
                 mapArtStyleModel = MapArtStyleModel(
                     titleId = R.string.colorful_map,
                     descriptionId = R.string.colorful_map_description,
@@ -298,8 +303,8 @@ fun ArtStyleSelectors(
             )
             Spacer(modifier = Modifier.height(8.dp))
             ArtStyleCardSelector(
-                viewModel = viewModel,
-                currentArtStyleSelected = selectedArtStyle,
+                isSelected = selectedArtStyle == SketchArtType.POINTILLISM,
+                onSelect = onArtStyleSelected,
                 mapArtStyleModel = MapArtStyleModel(
                     titleId = R.string.pointillism,
                     descriptionId = R.string.pointillism_colorful_description,
@@ -341,8 +346,12 @@ fun ColorPaletteSelectors(
     viewModel: MainViewModel,
     loadedColorPalette: String
 ) {
-    val selectedColorPalette = remember {
-        mutableStateOf(ColorPaletteProvider.byNameOrDefault(loadedColorPalette) ?: ColorPaletteProvider.all.first())
+    var selectedColorPaletteName by remember {
+        mutableStateOf(ColorPaletteProvider.byNameOrDefault(loadedColorPalette).name)
+    }
+    val onColorPaletteSelected: (String) -> Unit = { colorPaletteName ->
+        selectedColorPaletteName = colorPaletteName
+        viewModel.setColorPalette(colorPaletteName)
     }
     Column(
         modifier = Modifier.padding(
@@ -367,9 +376,9 @@ fun ColorPaletteSelectors(
 
         for(colorPalette in ColorPaletteProvider.all) {
             ColorPaletteCardSelector(
-                viewModel = viewModel,
-                currentColorPaletteSelected = selectedColorPalette,
-                colorPalette = colorPalette
+                colorPalette = colorPalette,
+                isSelected = colorPalette.name == selectedColorPaletteName,
+                onSelect = onColorPaletteSelected
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -378,16 +387,12 @@ fun ColorPaletteSelectors(
 
 @Composable
 fun ArtStyleCardSelector(
-    viewModel: MainViewModel,
-    currentArtStyleSelected: MutableState<SketchArtType>,
     mapArtStyleModel: MapArtStyleModel,
+    isSelected: Boolean,
+    onSelect: (SketchArtType) -> Unit,
 ) {
-    val isSelected = mapArtStyleModel.sketchArtType == currentArtStyleSelected.value
     Card(
-        onClick = {
-            currentArtStyleSelected.value = mapArtStyleModel.sketchArtType
-            viewModel.setMapStyle(mapArtStyleModel.sketchArtType)
-        },
+        onClick = { onSelect(mapArtStyleModel.sketchArtType) },
         colors = CardDefaults.cardColors(
             containerColor = White,
         ),
@@ -448,10 +453,7 @@ fun ArtStyleCardSelector(
                         disabledSelectedColor = White,
                         disabledUnselectedColor = White
                     ),
-                    onClick = {
-                        currentArtStyleSelected.value = mapArtStyleModel.sketchArtType
-                        viewModel.setMapStyle(mapArtStyleModel.sketchArtType)
-                    }
+                    onClick = { onSelect(mapArtStyleModel.sketchArtType) }
                 )
             }
         }
@@ -460,16 +462,12 @@ fun ArtStyleCardSelector(
 
 @Composable
 fun ColorPaletteCardSelector(
-    viewModel: MainViewModel,
-    currentColorPaletteSelected: MutableState<ColorPalette>,
     colorPalette: ColorPalette,
+    isSelected: Boolean,
+    onSelect: (String) -> Unit,
 ) {
-    val isSelected = colorPalette.name == currentColorPaletteSelected.value.name
     Card(
-        onClick = {
-            currentColorPaletteSelected.value = colorPalette
-            viewModel.setColorPalette(colorPalette.name)
-        },
+        onClick = { onSelect(colorPalette.name) },
         colors = CardDefaults.cardColors(
             containerColor = White,
         ),
@@ -522,10 +520,7 @@ fun ColorPaletteCardSelector(
                         disabledSelectedColor = White,
                         disabledUnselectedColor = White
                     ),
-                    onClick = {
-                        currentColorPaletteSelected.value = colorPalette
-                        viewModel.setColorPalette(colorPalette.name)
-                    }
+                    onClick = { onSelect(colorPalette.name) }
                 )
             }
         }

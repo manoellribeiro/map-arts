@@ -117,6 +117,9 @@ class ArtStyleSettingsFragment : Fragment() {
                                 Header()
 
                                 var selectedArtStyle by remember { mutableStateOf(state.mapArtStyle) }
+                                var selectedColorPaletteName by remember {
+                                    mutableStateOf(ColorPaletteProvider.byNameOrDefault(state.colorPaletteSelected).name)
+                                }
                                 // The slider holds its position (0..1) instead of the zoom itself, so switching to an
                                 // art style with another zoom range keeps the thumb where it was
                                 var zoomSliderPosition by remember {
@@ -140,7 +143,13 @@ class ArtStyleSettingsFragment : Fragment() {
                                 )
 
                                 if(selectedArtStyle == SketchArtType.COLORFUL_MAP) {
-                                    ColorPaletteSelectors(viewModel, state.colorPaletteSelected)
+                                    ColorPaletteSelectors(
+                                        selectedColorPaletteName = selectedColorPaletteName,
+                                        onColorPaletteSelected = { colorPaletteName ->
+                                            selectedColorPaletteName = colorPaletteName
+                                            viewModel.setColorPalette(colorPaletteName)
+                                        }
+                                    )
                                 }
                             }
                         }
@@ -340,16 +349,9 @@ fun ArtStyleSelectors(
 
 @Composable
 fun ColorPaletteSelectors(
-    viewModel: MainViewModel,
-    loadedColorPalette: String
+    selectedColorPaletteName: String,
+    onColorPaletteSelected: (String) -> Unit
 ) {
-    var selectedColorPaletteName by remember {
-        mutableStateOf(ColorPaletteProvider.byNameOrDefault(loadedColorPalette).name)
-    }
-    val onColorPaletteSelected: (String) -> Unit = { colorPaletteName ->
-        selectedColorPaletteName = colorPaletteName
-        viewModel.setColorPalette(colorPaletteName)
-    }
     Column(
         modifier = Modifier.padding(
             start = 16.dp,

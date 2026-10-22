@@ -1,6 +1,5 @@
 package manoellribeiro.dev.martp.scenes.main
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,7 +37,6 @@ class MainViewModel @Inject constructor(
     val galleryState: StateFlow<GalleryUiState> = repository.observeUserMapArts()
         .map { mapArts ->
             if(mapArts.isNotEmpty()) {
-                Log.i("MainViewModel", "Chamou aqui viu")
                 GalleryUiState.NotEmptyList(mapArts)
             } else {
                 GalleryUiState.EmptyList

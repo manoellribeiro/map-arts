@@ -340,7 +340,7 @@ class MartpRepositoryTest {
     }
 
     @Test
-    fun `if data store has no saved art style should return the DEFAULT SketchArtType`() = runTest {
+    fun `if data store has no saved art style should return the COLORFUL_MAP SketchArtType`() = runTest {
         // Given
         every { artSettingsDataSore.data } returns flowOf(emptyPreferences())
 
@@ -348,11 +348,11 @@ class MartpRepositoryTest {
         val result = repository.getArtStylePreference()
 
         // Then
-        assertEquals(SketchArtType.DEFAULT, result)
+        assertEquals(SketchArtType.COLORFUL_MAP, result)
     }
 
     @Test
-    fun `if data store has an unknown art style name should return the DEFAULT SketchArtType`() = runTest {
+    fun `if data store has an unknown art style name should return the COLORFUL_MAP SketchArtType`() = runTest {
         // Given
         val fakeUnknownArtStyleName = "FAKE_UNKNOWN_ART_STYLE"
         every { artSettingsDataSore.data } returns flowOf(preferencesOf(fakeMapArtStyleKey to fakeUnknownArtStyleName))
@@ -362,12 +362,12 @@ class MartpRepositoryTest {
         val result = repository.getArtStylePreference()
 
         // Then
-        assertEquals(SketchArtType.DEFAULT, result)
+        assertEquals(SketchArtType.COLORFUL_MAP, result)
         verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalArgumentException>(), "MartpRepository.getArtStylePreference") }
     }
 
     @Test
-    fun `if data store throws an exception when reading the art style should return the DEFAULT SketchArtType`() = runTest {
+    fun `if data store throws an exception when reading the art style should return the COLORFUL_MAP SketchArtType`() = runTest {
         // Given
         every { artSettingsDataSore.data } returns flow { throw IOException("fake art style read error") }
         every { errorLogger.logNonFatal(any(), any()) } just runs
@@ -376,7 +376,7 @@ class MartpRepositoryTest {
         val result = repository.getArtStylePreference()
 
         // Then
-        assertEquals(SketchArtType.DEFAULT, result)
+        assertEquals(SketchArtType.COLORFUL_MAP, result)
         verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.getArtStylePreference") }
     }
 
@@ -493,7 +493,7 @@ class MartpRepositoryTest {
     }
 
     @Test
-    fun `if data store has no saved map zoom should return the default zoom of 15`() = runTest {
+    fun `if data store has no saved map zoom should return the default zoom of 16 point 5`() = runTest {
         // Given
         every { artSettingsDataSore.data } returns flowOf(emptyPreferences())
 
@@ -501,11 +501,11 @@ class MartpRepositoryTest {
         val result = repository.getMapZoomPreference()
 
         // Then
-        assertEquals(15f, result)
+        assertEquals(16.5f, result)
     }
 
     @Test
-    fun `if data store throws an exception when reading the map zoom should return the default zoom of 15`() = runTest {
+    fun `if data store throws an exception when reading the map zoom should return the default zoom of 16 point 5`() = runTest {
         // Given
         every { artSettingsDataSore.data } returns flow { throw IOException("fake map zoom read error") }
         every { errorLogger.logNonFatal(any(), any()) } just runs
@@ -514,7 +514,7 @@ class MartpRepositoryTest {
         val result = repository.getMapZoomPreference()
 
         // Then
-        assertEquals(15f, result)
+        assertEquals(16.5f, result)
         verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.getMapZoomPreference") }
     }
 
@@ -839,7 +839,7 @@ class MartpRepositoryTest {
     }
 
     @Test
-    fun `if there is no saved map zoom should request the mapbox image with the default zoom of 15`(
+    fun `if there is no saved map zoom should request the mapbox image with the default zoom of 16 point 5`(
         @TempDir fakeDir: File
     ) = runTest {
         // Given
@@ -863,7 +863,7 @@ class MartpRepositoryTest {
 
         // Then
         coVerify(exactly = 1) {
-            mapboxApiService.getStaticMapImage(any(), any(), any(), any(), any(), mapZoom = 15f)
+            mapboxApiService.getStaticMapImage(any(), any(), any(), any(), any(), mapZoom = 16.5f)
         }
     }
 

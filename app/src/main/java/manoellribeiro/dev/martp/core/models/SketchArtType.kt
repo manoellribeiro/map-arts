@@ -1,4 +1,4 @@
-package manoellribeiro.dev.martp.core.models.failures
+package manoellribeiro.dev.martp.core.models
 
 import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
 

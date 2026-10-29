@@ -26,7 +26,8 @@ import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.LocationPermissionNotGrantedFailure
 import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.MapLayersColors
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
@@ -801,7 +802,8 @@ class CreateNewMapArtViewModelTest {
             title = "Fake Art Title",
             description = "Fake art description",
             newArtBitMap = fakeBitmap,
-            directory = fakeDirectory
+            directory = fakeDirectory,
+            mapLayersColors = null
         )
         advanceUntilIdle()
 
@@ -855,7 +857,8 @@ class CreateNewMapArtViewModelTest {
             title = fakeTitle,
             description = fakeDescription,
             newArtBitMap = mockk<Bitmap>(),
-            directory = File("fake-located-directory")
+            directory = File("fake-located-directory"),
+            mapLayersColors = null
         )
         advanceUntilIdle()
 
@@ -880,7 +883,8 @@ class CreateNewMapArtViewModelTest {
             title = "Fake Unlocated Art Title",
             description = "Fake unlocated art description",
             newArtBitMap = mockk<Bitmap>(),
-            directory = File("fake-unlocated-directory")
+            directory = File("fake-unlocated-directory"),
+            mapLayersColors = null
         )
         advanceUntilIdle()
 
@@ -901,7 +905,8 @@ class CreateNewMapArtViewModelTest {
             title = fakeTitle,
             description = null,
             newArtBitMap = mockk<Bitmap>(),
-            directory = File("fake-no-description-directory")
+            directory = File("fake-no-description-directory"),
+            mapLayersColors = null
         )
         advanceUntilIdle()
 
@@ -923,13 +928,15 @@ class CreateNewMapArtViewModelTest {
             title = "Fake First Art Title",
             description = null,
             newArtBitMap = mockk<Bitmap>(),
-            directory = fakeDirectory
+            directory = fakeDirectory,
+            mapLayersColors = null
         )
         viewModel.saveArtToLocalDatabase(
             title = "Fake Second Art Title",
             description = null,
             newArtBitMap = mockk<Bitmap>(),
-            directory = fakeDirectory
+            directory = fakeDirectory,
+            mapLayersColors = null
         )
         advanceUntilIdle()
 
@@ -953,7 +960,8 @@ class CreateNewMapArtViewModelTest {
             title = "Fake Failing Art Title",
             description = "Fake failing art description",
             newArtBitMap = mockk<Bitmap>(),
-            directory = File("fake-failing-directory")
+            directory = File("fake-failing-directory"),
+            mapLayersColors = null
         )
         advanceUntilIdle()
 
@@ -964,6 +972,106 @@ class CreateNewMapArtViewModelTest {
         val errorState = assertInstanceOf(CreateNewMapArtUiState.Error::class.java, states[2])
         assertSame(fakeFailure, errorState.failure)
         assertTrue(events.isEmpty())
+    }
+
+    @Test
+    fun `if a colorful map art was generated before should save the entity with its art style, color palette and layer colors`() = runTest {
+        // Given
+        val fakeColorPaletteName = "Fake Saved Palette"
+        val fakeMapLayersColors = MapLayersColors(
+            roadsColor = 0x111111,
+            buildingStrokeColor = 0x222222,
+            buildingColor = 0x333333,
+            roadsPathColor = 0x444444,
+            waterColor = 0x555555,
+            landOthersColor = 0x666666
+        )
+        val mapArtSlot = slot<MapArtEntity>()
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.COLORFUL_MAP
+        coEvery { repository.getColorPalettePreference() } returns fakeColorPaletteName
+        coEvery { locationService.getCurrentLocation() } returns createFakeLocation(latitude = 48.8584, longitude = 2.2945)
+        coEvery { getAddressService.getAddress(any(), any()) } returns null
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-colorful-directory/image.png"
+        coEvery { repository.saveMapArtEntity(capture(mapArtSlot)) } just runs
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-colorful-directory"),
+            canvasToDrawArtWidth = 500,
+            canvasToDrawArtHeight = 500
+        )
+        advanceUntilIdle()
+
+        // When
+        viewModel.saveArtToLocalDatabase(
+            title = "Fake Colorful Art Title",
+            description = null,
+            newArtBitMap = mockk<Bitmap>(),
+            directory = File("fake-colorful-directory"),
+            mapLayersColors = fakeMapLayersColors
+        )
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(SketchArtType.COLORFUL_MAP, mapArtSlot.captured.sketchArtType)
+        assertEquals(fakeColorPaletteName, mapArtSlot.captured.colorPalette)
+        assertEquals(fakeMapLayersColors, mapArtSlot.captured.colorsLayers)
+    }
+
+    @Test
+    fun `if a default map art was generated before should save the entity with its art style and no color palette or layer colors`() = runTest {
+        // Given
+        val mapArtSlot = slot<MapArtEntity>()
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
+        coEvery { locationService.getCurrentLocation() } returns createFakeLocation(latitude = 35.6586, longitude = 139.7454)
+        coEvery { getAddressService.getAddress(any(), any()) } returns null
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-default-directory/image.png"
+        coEvery { repository.saveMapArtEntity(capture(mapArtSlot)) } just runs
+        viewModel.startToGenerateMapArt(
+            directory = File("fake-default-directory"),
+            canvasToDrawArtWidth = 500,
+            canvasToDrawArtHeight = 500
+        )
+        advanceUntilIdle()
+
+        // When
+        viewModel.saveArtToLocalDatabase(
+            title = "Fake Default Art Title",
+            description = null,
+            newArtBitMap = mockk<Bitmap>(),
+            directory = File("fake-default-directory"),
+            mapLayersColors = null
+        )
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(SketchArtType.DEFAULT, mapArtSlot.captured.sketchArtType)
+        assertNull(mapArtSlot.captured.colorPalette)
+        assertNull(mapArtSlot.captured.colorsLayers)
+    }
+
+    @Test
+    fun `if no map art was generated before should save the entity with no art style, color palette or layer colors`() = runTest {
+        // Given
+        val mapArtSlot = slot<MapArtEntity>()
+        coEvery { repository.saveMapArtEntity(capture(mapArtSlot)) } just runs
+
+        // When
+        viewModel.saveArtToLocalDatabase(
+            title = "Fake Ungenerated Art Title",
+            description = null,
+            newArtBitMap = mockk<Bitmap>(),
+            directory = File("fake-ungenerated-directory"),
+            mapLayersColors = null
+        )
+        advanceUntilIdle()
+
+        // Then
+        assertNull(mapArtSlot.captured.sketchArtType)
+        assertNull(mapArtSlot.captured.colorPalette)
+        assertNull(mapArtSlot.captured.colorsLayers)
     }
 
     // endregion

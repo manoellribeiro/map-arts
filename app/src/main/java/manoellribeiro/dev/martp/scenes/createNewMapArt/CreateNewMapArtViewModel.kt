@@ -20,8 +20,9 @@ import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
+import manoellribeiro.dev.martp.core.models.MapLayersColors
 import manoellribeiro.dev.martp.core.models.failures.Failure
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
@@ -54,6 +55,8 @@ class CreateNewMapArtViewModel @Inject constructor(
 
     private var currentArtLocation: Location? = null
     private var currentArtAddress: Address? = null
+    private var currentSketchArtType: SketchArtType? = null
+    private var currentColorPalette: String? = null
     private var generateMapArtJob: Job? = null
 
     fun startToGenerateMapArt(
@@ -104,6 +107,8 @@ class CreateNewMapArtViewModel @Inject constructor(
                     Triple(address.await(), staticImagePath.await(), colorPalette.await())
                 }
                 currentArtAddress = address
+                currentSketchArtType = sketchArtType
+                currentColorPalette = colorPalette
                 emitNewState(
                     CreateNewMapArtUiState.ImageDownloaded(
                         staticMapImagePath = staticImagePath,
@@ -130,7 +135,8 @@ class CreateNewMapArtViewModel @Inject constructor(
         title: String,
         description: String?,
         newArtBitMap: Bitmap,
-        directory: File
+        directory: File,
+        mapLayersColors: MapLayersColors?
     ) {
         viewModelScope.launch {
             try {
@@ -143,7 +149,10 @@ class CreateNewMapArtViewModel @Inject constructor(
                     latitude = currentArtLocation?.latitude?.toFloat() ?: 0F ,
                     longitude = currentArtLocation?.longitude?.toFloat() ?:0F ,
                     dateInMillis = Calendar.getInstance().timeInMillis,
-                    imagePathLocation = directory.path + MartpDatabase.artsDirectoryName + artId + ".png"
+                    imagePathLocation = directory.path + MartpDatabase.artsDirectoryName + artId + ".png",
+                    sketchArtType = currentSketchArtType,
+                    colorPalette = currentColorPalette,
+                    colorsLayers = mapLayersColors
                 )
 
                 repository.saveMapArtEntity(newMartp)

@@ -2,7 +2,7 @@ package manoellribeiro.dev.martp.scenes.createNewMapArt
 
 import android.location.Address
 import manoellribeiro.dev.martp.core.models.failures.Failure
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.scenes.artStyleSettings.ColorPalette
 
 sealed interface CreateNewMapArtUiState {

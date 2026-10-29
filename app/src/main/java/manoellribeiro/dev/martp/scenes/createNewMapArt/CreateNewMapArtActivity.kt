@@ -26,8 +26,9 @@ import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
 import manoellribeiro.dev.martp.core.extensions.gone
 import manoellribeiro.dev.martp.core.extensions.toBitmap
 import manoellribeiro.dev.martp.core.extensions.visible
+import manoellribeiro.dev.martp.core.models.MapLayersColors
 import manoellribeiro.dev.martp.core.models.failures.Failure
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.services.sensors.GravitySensor
 import manoellribeiro.dev.martp.core.sketches.ColorfulMapSketch
 import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
@@ -47,6 +48,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     private lateinit var binding: ActivityCreateNewMapArtBinding
     private val viewModel: CreateNewMapArtViewModel by viewModels()
     private var sketch: MartpSketch? = null
+    private var mapLayersColors: MapLayersColors? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -193,7 +195,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         }
     }
 
-    private fun setColorsLayersForColorfulMap(colorLayerHolder: ColorfulMapSketch.ColorLayerHolder) {
+    private fun setColorsLayersForColorfulMap(colorLayerHolder: MapLayersColors) {
+        mapLayersColors = colorLayerHolder
         binding.mapColorsHoldersLL.removeAllViews()
         addColorLayer(colorLayerHolder.buildingColor, R.string.layer_buildings)
         addColorLayer(colorLayerHolder.buildingStrokeColor, R.string.layer_building_delimitations)
@@ -206,6 +209,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     private fun handleImageDownloadedState(
         state: CreateNewMapArtUiState.ImageDownloaded
     ) = with(binding) {
+        mapLayersColors = null
         mapArtsContainer.visible()
         loadingIndicatorLAV.gone()
         loadingMessageTV.gone()
@@ -294,7 +298,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             title = cityCountryTV.text.toString(),
             description = "", //todo: dropar essa coluna do banco
             directory = this@CreateNewMapArtActivity.filesDir,
-            newArtBitMap = mapArtsContainer.toBitmap()
+            newArtBitMap = mapArtsContainer.toBitmap(),
+            mapLayersColors = mapLayersColors
         )
     }
 

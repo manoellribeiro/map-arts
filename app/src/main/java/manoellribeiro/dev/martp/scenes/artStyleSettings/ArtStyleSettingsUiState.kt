@@ -1,6 +1,6 @@
 package manoellribeiro.dev.martp.scenes.artStyleSettings
 
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 
 sealed interface ArtStyleSettingsUiState {
 

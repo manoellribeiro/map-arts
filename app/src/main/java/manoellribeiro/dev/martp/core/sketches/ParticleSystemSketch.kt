@@ -5,7 +5,7 @@ import manoellribeiro.dev.martp.core.extensions.greenValue
 import manoellribeiro.dev.martp.core.extensions.isRgbColor
 import manoellribeiro.dev.martp.core.extensions.orZero
 import manoellribeiro.dev.martp.core.extensions.redValue
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.services.sensors.MeasurableSensor
 import manoellribeiro.dev.martp.core.sketches.particles.Particle
 import processing.core.PImage

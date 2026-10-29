@@ -32,7 +32,7 @@ import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.services.ConnectivityService
 import manoellribeiro.dev.martp.infra.MainDispatcherExtension
 import okhttp3.ResponseBody

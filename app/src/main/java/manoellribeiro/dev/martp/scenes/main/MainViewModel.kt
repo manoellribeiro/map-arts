@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.Failure
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.scenes.artStyleSettings.ArtStyleSettingsUiState
 import manoellribeiro.dev.martp.scenes.gallery.GalleryUiState
 import manoellribeiro.dev.martp.scenes.userInfo.UserInfoUiState

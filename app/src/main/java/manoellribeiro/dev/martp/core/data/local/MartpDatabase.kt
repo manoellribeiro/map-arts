@@ -14,7 +14,7 @@ import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
         MapArtEntity::class,
         UserInfoEntity::class
     ],
-    version = 2
+    version = 3
 )
 abstract class MartpDatabase: RoomDatabase() {
     companion object {
@@ -28,6 +28,19 @@ abstract class MartpDatabase: RoomDatabase() {
                             `email` TEXT DEFAULT NULL
                         ) 
                 """)
+            }
+        }
+
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `map_arts` ADD COLUMN `sketchArtType` TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE `map_arts` ADD COLUMN `colorPalette` TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE `map_arts` ADD COLUMN `map_layer_roadsColor` INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE `map_arts` ADD COLUMN `map_layer_buildingStrokeColor` INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE `map_arts` ADD COLUMN `map_layer_buildingColor` INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE `map_arts` ADD COLUMN `map_layer_roadsPathColor` INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE `map_arts` ADD COLUMN `map_layer_waterColor` INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE `map_arts` ADD COLUMN `map_layer_landOthersColor` INTEGER DEFAULT NULL")
             }
         }
 

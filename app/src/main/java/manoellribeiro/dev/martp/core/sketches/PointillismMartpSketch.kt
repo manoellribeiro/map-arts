@@ -1,6 +1,6 @@
 package manoellribeiro.dev.martp.core.sketches
 
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import processing.core.PImage
 
 class PointillismMartpSketch(

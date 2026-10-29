@@ -5,7 +5,8 @@ import manoellribeiro.dev.martp.core.extensions.greenValue
 import manoellribeiro.dev.martp.core.extensions.isRgbColor
 import manoellribeiro.dev.martp.core.extensions.orZero
 import manoellribeiro.dev.martp.core.extensions.redValue
-import manoellribeiro.dev.martp.core.models.failures.SketchArtType
+import manoellribeiro.dev.martp.core.models.MapLayersColors
+import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.services.sensors.MeasurableSensor
 import manoellribeiro.dev.martp.core.sketches.particles.Particle
 import manoellribeiro.dev.martp.scenes.artStyleSettings.ColorPalette
@@ -18,7 +19,7 @@ class ColorfulMapSketch(
     canvasHeight: Float = 640.0F,
     private val imagePath: String,
     private val colorPalette: ColorPalette,
-    val onColorsShuffled: (ColorLayerHolder) -> Unit
+    val onColorsShuffled: (MapLayersColors) -> Unit
 ) : MartpSketch(
     0,
     0,
@@ -60,21 +61,12 @@ class ColorfulMapSketch(
     val roadsPathOriginalColor = color(93, 249, 192)
     val waterOriginalColor = color(234, 26, 234)
 
-    data class ColorLayerHolder(
-        var roadsColor: Int? = null,
-        var buildingStrokeColor: Int? = null,
-        var buildingColor: Int? = null,
-        var roadsPathColor: Int? = null,
-        var waterColor: Int? = null,
-        var landOthersColor: Int? = null,
-    )
-
     // TODO: Getting the color of a single pixel with get(x, y) is easy, but not as fast as grabbing the data directly from pixels[]. The equivalent statement to get(x, y) using pixels[] is pixels[y*width+x]. See the reference for pixels[] for more information.
     private fun changePixelColors(mapImage: PImage) {
         mapImage.loadPixels()
         val mapImagePixels = mapImage.pixels
         val randomColors = colorPalette.colors.shuffled()
-        val colorHolder = ColorLayerHolder()
+        val colorHolder = MapLayersColors()
         for (y in 0..<mapImage.height) {
             for (x in 0..<mapImage.width) {
                 val currentPixelColor = mapImagePixels[y*mapImage.width+x]

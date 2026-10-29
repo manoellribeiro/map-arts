@@ -46,7 +46,10 @@ object DatabaseModule {
         return Room.databaseBuilder(
             applicationContext,
             MartpDatabase::class.java, MartpDatabase.databaseName
-        ).addMigrations(MartpDatabase.MIGRATION_1_2).build()
+        ).addMigrations(
+            MartpDatabase.MIGRATION_1_2,
+            MartpDatabase.MIGRATION_2_3
+        ).build()
     }
 
 }

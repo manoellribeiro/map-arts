@@ -12,6 +12,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import manoellribeiro.dev.martp.core.data.local.MartpDatabase
+import manoellribeiro.dev.martp.core.data.local.daos.ColorPalettesDao
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
 import javax.inject.Singleton
@@ -39,6 +40,11 @@ object DatabaseModule {
     }
 
     @Provides
+    fun providesColorPalettesDao(martpDatabase: MartpDatabase): ColorPalettesDao {
+        return martpDatabase.colorPalettesDao()
+    }
+
+    @Provides
     @Singleton
     fun providesMartpRoomDatabase(
         @ApplicationContext applicationContext: Context
@@ -48,7 +54,8 @@ object DatabaseModule {
             MartpDatabase::class.java, MartpDatabase.databaseName
         ).addMigrations(
             MartpDatabase.MIGRATION_1_2,
-            MartpDatabase.MIGRATION_2_3
+            MartpDatabase.MIGRATION_2_3,
+            MartpDatabase.MIGRATION_3_4
         ).build()
     }
 

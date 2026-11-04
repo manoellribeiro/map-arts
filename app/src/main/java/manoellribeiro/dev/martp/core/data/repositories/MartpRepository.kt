@@ -21,6 +21,7 @@ import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.data.network.martp.MartpApiService
+import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteReversedAddress
 import manoellribeiro.dev.martp.core.di.IoDispatcher
 import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
@@ -33,6 +34,7 @@ import manoellribeiro.dev.martp.core.services.ConnectivityService
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 
@@ -311,6 +313,24 @@ class MartpRepository @Inject constructor(
         } catch (e: Exception) {
             errorLogger.logNonFatal(e, "MartpRepository.fetchColorsPalettes")
             throw LocalStorageErrorFailure(originalExceptionMessage = e.message)
+        }
+    }
+
+    suspend fun getReversedAddressFromApi(
+        latitude: Double,
+        longitude: Double
+    ): RemoteReversedAddress {
+        try {
+            return martpApiService.reverseGeocode(
+                latitude = latitude,
+                longitude = longitude,
+                language = Locale.getDefault().language
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.fetchColorsPalettes")
+            throw MartpApiErrorFailure(originalExceptionMessage = e.message)
         }
     }
 

@@ -55,7 +55,6 @@ class CreateNewMapArtViewModel @Inject constructor(
     }
 
     private var currentArtLocation: Location? = null
-    private var currentArtAddress: Address? = null
     private var currentSketchArtType: SketchArtType? = null
     private var currentColorPalette: ColorPaletteEntity? = null
     private var generateMapArtJob: Job? = null
@@ -81,12 +80,9 @@ class CreateNewMapArtViewModel @Inject constructor(
                 val verticalPaddingsNumber = verticalTilesCount + 1
                 val padding = 20
                 emitNewState(CreateNewMapArtUiState.Loading(R.string.downloading_map_image))
-                val (address, staticImagePath, colorPalette) = coroutineScope {
-                    val address = async {
-                        getAddressService.getAddress(
-                            location.latitude,
-                            location.longitude
-                        )
+                val (title, staticImagePath, colorPalette) = coroutineScope {
+                    val title = async {
+                        getAddressTitle(location.latitude, location.longitude)
                     }
                     val colorPalette = async {
                         if(sketchArtType == SketchArtType.COLORFUL_MAP) {
@@ -105,15 +101,14 @@ class CreateNewMapArtViewModel @Inject constructor(
                             dir = directory
                         )
                     }
-                    Triple(address.await(), staticImagePath.await(), colorPalette.await())
+                    Triple(title.await(), staticImagePath.await(), colorPalette.await())
                 }
-                currentArtAddress = address
                 currentSketchArtType = sketchArtType
                 currentColorPalette = colorPalette
                 emitNewState(
                     CreateNewMapArtUiState.ImageDownloaded(
                         staticMapImagePath = staticImagePath,
-                        title = buildTitleWithAddress(address),
+                        title = title,
                         sketchArtType = sketchArtType,
                         colorPalette = colorPalette,
                         latitude = location.latitude,
@@ -126,8 +121,32 @@ class CreateNewMapArtViewModel @Inject constructor(
         }
     }
 
-    private fun buildTitleWithAddress(address: Address?): String {
-        return listOfNotNull(address?.thoroughfare, address?.locality, address?.countryName)
+    private suspend fun getAddressTitle(
+        latitude: Double,
+        longitude: Double
+    ): String {
+        val addressFromAndroidGeocode = getAddressService.getAddress(latitude, longitude)
+        if(addressFromAndroidGeocode == null) {
+            val addressFromTheApi = repository.getReversedAddressFromApi(latitude, longitude)
+            return buildTitleWithAddress(
+                street = addressFromTheApi.street,
+                city = addressFromTheApi.city,
+                country = addressFromTheApi.country
+            )
+        }
+        return buildTitleWithAddress(
+            street = addressFromAndroidGeocode.thoroughfare,
+            city = addressFromAndroidGeocode.locality,
+            country = addressFromAndroidGeocode.countryName
+        )
+    }
+
+    private fun buildTitleWithAddress(
+        street: String?,
+        city: String?,
+        country: String?
+    ): String {
+        return listOfNotNull(street, city, country)
             .filter { it.isNotBlank() }
             .joinToString(", ")
     }

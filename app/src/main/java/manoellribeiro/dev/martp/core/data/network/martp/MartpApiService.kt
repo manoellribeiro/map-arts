@@ -2,6 +2,7 @@ package manoellribeiro.dev.martp.core.data.network.martp
 
 import manoellribeiro.dev.martp.BuildConfig
 import manoellribeiro.dev.martp.core.data.network.martp.models.ColorPalettesResponse
+import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -15,13 +16,15 @@ interface MartpApiService {
 
     companion object {
 
-        operator fun invoke(): MartpApiService {
+        operator fun invoke(errorLogger: ErrorLogger): MartpApiService {
 
             val loggingInterceptor = HttpLoggingInterceptor().apply {
                 setLevel(HttpLoggingInterceptor.Level.BODY)
+                redactHeader(AppCheckInterceptor.APP_CHECK_HEADER)
             }
 
             val okHttpClient = OkHttpClient.Builder()
+                .addInterceptor(AppCheckInterceptor(errorLogger))
                 .addInterceptor(loggingInterceptor)
                 .build()
 

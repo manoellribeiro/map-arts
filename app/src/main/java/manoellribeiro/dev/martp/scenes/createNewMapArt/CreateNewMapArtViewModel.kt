@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.MartpDatabase
+import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.MapLayersColors
@@ -56,7 +57,7 @@ class CreateNewMapArtViewModel @Inject constructor(
     private var currentArtLocation: Location? = null
     private var currentArtAddress: Address? = null
     private var currentSketchArtType: SketchArtType? = null
-    private var currentColorPalette: String? = null
+    private var currentColorPalette: ColorPaletteEntity? = null
     private var generateMapArtJob: Job? = null
 
     fun startToGenerateMapArt(
@@ -89,7 +90,7 @@ class CreateNewMapArtViewModel @Inject constructor(
                     }
                     val colorPalette = async {
                         if(sketchArtType == SketchArtType.COLORFUL_MAP) {
-                            repository.getColorPalettePreference()
+                            repository.getSelectedColorPalette()
                         } else null
                     }
                     val staticImagePath = async {
@@ -151,7 +152,7 @@ class CreateNewMapArtViewModel @Inject constructor(
                     dateInMillis = Calendar.getInstance().timeInMillis,
                     imagePathLocation = directory.path + MartpDatabase.artsDirectoryName + artId + ".png",
                     sketchArtType = currentSketchArtType,
-                    colorPalette = currentColorPalette,
+                    colorPalette = currentColorPalette?.name,
                     colorsLayers = mapLayersColors
                 )
 

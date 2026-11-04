@@ -2,14 +2,14 @@ package manoellribeiro.dev.martp.core.data.network.martp.models
 
 import com.google.gson.annotations.SerializedName
 
-data class ColorPalettesResponse(
+data class RemoteColorPalettesResponse(
     @SerializedName("palettes")
-    val palettes: List<ColorPaletteResponse>
+    val palettes: List<RemoteColorPalette>
 )
 
-data class ColorPaletteResponse(
+data class RemoteColorPalette(
     @SerializedName("name")
     val name: String,
     @SerializedName("colors")
-    val colors: List<String>
+    val colors: List<String>,
 )

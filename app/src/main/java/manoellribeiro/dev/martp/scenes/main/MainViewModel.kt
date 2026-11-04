@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -83,17 +85,30 @@ class MainViewModel @Inject constructor(
 
     fun getArtStyleSettings() {
         viewModelScope.launch {
-            emitNewArtStyleSettingsState(ArtStyleSettingsUiState.Loading)
-            val mapZoom = repository.getMapZoomPreference()
-            val artStyle = repository.getArtStylePreference()
-            val colorPaletteName = repository.getColorPalettePreference()
-            emitNewArtStyleSettingsState(
-                ArtStyleSettingsUiState.SettingsLoaded(
-                    mapZoom = mapZoom,
-                    mapArtStyle = artStyle,
-                    colorPaletteSelected = colorPaletteName
+            try {
+                emitNewArtStyleSettingsState(ArtStyleSettingsUiState.Loading)
+                val settingsLoadedState = coroutineScope {
+                    val colorPalettes = async { repository.getColorsPalettes() }
+                    val mapZoom = async { repository.getMapZoomPreference() }
+                    val artStyle = async { repository.getArtStylePreference() }
+                    val colorPaletteName = async { repository.getColorPalettePreference() }
+                    ArtStyleSettingsUiState.SettingsLoaded(
+                        mapZoom = mapZoom.await(),
+                        mapArtStyle = artStyle.await(),
+                        colorPaletteSelected = colorPaletteName.await(),
+                        colorsPalettes = colorPalettes.await()
+                    )
+                }
+                emitNewArtStyleSettingsState(
+                    settingsLoadedState
                 )
-            )
+            } catch (failure: Failure) {
+                emitNewArtStyleSettingsState(
+                    ArtStyleSettingsUiState.Error(
+                        messageId = failure.messageToBeDisplayedToUserId
+                    )
+                )
+            }
         }
     }
 

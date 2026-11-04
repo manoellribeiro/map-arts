@@ -1,14 +1,11 @@
 package manoellribeiro.dev.martp.core.data.repositories
 
-import android.graphics.Bitmap
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
-import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -16,20 +13,23 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import manoellribeiro.dev.martp.core.data.local.daos.ColorPalettesDao
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
+import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
+import manoellribeiro.dev.martp.core.data.network.martp.MartpApiService
 import manoellribeiro.dev.martp.core.di.IoDispatcher
 import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import manoellribeiro.dev.martp.core.models.SketchArtType
+import manoellribeiro.dev.martp.core.models.failures.Failure
+import manoellribeiro.dev.martp.core.models.failures.MartpApiErrorFailure
 import manoellribeiro.dev.martp.core.services.ConnectivityService
-import manoellribeiro.dev.martp.core.sketches.MartpSketch
-import manoellribeiro.dev.martp.core.utils.ColorPaletteProvider
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
@@ -39,9 +39,11 @@ import javax.inject.Inject
 class MartpRepository @Inject constructor(
     private val mapboxApiService: MapboxApiService,
     private val geoapifyApiService: GeoapifyApiService,
+    private val martpApiService: MartpApiService,
     private val connectivityService: ConnectivityService,
     private val mapArtDao: MapArtsDao,
     private val userInfoDao: UserInfoDao,
+    private val colorPalettesDao: ColorPalettesDao,
     private val artSettingsDataSore: DataStore<Preferences>,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val errorLogger: ErrorLogger
@@ -252,6 +254,62 @@ class MartpRepository @Inject constructor(
             throw e
         } catch (e: Exception) {
             errorLogger.logNonFatal(e, "MartpRepository.saveMapArtEntity")
+            throw LocalStorageErrorFailure(originalExceptionMessage = e.message)
+        }
+    }
+
+    suspend fun getColorsPalettes(): List<ColorPaletteEntity> {
+        try {
+            return colorPalettesDao.getAll().ifEmpty { fetchColorsPalettes() }
+        } catch (failure: Failure) {
+            throw failure
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.getColorsPalettes")
+            throw LocalStorageErrorFailure(originalExceptionMessage = e.message)
+        }
+    }
+
+    suspend fun fetchColorsPalettes(): List<ColorPaletteEntity>  {
+        try {
+            val emptyListFallback = listOf(ColorPaletteEntity(
+                name = "Martp",
+                colors = listOf(
+                    0xFF100C2D.toInt(),
+                    0xFF120D31.toInt(),
+                    0xFF4E3C41.toInt(),
+                    0xFF896B51.toInt(),
+                    0xFFFFC971.toInt(),
+                    0xFFFFCE7E.toInt(),
+                )
+            ))
+
+            val colorPaletteEntities = martpApiService.getColorPalettes().palettes.map {
+                ColorPaletteEntity(it)
+            }.ifEmpty { emptyListFallback }
+
+            colorPalettesDao.insertAll(colorPaletteEntities)
+
+            return martpApiService.getColorPalettes().palettes.map {
+                ColorPaletteEntity(it)
+            }.ifEmpty { emptyListFallback }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.fetchColorsPalettes")
+            throw MartpApiErrorFailure(originalExceptionMessage = e.message)
+        }
+    }
+
+    suspend fun getSelectedColorPalette(): ColorPaletteEntity {
+        try {
+            val selectedColorPalette = getColorPalettePreference()
+            return colorPalettesDao.getByName(selectedColorPalette)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.fetchColorsPalettes")
             throw LocalStorageErrorFailure(originalExceptionMessage = e.message)
         }
     }

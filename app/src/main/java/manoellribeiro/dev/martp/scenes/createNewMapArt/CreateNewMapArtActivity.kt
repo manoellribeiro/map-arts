@@ -16,11 +16,10 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import manoellribeiro.dev.martp.R
+import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.extensions.dp
 import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
 import manoellribeiro.dev.martp.core.extensions.gone
@@ -36,7 +35,6 @@ import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.sketches.PointillismMartpSketch
 import manoellribeiro.dev.martp.core.sketches.ParticleSystemSketch
 import manoellribeiro.dev.martp.core.sketches.WaterFlowMartpSketch
-import manoellribeiro.dev.martp.core.utils.ColorPaletteProvider
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import manoellribeiro.dev.martp.databinding.LayoutMapLayerLineBinding
 import processing.android.PFragment
@@ -255,13 +253,23 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             SketchArtType.COLORFUL_MAP -> {
                 colorPaletteTV.visible()
                 mapLayersSubTitleTV.visible()
-                colorPaletteTV.text = getString(R.string.color_palette_value, state.colorPalette)
+                colorPaletteTV.text = getString(R.string.color_palette_value, state.colorPalette?.name)
                 ColorfulMapSketch(
                     padding = 20,
                     canvasWidth = mapArtsContainer.width.toFloat(),
                     canvasHeight = mapArtsContainer.height.toFloat(),
                     imagePath = state.staticMapImagePath,
-                    colorPalette = ColorPaletteProvider.byNameOrDefault(state.colorPalette)
+                    colorPalette = ColorPaletteEntity(
+                        name = "Martp",
+                        colors = listOf(
+                            0xFF100C2D.toInt(),
+                            0xFF120D31.toInt(),
+                            0xFF4E3C41.toInt(),
+                            0xFF896B51.toInt(),
+                            0xFFFFC971.toInt(),
+                            0xFFFFCE7E.toInt(),
+                        )
+                    )
                 ) {
                     runOnUiThread {
                         setColorsLayersForColorfulMap(it)

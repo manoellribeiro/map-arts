@@ -69,9 +69,8 @@ import manoellribeiro.dev.martp.core.components.compose.theme.LightL1
 import manoellribeiro.dev.martp.core.components.compose.theme.LightL5
 import manoellribeiro.dev.martp.core.components.compose.theme.LightYellow
 import manoellribeiro.dev.martp.core.components.compose.theme.White
-import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
+import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.models.SketchArtType
-import manoellribeiro.dev.martp.core.utils.ColorPaletteProvider
 import manoellribeiro.dev.martp.scenes.main.MainViewModel
 import kotlin.getValue
 
@@ -111,6 +110,9 @@ class ArtStyleSettingsFragment : Fragment() {
                             }
                         }
                     }
+                    is ArtStyleSettingsUiState.Error -> {
+
+                    }
                     is ArtStyleSettingsUiState.SettingsLoaded -> {
                         Column(
                             modifier = Modifier
@@ -122,7 +124,7 @@ class ArtStyleSettingsFragment : Fragment() {
 
                             var selectedArtStyle by remember { mutableStateOf(state.mapArtStyle) }
                             var selectedColorPaletteName by remember {
-                                mutableStateOf(ColorPaletteProvider.byNameOrDefault(state.colorPaletteSelected).name)
+                                mutableStateOf(state.colorPaletteSelected)
                             }
                             // The slider holds its position (0..1) instead of the zoom itself, so switching to an
                             // art style with another zoom range keeps the thumb where it was
@@ -148,6 +150,7 @@ class ArtStyleSettingsFragment : Fragment() {
 
                             if(selectedArtStyle == SketchArtType.COLORFUL_MAP) {
                                 ColorPaletteSelectors(
+                                    colorPalettes = state.colorsPalettes,
                                     selectedColorPaletteName = selectedColorPaletteName,
                                     onColorPaletteSelected = { colorPaletteName ->
                                         selectedColorPaletteName = colorPaletteName
@@ -336,6 +339,7 @@ fun ArtStyleSelectors(
 
 @Composable
 fun ColorPaletteSelectors(
+    colorPalettes: List<ColorPaletteEntity>,
     selectedColorPaletteName: String,
     onColorPaletteSelected: (String) -> Unit
 ) {
@@ -364,7 +368,7 @@ fun ColorPaletteSelectors(
             modifier = Modifier.padding(bottom = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            for(colorPalette in ColorPaletteProvider.all) {
+            for(colorPalette in colorPalettes) {
                 ColorPaletteCardSelector(
                     colorPalette = colorPalette,
                     isSelected = colorPalette.name == selectedColorPaletteName,
@@ -443,7 +447,7 @@ fun ArtStyleCardSelector(
 
 @Composable
 fun ColorPaletteCardSelector(
-    colorPalette: ColorPalette,
+    colorPalette: ColorPaletteEntity,
     isSelected: Boolean,
     onSelect: (String) -> Unit,
 ) {

@@ -55,8 +55,7 @@ abstract class MartpDatabase: RoomDatabase() {
                 db.execSQL("""
                     CREATE TABLE IF NOT EXISTS `color_palettes` (
                             `name` TEXT NOT NULL PRIMARY KEY,
-                            `colors` TEXT NOT NULL,
-                            `position` INTEGER NOT NULL
+                            `colors` TEXT NOT NULL
                         )
                 """)
             }

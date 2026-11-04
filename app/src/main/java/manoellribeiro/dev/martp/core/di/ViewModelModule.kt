@@ -15,10 +15,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.CoroutineDispatcher
+import manoellribeiro.dev.martp.core.data.local.daos.ColorPalettesDao
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
+import manoellribeiro.dev.martp.core.data.network.martp.MartpApiService
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.services.ConnectivityService
@@ -36,8 +38,10 @@ object ViewModelModule {
     fun bindsMartpRepository(
         mapArtsDao: MapArtsDao,
         userInfoDao: UserInfoDao,
+        colorPalettesDao: ColorPalettesDao,
         mapboxApiService: MapboxApiService,
         geoapifyApiService: GeoapifyApiService,
+        martpApiService: MartpApiService,
         connectivityService: ConnectivityService,
         artSettingsDataStore: DataStore<Preferences>,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
@@ -51,7 +55,9 @@ object ViewModelModule {
             artSettingsDataSore = artSettingsDataStore,
             geoapifyApiService = geoapifyApiService,
             ioDispatcher = ioDispatcher,
-            errorLogger = errorLogger
+            errorLogger = errorLogger,
+            martpApiService = martpApiService,
+            colorPalettesDao = colorPalettesDao
         )
     }
 

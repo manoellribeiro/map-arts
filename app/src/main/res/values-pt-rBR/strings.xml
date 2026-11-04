@@ -90,4 +90,5 @@
     <string name="error_downloading_location_image">Um erro aconteceu ao baixar a imagem da sua localização, tente novamente.</string>
     <string name="tap_map_to_shuffle_colors">Você pode tocar no mapa para embaralhar as cores até encontrar a melhor combinação.</string>
     <string name="unknown_location">Localização desconhecida</string>
+    <string name="martp_api_failure_message">Um erro aconteceu ao buscar os dados dos serviços internos do Martp, tente novamente.</string>
 </resources>

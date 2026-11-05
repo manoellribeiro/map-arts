@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -67,6 +68,13 @@ class CreateNewMapArtActivity: AppCompatActivity() {
 
     private fun setupViews() = with(binding) {
         ViewCompat.setOnApplyWindowInsetsListener(titleTV) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top + 16.dp(resources)
+            }
+            WindowInsetsCompat.CONSUMED
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(mapArtsContainer) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = insets.top + 16.dp(resources)
@@ -148,6 +156,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         mapLayersTitleTV.gone()
         mapLayersSubTitleTV.gone()
         loadingMessageTV.gone()
+        usernameInfoContainerLL.gone()
     }
 
     private fun handleLoadingState(
@@ -169,6 +178,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         longTV.gone()
         mapColorsHoldersLL.gone()
         mapLayersTitleTV.gone()
+        usernameInfoContainerLL.gone()
     }
 
     private fun addDefaultAndPointillismMapLayers() {
@@ -212,9 +222,19 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         mapArtsContainer.visible()
         loadingIndicatorLAV.gone()
         loadingMessageTV.gone()
-        titleTV.visible()
+        titleTV.gone()
         mapLayersTitleTV.visible()
         mapColorsHoldersLL.visible()
+        usernameInfoContainerLL.visible()
+        if(!state.user?.username.isNullOrEmpty()) {
+            usernameTV.text = state.user.username
+            addUsernameMB.setStrokeColor(getColor(R.color.light_l3))
+            addUsernameMB.setButtonBackGroundColor(getColor(R.color.white))
+            addUsernameMB.title = getString(R.string.menu_edit)
+        } else {
+            usernameTV.text = getString(R.string.anonymous)
+        }
+
         sketch = when(state.sketchArtType) {
             SketchArtType.DEFAULT -> {
                 addDefaultAndPointillismMapLayers()

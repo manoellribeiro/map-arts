@@ -44,8 +44,8 @@
     <string name="your_gallery">Your Gallery</string>
     <string name="create_description_with_ai">Create description with AI</string>
     <string name="thinking">Thinking…</string>
-    <string name="digital_exposition">Digital Exposition</string>
-    <string name="digital_exposition_description">Every art created on Martp is sent to our digital exposition — a shared gallery where everyone can explore the creativity of our community. If you want your name alongside your art, fill in the fields below.</string>
+    <string name="digital_exhibition">Digital Exhibition</string>
+    <string name="digital_exhibition_description">Every art created on Martp is sent to our digital exhibition — a shared gallery where everyone can explore the creativity of our community. If you want your name alongside your art, fill in the fields below.</string>
     <string name="email_not_mandatory_hint">Not mandatory! The only downside is that I won\'t be able to contact you if I really like your art :)</string>
     <string name="save_my_info">Save my info</string>
     <string name="username" translatable="false">Username</string>
@@ -92,4 +92,11 @@
     <string name="tap_map_to_shuffle_colors">You can tap on the map to shuffle the colors until you find the best match.</string>
     <string name="unknown_location">Unknown Location</string>
     <string name="martp_api_failure_message">An error occurred while fetching data from the Martp internal services, please try again.</string>
+    <string name="shown_in_gallery_as">Shown in the gallery as</string>
+    <string name="add_name">Add name</string>
+    <string name="save_with_my_username">Save with my username</string>
+    <string name="save_anonymously">Save anonymously</string>
+    <string name="want_your_name_on_it">Want your name on it?</string>
+    <string name="anonymous">Anonymous</string>
+    <string name="author_in_digital_exhibition">Author in the Digital Exhibition:</string>
 </resources>

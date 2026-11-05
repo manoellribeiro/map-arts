@@ -68,10 +68,11 @@ class CreateNewMapArtViewModel @Inject constructor(
         generateMapArtJob = viewModelScope.launch {
             try {
                 emitNewState(CreateNewMapArtUiState.Loading(R.string.accessing_your_location))
-                val (sketchArtType, location) = coroutineScope {
+                val (sketchArtType, location, user) = coroutineScope {
                     val sketchArtType = async { repository.getArtStylePreference() }
                     val location = async { locationService.getCurrentLocation() }
-                    sketchArtType.await() to location.await()
+                    val user = async { repository.fetchCurrentUserInfo() }
+                    Triple(sketchArtType.await(), location.await(), user.await())
                 }
                 currentArtLocation = location
                 val horizontalTilesCount = 4
@@ -112,7 +113,8 @@ class CreateNewMapArtViewModel @Inject constructor(
                         sketchArtType = sketchArtType,
                         colorPalette = colorPalette,
                         latitude = location.latitude,
-                        longitude = location.longitude
+                        longitude = location.longitude,
+                        user = user
                     )
                 )
             } catch (failure: Failure) {

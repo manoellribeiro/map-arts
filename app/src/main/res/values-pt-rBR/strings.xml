@@ -44,8 +44,8 @@
     <string name="your_gallery">Sua galeria</string>
     <string name="create_description_with_ai">Criar descrição com IA</string>
     <string name="thinking">Pensando…</string>
-    <string name="digital_exposition">Exposição Digital</string>
-    <string name="digital_exposition_description">Toda arte criada no Martp é enviada para a nossa exposição digital — uma galeria compartilhada onde todos podem explorar a criatividade da nossa comunidade. Se você quer o seu nome junto com a sua arte, preencha os campos abaixo.</string>
+    <string name="digital_exhibition">Exposição Digital</string>
+    <string name="digital_exhibition_description">Toda arte criada no Martp é enviada para a nossa exposição digital — uma galeria compartilhada onde todos podem explorar a criatividade da nossa comunidade. Se você quer o seu nome junto com a sua arte, preencha os campos abaixo.</string>
     <string name="email_not_mandatory_hint">Não é obrigatório! O único lado negativo é que não vou conseguir entrar em contato se eu realmente gostar da sua arte :)</string>
     <string name="save_my_info">Salvar minhas informações</string>
     <string name="email_optional_hint">Email (opcional)</string>
@@ -91,4 +91,11 @@
     <string name="tap_map_to_shuffle_colors">Você pode tocar no mapa para embaralhar as cores até encontrar a melhor combinação.</string>
     <string name="unknown_location">Localização desconhecida</string>
     <string name="martp_api_failure_message">Um erro aconteceu ao buscar os dados dos serviços internos do Martp, tente novamente.</string>
+    <string name="shown_in_gallery_as">Aparece na galeria como</string>
+    <string name="add_name">Adicionar nome</string>
+    <string name="save_with_my_username">Salvar com meu nome de usuário</string>
+    <string name="save_anonymously">Salvar anonimamente</string>
+    <string name="want_your_name_on_it">Quer seu nome na sua arte?</string>
+    <string name="anonymous">Anônimo</string>
+    <string name="author_in_digital_exhibition">Autor na Exposição Digital:</string>
 </resources>

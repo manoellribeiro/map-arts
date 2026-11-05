@@ -10,9 +10,11 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.ProgressBar
+import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import androidx.core.view.setPadding
@@ -75,6 +77,7 @@ class MartpButton @JvmOverloads constructor(
         )
 
         val titleText = customAttributes.getString(R.styleable.MartpButton_title) ?: ""
+        val titleFontFamilyId = customAttributes.getResourceId(R.styleable.MartpButton_titleFontFamily, 0)
 
 
         val startIconDrawable = customAttributes.getDrawable(R.styleable.MartpButton_startIcon)
@@ -98,6 +101,9 @@ class MartpButton @JvmOverloads constructor(
         ]
 
         customAttributes.recycle()
+        if (titleFontFamilyId != 0) {
+            titleBinding.titleTX.typeface = ResourcesCompat.getFont(context, titleFontFamilyId)
+        }
         initViews(
             titleText,
             fontAndIconColor,
@@ -110,11 +116,11 @@ class MartpButton @JvmOverloads constructor(
         )
     }
 
-    fun setTitleColor(color: Int) {
+    fun setTitleColor(@ColorInt color: Int) {
         titleBinding.titleTX.setTextColor(color)
     }
 
-    fun setButtonBackGroundColor(color: Int) {
+    fun setButtonBackGroundColor(@ColorInt color: Int) {
         (
             (this@MartpButton.background as RippleDrawable)
                 .findDrawableByLayerId(R.id.martpButtonShape) as GradientDrawable
@@ -124,7 +130,7 @@ class MartpButton @JvmOverloads constructor(
         buttonBackgroundColor = color
     }
 
-    fun setStrokeColor(color: Int) {
+    fun setStrokeColor(@ColorInt color: Int) {
         (
             (this@MartpButton.background as RippleDrawable)
                 .findDrawableByLayerId(R.id.martpButtonShape) as GradientDrawable
@@ -147,10 +153,11 @@ class MartpButton @JvmOverloads constructor(
         cornerRadius: Float,
         martpButtonType: MartpButtonType,
     ) {
-        this@MartpButton.setPadding(
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8F, resources.displayMetrics).toInt() +
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4F, resources.displayMetrics).toInt()
-        )
+        if (paddingStart == 0 && paddingEnd == 0 && paddingTop == 0 && paddingBottom == 0) {
+            this@MartpButton.setPadding(
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12F, resources.displayMetrics).toInt()
+            )
+        }
 
         this@MartpButton.title = title
         titleBinding.titleTX.setTextColor(fontAndIconColor)

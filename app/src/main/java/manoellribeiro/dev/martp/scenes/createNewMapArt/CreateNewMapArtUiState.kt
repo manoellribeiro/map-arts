@@ -2,6 +2,7 @@ package manoellribeiro.dev.martp.scenes.createNewMapArt
 
 import android.location.Address
 import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
+import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.SketchArtType
 
@@ -17,6 +18,7 @@ sealed interface CreateNewMapArtUiState {
         val sketchArtType: SketchArtType,
         val latitude: Double,
         val longitude: Double,
-        val colorPalette: ColorPaletteEntity?
+        val colorPalette: ColorPaletteEntity?,
+        val user: UserInfoEntity?
     ): CreateNewMapArtUiState
 }

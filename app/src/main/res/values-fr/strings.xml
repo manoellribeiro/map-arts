@@ -44,8 +44,8 @@
     <string name="your_gallery">Votre galerie</string>
     <string name="create_description_with_ai">Créer une description avec l\'IA</string>
     <string name="thinking">Réflexion en cours…</string>
-    <string name="digital_exposition">Exposition Numérique</string>
-    <string name="digital_exposition_description">Chaque œuvre créée sur Martp est envoyée à notre exposition numérique — une galerie partagée où chacun peut explorer la créativité de notre communauté. Si vous souhaitez que votre nom accompagne votre art, remplissez les champs ci-dessous.</string>
+    <string name="digital_exhibition">Exposition Numérique</string>
+    <string name="digital_exhibition_description">Chaque œuvre créée sur Martp est envoyée à notre exposition numérique — une galerie partagée où chacun peut explorer la créativité de notre communauté. Si vous souhaitez que votre nom accompagne votre art, remplissez les champs ci-dessous.</string>
     <string name="email_not_mandatory_hint">Pas obligatoire ! Le seul inconvénient est que je ne pourrai pas vous contacter si j\'aime vraiment votre art :)</string>
     <string name="save_my_info">Enregistrer mes informations</string>
     <string name="email_optional_hint">Email (optionnel)</string>
@@ -91,4 +91,11 @@
     <string name="tap_map_to_shuffle_colors">Vous pouvez toucher la carte pour mélanger les couleurs jusqu\'à trouver la meilleure combinaison.</string>
     <string name="unknown_location">Position inconnue</string>
     <string name="martp_api_failure_message">Une erreur s’est produite lors de la récupération des données des services internes de Martp, veuillez réessayer.</string>
+    <string name="shown_in_gallery_as">Apparaît dans la galerie sous le nom de</string>
+    <string name="add_name">Ajouter un nom</string>
+    <string name="save_with_my_username">Enregistrer avec mon nom d\'utilisateur</string>
+    <string name="save_anonymously">Enregistrer anonymement</string>
+    <string name="want_your_name_on_it">Vous voulez votre nom sur votre œuvre ?</string>
+    <string name="anonymous">Anonyme</string>
+    <string name="author_in_digital_exhibition">Auteur dans l\'Exposition Numérique :</string>
 </resources>

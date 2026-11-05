@@ -8,6 +8,7 @@
         <attr name="startIcon" format="integer"/>
         <attr name="endIcon" format="integer"/>
         <attr name="buttonBackgroundColor" format="color"/>
+        <attr name="titleFontFamily" format="reference"/>
         <attr name="strokeColor"/>
         <attr name="cornerRadius"/>
         <attr name="type" format="enum">

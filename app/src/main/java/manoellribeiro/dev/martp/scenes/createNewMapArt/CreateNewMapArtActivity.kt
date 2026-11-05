@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
+import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.extensions.dp
 import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
 import manoellribeiro.dev.martp.core.extensions.gone
@@ -259,17 +260,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                     canvasWidth = mapArtsContainer.width.toFloat(),
                     canvasHeight = mapArtsContainer.height.toFloat(),
                     imagePath = state.staticMapImagePath,
-                    colorPalette = ColorPaletteEntity(
-                        name = "Martp",
-                        colors = listOf(
-                            0xFF100C2D.toInt(),
-                            0xFF120D31.toInt(),
-                            0xFF4E3C41.toInt(),
-                            0xFF896B51.toInt(),
-                            0xFFFFC971.toInt(),
-                            0xFFFFCE7E.toInt(),
-                        )
-                    )
+                    colorPalette = state.colorPalette!!
                 ) {
                     runOnUiThread {
                         setColorsLayersForColorfulMap(it)

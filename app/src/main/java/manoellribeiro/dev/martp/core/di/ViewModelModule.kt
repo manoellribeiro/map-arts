@@ -15,6 +15,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import manoellribeiro.dev.martp.core.data.local.daos.ColorPalettesDao
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
@@ -45,6 +46,7 @@ object ViewModelModule {
         connectivityService: ConnectivityService,
         artSettingsDataStore: DataStore<Preferences>,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
+        @ApplicationScope applicationScope: CoroutineScope,
         errorLogger: ErrorLogger
     ): MartpRepository {
         return MartpRepository(
@@ -55,6 +57,7 @@ object ViewModelModule {
             artSettingsDataSore = artSettingsDataStore,
             geoapifyApiService = geoapifyApiService,
             ioDispatcher = ioDispatcher,
+            applicationScope = applicationScope,
             errorLogger = errorLogger,
             martpApiService = martpApiService,
             colorPalettesDao = colorPalettesDao

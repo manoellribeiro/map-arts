@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import manoellribeiro.dev.martp.core.data.local.daos.ColorPalettesDao
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
@@ -22,6 +24,7 @@ import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.data.network.martp.MartpApiService
 import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteReversedAddress
+import manoellribeiro.dev.martp.core.di.ApplicationScope
 import manoellribeiro.dev.martp.core.di.IoDispatcher
 import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
@@ -47,6 +50,7 @@ class MartpRepository @Inject constructor(
     private val colorPalettesDao: ColorPalettesDao,
     private val artSettingsDataSore: DataStore<Preferences>,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    @ApplicationScope private val applicationScope: CoroutineScope,
     private val errorLogger: ErrorLogger
 ) {
 
@@ -281,7 +285,10 @@ class MartpRepository @Inject constructor(
             errorLogger.logNonFatal(e, "MartpRepository.getColorsPalettes")
             emptyList()
         }
-        return localColorPalettes.ifEmpty { fetchColorsPalettes() }
+        if (localColorPalettes.isEmpty()) return fetchColorsPalettes()
+
+        applicationScope.launch { fetchColorsPalettes() }
+        return localColorPalettes
     }
 
     suspend fun fetchColorsPalettes(): List<ColorPaletteEntity> {
@@ -297,7 +304,7 @@ class MartpRepository @Inject constructor(
         if (remoteColorPalettes.isEmpty()) return FALLBACK_COLOR_PALETTES
 
         try {
-            colorPalettesDao.insertAll(remoteColorPalettes)
+            colorPalettesDao.replaceAll(remoteColorPalettes)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

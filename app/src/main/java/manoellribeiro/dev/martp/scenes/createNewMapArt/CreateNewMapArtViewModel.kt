@@ -20,6 +20,7 @@ import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.MartpDatabase
 import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
+import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.MapLayersColors
 import manoellribeiro.dev.martp.core.models.failures.Failure
@@ -153,16 +154,18 @@ class CreateNewMapArtViewModel @Inject constructor(
             .joinToString(", ")
     }
 
-    fun saveArtToLocalDatabase(
+    fun saveArt(
         title: String,
         description: String?,
-        newArtBitMap: Bitmap,
         directory: File,
-        mapLayersColors: MapLayersColors?
+        mapLayersColors: MapLayersColors?,
+        updateUserInfo: UserInfoEntity
     ) {
         viewModelScope.launch {
             try {
                 emitNewState(CreateNewMapArtUiState.ActionButtonLoading)
+                repository.setUserName(updateUserInfo.username.orEmpty(), updateUserInfo.id)
+                repository.setUserEmail(updateUserInfo.email.orEmpty(), updateUserInfo.id)
                 val artId = UUID.randomUUID().toString()
                 val newMartp = MapArtEntity(
                     id = artId,

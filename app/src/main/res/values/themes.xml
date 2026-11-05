@@ -55,6 +55,17 @@
         <item name="fontAndIconColor">@color/dark_d1</item>
         <item name="cornerRadius">8dp</item>
     </style>
+    <style name="MartpButton.TextButton">
+        <item name="type">outlined</item>
+        <item name="buttonBackgroundColor">@android:color/transparent</item>
+        <item name="strokeColor">@android:color/transparent</item>
+        <item name="fontAndIconColor">@color/dark_d1</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
 <!--    <style name="MartpButton.Destructive">-->
 <!--        <item name="type">filled</item>-->
 <!--        <item name="buttonBackgroundColor">@color/error_medium</item>-->

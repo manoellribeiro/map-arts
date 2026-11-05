@@ -111,7 +111,7 @@ class MainViewModel @Inject constructor(
     fun setUserName(username: String, userId: String) {
         setUserNameJob?.cancel()
         setUserNameJob = viewModelScope.launch {
-            delay(2000.milliseconds)
+            delay(1000.milliseconds)
             repository.setUserName(username, userId)
         }
     }
@@ -119,7 +119,7 @@ class MainViewModel @Inject constructor(
     fun setUserEmail(email: String, userId: String) {
         setUserEmailJob?.cancel()
         setUserEmailJob = viewModelScope.launch {
-            delay(2000.milliseconds)
+            delay(1000.milliseconds)
             repository.setUserEmail(email, userId)
         }
     }
@@ -127,7 +127,7 @@ class MainViewModel @Inject constructor(
     fun setMapZoom(mapZoom: Float) {
         setMapZoomJob?.cancel()
         setMapZoomJob = viewModelScope.launch {
-            delay(1500.milliseconds)
+            delay(1000.milliseconds)
             repository.setMapZoomPreference(mapZoom)
         }
     }
@@ -135,7 +135,7 @@ class MainViewModel @Inject constructor(
     fun setMapStyle(sketchArtType: SketchArtType) {
         setMapStyleJob?.cancel()
         setMapStyleJob = viewModelScope.launch {
-            delay(1500.milliseconds)
+            delay(1000.milliseconds)
             repository.setMapArtStylePreference(sketchArtType)
         }
     }
@@ -143,7 +143,7 @@ class MainViewModel @Inject constructor(
     fun setColorPalette(name: String) {
         setColorPaletteJob?.cancel()
         setColorPaletteJob = viewModelScope.launch {
-            delay(1500.milliseconds)
+            delay(1000.milliseconds)
             repository.setColorPalettePreference(name)
         }
     }

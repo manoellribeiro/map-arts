@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
+import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.extensions.dp
 import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
@@ -39,6 +40,7 @@ import manoellribeiro.dev.martp.core.sketches.ParticleSystemSketch
 import manoellribeiro.dev.martp.core.sketches.WaterFlowMartpSketch
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import manoellribeiro.dev.martp.databinding.LayoutMapLayerLineBinding
+import manoellribeiro.dev.martp.scenes.userInfoBottomSheet.SetUserInfoBottomSheetFragment
 import processing.android.PFragment
 
 
@@ -226,13 +228,26 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         mapLayersTitleTV.visible()
         mapColorsHoldersLL.visible()
         usernameInfoContainerLL.visible()
-        if(!state.user?.username.isNullOrEmpty()) {
+        if(!state.user.username.isNullOrEmpty()) {
             usernameTV.text = state.user.username
             addUsernameMB.setStrokeColor(getColor(R.color.light_l3))
             addUsernameMB.setButtonBackGroundColor(getColor(R.color.white))
             addUsernameMB.title = getString(R.string.menu_edit)
         } else {
             usernameTV.text = getString(R.string.anonymous)
+        }
+        addUsernameMB.setOnClickListener {
+           SetUserInfoBottomSheetFragment(
+                userInfo = state.user,
+                onSaveAnonymously = {
+                    saveArt(state.user)
+                },
+                onSaveWithMyName = { updatedUser ->
+                    saveArt(updatedUser)
+                }
+            ).apply {
+                show(supportFragmentManager, "SetUserInfoBottomSheetFragment")
+            }
         }
 
         sketch = when(state.sketchArtType) {
@@ -308,17 +323,17 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         actionMB.isClickable = true
         actionMB.title = getString(R.string.save_art)
         actionMB.setOnClickListener {
-            saveArtToLocalDatabase()
+            saveArt(state.user)
         }
     }
 
-    private fun saveArtToLocalDatabase() = with(binding) {
-        viewModel.saveArtToLocalDatabase(
+    private fun saveArt(user: UserInfoEntity) = with(binding) {
+        viewModel.saveArt(
             title = cityCountryTV.text.toString(),
             description = "", //todo: dropar essa coluna do banco
             directory = this@CreateNewMapArtActivity.filesDir,
-            newArtBitMap = mapArtsContainer.toBitmap(),
-            mapLayersColors = mapLayersColors
+            mapLayersColors = mapLayersColors,
+            updateUserInfo = user
         )
     }
 

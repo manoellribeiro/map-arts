@@ -186,6 +186,10 @@ class MartpButton @JvmOverloads constructor(
                 setColor(buttonBackgroundColor)
             }
 
+        (this@MartpButton.background as RippleDrawable).findDrawableByLayerId(android.R.id.mask)?.let { mask ->
+            (mask as GradientDrawable).cornerRadius = cornerRadius
+        }
+
         if (startIcon != null) {
             startIconBinding.startIconIMG.visibility = VISIBLE
             startIconBinding.startIconIMG.setImageDrawable(startIcon)

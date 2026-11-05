@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
@@ -56,6 +57,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCreateNewMapArtBinding.inflate(layoutInflater)
+        enableEdgeToEdge()
         setContentView(binding.root)
         setupObservables()
         setupViews()
@@ -72,23 +74,23 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(titleTV) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.top + 16.dp(resources)
+                topMargin = insets.top + 8.dp(resources)
             }
-            WindowInsetsCompat.CONSUMED
+            windowInsets
         }
         ViewCompat.setOnApplyWindowInsetsListener(mapArtsContainer) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.top + 16.dp(resources)
+                topMargin = insets.top + 8.dp(resources)
             }
-            WindowInsetsCompat.CONSUMED
+            windowInsets
         }
         ViewCompat.setOnApplyWindowInsetsListener(actionMB) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = insets.bottom
+                bottomMargin = insets.bottom + 8.dp(resources)
             }
-            WindowInsetsCompat.CONSUMED
+            windowInsets
         }
     }
 
@@ -232,7 +234,6 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             usernameTV.text = state.user.username
             addUsernameMB.setStrokeColor(getColor(R.color.light_l3))
             addUsernameMB.setButtonBackGroundColor(getColor(R.color.white))
-            addUsernameMB.title = getString(R.string.menu_edit)
         } else {
             usernameTV.text = getString(R.string.anonymous)
         }

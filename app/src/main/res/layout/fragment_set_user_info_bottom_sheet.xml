@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="8dp"
     android:background="@drawable/background_rounded_bottom_sheet_dialog"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -113,8 +114,7 @@
         android:layout_height="wrap_content"
         app:title="@string/save_art"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginVertical="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/emailDescriptionTV"
         style="@style/MartpButton.Primary"/>
@@ -124,11 +124,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:title="@string/save_anonymously"
-        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
         android:visibility="gone"
-        app:layout_goneMarginBottom="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/saveWithNameMB"

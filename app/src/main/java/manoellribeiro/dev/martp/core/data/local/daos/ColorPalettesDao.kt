@@ -21,6 +21,6 @@ interface ColorPalettesDao {
     @Query("""
         SELECT * FROM color_palettes where name = :name
     """)
-    suspend fun getByName(name: String): ColorPaletteEntity
+    suspend fun getByName(name: String): ColorPaletteEntity?
 
 }

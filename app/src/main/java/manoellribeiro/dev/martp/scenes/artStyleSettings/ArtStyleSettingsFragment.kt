@@ -110,9 +110,6 @@ class ArtStyleSettingsFragment : Fragment() {
                             }
                         }
                     }
-                    is ArtStyleSettingsUiState.Error -> {
-
-                    }
                     is ArtStyleSettingsUiState.SettingsLoaded -> {
                         Column(
                             modifier = Modifier

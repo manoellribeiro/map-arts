@@ -85,30 +85,26 @@ class MainViewModel @Inject constructor(
 
     fun getArtStyleSettings() {
         viewModelScope.launch {
-            try {
-                emitNewArtStyleSettingsState(ArtStyleSettingsUiState.Loading)
-                val settingsLoadedState = coroutineScope {
-                    val colorPalettes = async { repository.getColorsPalettes() }
-                    val mapZoom = async { repository.getMapZoomPreference() }
-                    val artStyle = async { repository.getArtStylePreference() }
-                    val colorPaletteName = async { repository.getColorPalettePreference() }
-                    ArtStyleSettingsUiState.SettingsLoaded(
-                        mapZoom = mapZoom.await(),
-                        mapArtStyle = artStyle.await(),
-                        colorPaletteSelected = colorPaletteName.await(),
-                        colorsPalettes = colorPalettes.await()
-                    )
-                }
-                emitNewArtStyleSettingsState(
-                    settingsLoadedState
-                )
-            } catch (failure: Failure) {
-                emitNewArtStyleSettingsState(
-                    ArtStyleSettingsUiState.Error(
-                        messageId = failure.messageToBeDisplayedToUserId
-                    )
+            emitNewArtStyleSettingsState(ArtStyleSettingsUiState.Loading)
+            val settingsLoadedState = coroutineScope {
+                val colorPalettes = async { repository.getColorsPalettes() }
+                val mapZoom = async { repository.getMapZoomPreference() }
+                val artStyle = async { repository.getArtStylePreference() }
+                val colorPaletteName = async { repository.getColorPalettePreference() }
+                val loadedColorPalettes = colorPalettes.await()
+                val savedColorPaletteName = colorPaletteName.await()
+                ArtStyleSettingsUiState.SettingsLoaded(
+                    mapZoom = mapZoom.await(),
+                    mapArtStyle = artStyle.await(),
+                    colorPaletteSelected = loadedColorPalettes
+                        .firstOrNull { colorPalette -> colorPalette.name == savedColorPaletteName }
+                        ?.name ?: loadedColorPalettes.first().name,
+                    colorsPalettes = loadedColorPalettes
                 )
             }
+            emitNewArtStyleSettingsState(
+                settingsLoadedState
+            )
         }
     }
 

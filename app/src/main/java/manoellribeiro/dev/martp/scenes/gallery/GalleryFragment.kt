@@ -9,6 +9,7 @@ import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -46,12 +47,17 @@ class GalleryFragment : Fragment() {
     }
 
     private fun setupViews() = with(binding) {
-        ViewCompat.setOnApplyWindowInsetsListener(logoIV) { v, windowInsets ->
+        ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.top
+            galleryHeaderLL.updatePadding(top = HEADER_TOP_PADDING_DP.dp(resources) + insets.top)
+            statusScrimV.updateLayoutParams {
+                height = insets.top + STATUS_SCRIM_FADE_DP.dp(resources)
             }
             WindowInsetsCompat.CONSUMED
+        }
+        galleryHeaderABL.addOnOffsetChangedListener { _, verticalOffset ->
+            val scrimFadeDistance = STATUS_SCRIM_FADE_DP.dp(resources).toFloat()
+            statusScrimV.alpha = (-verticalOffset / scrimFadeDistance).coerceIn(0f, 1f)
         }
     }
 
@@ -102,6 +108,7 @@ class GalleryFragment : Fragment() {
     }
 
     private fun setupLoadingState() = with(binding) {
+        galleryHeaderABL.setExpanded(true, false)
         mapArtsRV.gone()
         emptyListTV.gone()
         errorTV.gone()
@@ -110,6 +117,7 @@ class GalleryFragment : Fragment() {
     }
 
     private fun setupErrorState(failure: Failure) = with(binding) {
+        galleryHeaderABL.setExpanded(true, false)
         mapArtsRV.gone()
         emptyListTV.gone()
         errorTV.visible()
@@ -119,10 +127,16 @@ class GalleryFragment : Fragment() {
     }
 
     private fun setupEmptyListState() = with(binding) {
+        galleryHeaderABL.setExpanded(true, false)
         mapArtsRV.gone()
         emptyListTV.visible()
         emptyGalleryImageIV.visible()
         errorTV.gone()
         loadingIndicatorPB.gone()
+    }
+
+    private companion object {
+        const val HEADER_TOP_PADDING_DP = 16
+        const val STATUS_SCRIM_FADE_DP = 24
     }
 }

@@ -127,6 +127,79 @@
             tools:visibility="gone"
             app:layout_constraintTop_toBottomOf="@+id/digitalExhibitionTV" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginHorizontal="16dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/background_digital_exhibition"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/background_live_indicator"
+                android:paddingHorizontal="8dp"
+                android:layout_marginBottom="4dp"
+                android:paddingVertical="4dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_rounded_globe"
+                    app:tint="@color/yellow"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/yellow"
+                    android:layout_marginStart="8dp"
+                    android:textAllCaps="true"
+                    android:text="@string/live"
+                    android:layout_gravity="center_vertical"
+                    android:fontFamily="@font/nunito_medium"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/galleryTV"
+                style="@style/Text.ScreenTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:textColor="@color/white"
+                android:text="@string/visit_digital_exhibition"
+                android:textSize="16sp" />
+
+            <TextView
+                style="@style/Text.GraySubTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/explore_community_artworks"
+                android:textSize="14sp"
+                android:textColor="@color/light_l1"
+                android:visibility="visible"
+                android:lineSpacingMultiplier="0.8"/>
+
+            <manoellribeiro.dev.martp.core.components.MartpButton
+                android:id="@+id/openInBrowserMB"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:title="@string/open_in_browser"
+                android:layout_marginTop="8dp"
+                app:buttonBackgroundColor="@color/yellow"
+                app:fontAndIconColor="@color/black"
+                app:startIcon="@drawable/ic_open_in_browser"
+                style="@style/MartpButton.Primary"/>
+
+        </LinearLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </RelativeLayout>

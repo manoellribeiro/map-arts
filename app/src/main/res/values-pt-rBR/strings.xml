@@ -98,4 +98,8 @@
     <string name="want_your_name_on_it">Quer seu nome na sua arte?</string>
     <string name="anonymous">Anônimo</string>
     <string name="author_in_digital_exhibition">Autor na Exposição Digital:</string>
+    <string name="live">Ao vivo</string>
+    <string name="visit_digital_exhibition">Visite a Exposição Digital</string>
+    <string name="explore_community_artworks">Explore artes criadas pela comunidade do Martp de todo o mundo.</string>
+    <string name="open_in_browser">Abrir no navegador</string>
 </resources>

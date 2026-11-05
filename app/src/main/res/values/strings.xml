@@ -99,4 +99,8 @@
     <string name="want_your_name_on_it">Want your name on it?</string>
     <string name="anonymous">Anonymous</string>
     <string name="author_in_digital_exhibition">Author in the Digital Exhibition:</string>
+    <string name="live">Live</string>
+    <string name="visit_digital_exhibition">Visit the Digital Exhibition</string>
+    <string name="explore_community_artworks">Explore artworks created by the Martp community from all around the world.</string>
+    <string name="open_in_browser">Open in Browser</string>
 </resources>

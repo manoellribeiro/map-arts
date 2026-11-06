@@ -23,9 +23,12 @@ import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.data.network.martp.MartpApiService
+import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteMapLayersColors
 import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteReversedAddress
+import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteSaveMapArtRequest
 import manoellribeiro.dev.martp.core.di.ApplicationScope
 import manoellribeiro.dev.martp.core.di.IoDispatcher
+import manoellribeiro.dev.martp.core.extensions.toHexColor
 import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
@@ -33,7 +36,11 @@ import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.models.failures.MartpApiErrorFailure
 import manoellribeiro.dev.martp.core.services.ConnectivityService
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.ResponseBody
+import retrofit2.http.Multipart
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Locale
@@ -265,7 +272,9 @@ class MartpRepository @Inject constructor(
         }
     }
 
-    suspend fun saveMapArtEntity(mapArtEntity: MapArtEntity) {
+    suspend fun saveMapArtEntity(
+        mapArtEntity: MapArtEntity,
+    ) {
         try {
             mapArtDao.insert(mapArtEntity)
         } catch (e: CancellationException) {
@@ -274,6 +283,60 @@ class MartpRepository @Inject constructor(
             errorLogger.logNonFatal(e, "MartpRepository.saveMapArtEntity")
             throw LocalStorageErrorFailure(originalExceptionMessage = e.message)
         }
+    }
+
+    fun uploadMapArt(
+        mapArtEntity: MapArtEntity,
+        userInfoEntity: UserInfoEntity
+    ) {
+        applicationScope.launch {
+            try {
+                martpApiService.saveMapArt(
+                    art = createRemoteSaveMapArtRequestFromMapArtEntity(mapArtEntity, userInfoEntity),
+                    image = createImageMultipartBody(mapArtEntity.imagePathLocation)
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                errorLogger.logNonFatal(e, "MartpRepository.uploadMapArt")
+            }
+        }
+    }
+
+    private fun createImageMultipartBody(
+        imagePathLocation: String
+    ): MultipartBody.Part {
+        val imageFile = File(imagePathLocation)
+        return MultipartBody.Part.createFormData(
+            name = "image",
+            filename = imageFile.name,
+            body = imageFile.asRequestBody("image/png".toMediaType())
+        )
+    }
+
+    private fun createRemoteSaveMapArtRequestFromMapArtEntity(
+        mapArtEntity: MapArtEntity,
+        userInfoEntity: UserInfoEntity
+    ): RemoteSaveMapArtRequest {
+        return RemoteSaveMapArtRequest(
+            id = mapArtEntity.id,
+            title = mapArtEntity.title,
+            latitude = mapArtEntity.latitude.toDouble(),
+            longitude = mapArtEntity.longitude.toDouble(),
+            dateInMillis = mapArtEntity.dateInMillis,
+            sketchArtType = mapArtEntity.sketchArtType?.name,
+            colorPalette = mapArtEntity.colorPalette,
+            colorsLayers = RemoteMapLayersColors(
+                roadsColor = mapArtEntity.colorsLayers?.roadsColor?.toHexColor(),
+                buildingStrokeColor = mapArtEntity.colorsLayers?.buildingStrokeColor?.toHexColor(),
+                buildingColor = mapArtEntity.colorsLayers?.buildingColor?.toHexColor(),
+                roadsPathColor = mapArtEntity.colorsLayers?.roadsPathColor?.toHexColor(),
+                waterColor = mapArtEntity.colorsLayers?.waterColor?.toHexColor(),
+                landOthersColor = mapArtEntity.colorsLayers?.landOthersColor?.toHexColor(),
+            ),
+            email = userInfoEntity.email,
+            username = userInfoEntity.username
+        )
     }
 
     suspend fun getColorsPalettes(): List<ColorPaletteEntity> {
@@ -342,5 +405,4 @@ class MartpRepository @Inject constructor(
             throw MartpApiErrorFailure(originalExceptionMessage = e.message)
         }
     }
-
 }

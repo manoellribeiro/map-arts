@@ -24,7 +24,9 @@ import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.MapLayersColors
 import manoellribeiro.dev.martp.core.models.failures.Failure
+import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.SketchArtType
+import manoellribeiro.dev.martp.core.models.failures.UnknownErrorFailure
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
@@ -159,7 +161,8 @@ class CreateNewMapArtViewModel @Inject constructor(
         description: String?,
         directory: File,
         mapLayersColors: MapLayersColors?,
-        updateUserInfo: UserInfoEntity
+        updateUserInfo: UserInfoEntity,
+        saveImage: (path: String) -> Unit
     ) {
         viewModelScope.launch {
             try {
@@ -179,16 +182,15 @@ class CreateNewMapArtViewModel @Inject constructor(
                     colorPalette = currentColorPalette?.name,
                     colorsLayers = mapLayersColors
                 )
-
+                saveImage(newMartp.imagePathLocation)
                 repository.saveMapArtEntity(newMartp)
+                repository.uploadMapArt(newMartp, updateUserInfo)
 
-                _events.send(
-                    CreateNewMapArtEvent.ArtCreatedSuccessfully(
-                        pathToStoreArtImage = newMartp.imagePathLocation
-                    )
-                )
+                _events.send(CreateNewMapArtEvent.ArtCreatedSuccessfully)
             } catch (failure: Failure) {
                 emitNewState(CreateNewMapArtUiState.Error(failure))
+            } catch (e: Exception) {
+                emitNewState(CreateNewMapArtUiState.Error(UnknownErrorFailure(originalExceptionMessage = e.message)))
             }
         }
     }

@@ -3,12 +3,17 @@ package manoellribeiro.dev.martp.core.data.network.martp
 import manoellribeiro.dev.martp.BuildConfig
 import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteColorPalettesResponse
 import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteReversedAddress
+import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteSaveMapArtRequest
 import manoellribeiro.dev.martp.core.logging.ErrorLogger
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Multipart
+import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Query
 
 interface MartpApiService {
@@ -22,6 +27,13 @@ interface MartpApiService {
         @Query("longitude") longitude: Double,
         @Query("language") language: String? = null,
     ): RemoteReversedAddress
+
+    @Multipart
+    @POST("map-arts")
+    suspend fun saveMapArt(
+        @Part("art") art: RemoteSaveMapArtRequest,
+        @Part image: MultipartBody.Part,
+    )
 
     companion object {
 

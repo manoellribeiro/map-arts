@@ -113,7 +113,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.events.collect { event ->
                     when(event) {
-                        is CreateNewMapArtEvent.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState(event.pathToStoreArtImage)
+                        CreateNewMapArtEvent.ArtCreatedSuccessfully -> finish()
                     }
                 }
             }
@@ -127,11 +127,6 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 R.color.white
             )
         )
-    }
-
-    private fun handleArtCreatedSuccessfullyState(pathToStoreArtImage: String) {
-        sketch?.save(pathToStoreArtImage)
-        finish()
     }
 
     private fun handleStateError(failure: Failure) = with(binding) {
@@ -334,7 +329,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             description = "", //todo: dropar essa coluna do banco
             directory = this@CreateNewMapArtActivity.filesDir,
             mapLayersColors = mapLayersColors,
-            updateUserInfo = user
+            updateUserInfo = user,
+            saveImage = { path -> sketch?.get()?.save(path) }
         )
     }
 

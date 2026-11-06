@@ -103,4 +103,18 @@
     <string name="visit_digital_exhibition">Visit the Digital Exhibition</string>
     <string name="explore_community_artworks">Explore artworks created by the Martp community from all around the world.</string>
     <string name="open_in_browser">Open in Browser</string>
+
+    <!-- Success -->
+    <string name="success_saved_to_gallery">Saved to your gallery</string>
+    <string name="success_title">Your art is heading to the Digital Exhibition</string>
+    <string name="success_saved_art_description">Your saved art</string>
+    <string name="success_awaiting_approval">Awaiting approval</string>
+    <string name="success_awaiting_approval_description">It joins the Digital Exhibition once approved</string>
+    <string name="success_share">Share</string>
+    <string name="success_remix_title">Same spot, a whole new creation</string>
+    <string name="success_remix_body">Try changing these in the %1$s tab before your next one.</string>
+    <string name="success_remix_art_style_description">%1$s, %2$s or %3$s</string>
+    <string name="success_remix_color_palette_description">Same streets, a whole new mood</string>
+    <string name="success_remix_map_zoom_description">Close-up details or the whole area</string>
+    <string name="success_create_another_art">Create another art</string>
 </resources>

@@ -46,6 +46,9 @@
             android:name=".scenes.createNewMapArt.CreateNewMapArtActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize"/>
+        <activity
+            android:name=".scenes.success.SuccessActivity"
+            android:exported="false"/>
     </application>
 
 </manifest>

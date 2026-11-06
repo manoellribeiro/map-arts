@@ -102,4 +102,18 @@
     <string name="visit_digital_exhibition">Visita la Exposición Digital</string>
     <string name="explore_community_artworks">Explora obras de arte creadas por la comunidad de Martp de todo el mundo.</string>
     <string name="open_in_browser">Abrir en el navegador</string>
+
+    <!-- Success -->
+    <string name="success_saved_to_gallery">Guardado en tu galería</string>
+    <string name="success_title">Tu arte va camino a la Exposición Digital</string>
+    <string name="success_saved_art_description">Tu arte guardado</string>
+    <string name="success_awaiting_approval">Esperando aprobación</string>
+    <string name="success_awaiting_approval_description">Se une a la Exposición Digital una vez aprobado</string>
+    <string name="success_share">Compartir</string>
+    <string name="success_remix_title">Mismo lugar, una creación totalmente nueva</string>
+    <string name="success_remix_body">Prueba cambiar estas opciones en la pestaña %1$s antes de la próxima.</string>
+    <string name="success_remix_art_style_description">%1$s, %2$s o %3$s</string>
+    <string name="success_remix_color_palette_description">Mismas calles, un ambiente totalmente nuevo</string>
+    <string name="success_remix_map_zoom_description">Detalles de cerca o toda la zona</string>
+    <string name="success_create_another_art">Crear otra obra</string>
 </resources>

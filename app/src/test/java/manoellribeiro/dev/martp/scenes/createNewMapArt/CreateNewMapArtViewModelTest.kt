@@ -996,12 +996,13 @@ class CreateNewMapArtViewModelTest {
     // region saveArt
 
     @Test
-    fun `if repository saves the art should send ArtCreatedSuccessfully event and keep the ActionButtonLoading ui state`() = runTest {
+    fun `if repository saves the art should send ArtCreatedSuccessfully event with the saved image path and keep the ActionButtonLoading ui state`() = runTest {
         // Given
         val fakeUserInfo = createFakeUserInfo(id = "fake-success-user-id")
+        val savedMapArtSlot = slot<MapArtEntity>()
         coEvery { repository.setUserName(any(), any()) } just runs
         coEvery { repository.setUserEmail(any(), any()) } just runs
-        coEvery { repository.saveMapArtEntity(any()) } just runs
+        coEvery { repository.saveMapArtEntity(capture(savedMapArtSlot)) } just runs
         every { repository.uploadMapArt(any(), any()) } just runs
         val states = collectStates()
         val events = collectEvents()
@@ -1018,7 +1019,10 @@ class CreateNewMapArtViewModelTest {
         advanceUntilIdle()
 
         // Then
-        assertEquals(listOf(CreateNewMapArtEvent.ArtCreatedSuccessfully), events)
+        assertEquals(
+            listOf(CreateNewMapArtEvent.ArtCreatedSuccessfully(savedMapArtSlot.captured.imagePathLocation)),
+            events
+        )
         assertEquals(
             listOf(CreateNewMapArtUiState.Idle, CreateNewMapArtUiState.ActionButtonLoading),
             states
@@ -1262,7 +1266,10 @@ class CreateNewMapArtViewModelTest {
         assertEquals(2, fakeSavedMapArts.size)
         assertNotEquals(fakeSavedMapArts[0].id, fakeSavedMapArts[1].id)
         assertEquals(
-            listOf(CreateNewMapArtEvent.ArtCreatedSuccessfully, CreateNewMapArtEvent.ArtCreatedSuccessfully),
+            listOf(
+                CreateNewMapArtEvent.ArtCreatedSuccessfully(fakeSavedMapArts[0].imagePathLocation),
+                CreateNewMapArtEvent.ArtCreatedSuccessfully(fakeSavedMapArts[1].imagePathLocation)
+            ),
             events
         )
     }

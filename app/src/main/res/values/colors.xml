@@ -30,4 +30,9 @@
     <color name="error_light">#FA8C8C</color>
     <color name="error_lightest">#FFE1D7</color>
 
+    <color name="blue_alpha_8">#14120d31</color>
+    <color name="blue_alpha_12">#1F120d31</color>
+    <color name="blue_alpha_80">#CC120d31</color>
+    <color name="white_alpha_80">#CCFFFFFF</color>
+
 </resources>

@@ -41,6 +41,7 @@ import manoellribeiro.dev.martp.core.sketches.ParticleSystemSketch
 import manoellribeiro.dev.martp.core.sketches.WaterFlowMartpSketch
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import manoellribeiro.dev.martp.databinding.LayoutMapLayerLineBinding
+import manoellribeiro.dev.martp.scenes.success.SuccessActivity
 import manoellribeiro.dev.martp.scenes.userInfoBottomSheet.SetUserInfoBottomSheetFragment
 import processing.android.PFragment
 
@@ -113,7 +114,10 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.events.collect { event ->
                     when(event) {
-                        CreateNewMapArtEvent.ArtCreatedSuccessfully -> finish()
+                        is CreateNewMapArtEvent.ArtCreatedSuccessfully -> {
+                            startActivity(SuccessActivity.newIntent(this@CreateNewMapArtActivity, event.imagePathLocation))
+                            finish()
+                        }
                     }
                 }
             }

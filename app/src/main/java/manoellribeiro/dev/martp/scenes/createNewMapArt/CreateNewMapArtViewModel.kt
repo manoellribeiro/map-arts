@@ -187,7 +187,7 @@ class CreateNewMapArtViewModel @Inject constructor(
                 repository.saveMapArtEntity(newMartp)
                 repository.uploadMapArt(newMartp, updateUserInfo)
 
-                _events.send(CreateNewMapArtEvent.ArtCreatedSuccessfully)
+                _events.send(CreateNewMapArtEvent.ArtCreatedSuccessfully(newMartp.imagePathLocation))
             } catch (failure: Failure) {
                 emitNewState(CreateNewMapArtUiState.Error(failure))
             } catch (e: CancellationException) {

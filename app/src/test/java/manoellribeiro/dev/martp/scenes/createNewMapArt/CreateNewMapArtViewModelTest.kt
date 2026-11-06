@@ -30,7 +30,6 @@ import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.LocationPermissionNotGrantedFailure
 import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
-import manoellribeiro.dev.martp.core.models.failures.MartpApiErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import manoellribeiro.dev.martp.core.models.failures.UnknownErrorFailure
 import manoellribeiro.dev.martp.core.models.MapLayersColors
@@ -532,35 +531,33 @@ class CreateNewMapArtViewModelTest {
     }
 
     @Test
-    fun `if the martp api throws a Failure when reverse geocoding should emit Error ui state after the downloading Loading message`() = runTest {
+    fun `if both get address service and the martp api return null should emit ImageDownloaded with an empty title`() = runTest {
         // Given
-        val fakeFailure = MartpApiErrorFailure("fake reverse geocode error")
         val fakeLocation = createFakeLocation(latitude = 11.5, longitude = 12.5)
         coEvery { repository.getArtStylePreference() } returns SketchArtType.DEFAULT
         coEvery { locationService.getCurrentLocation() } returns fakeLocation
         coEvery { repository.fetchCurrentUserInfo() } returns createFakeUserInfo()
         coEvery { getAddressService.getAddress(any(), any()) } returns null
-        coEvery { repository.getReversedAddressFromApi(any(), any()) } throws fakeFailure
+        coEvery { repository.getReversedAddressFromApi(any(), any()) } returns null
         coEvery {
             repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
-        } returns "fake-reverse-error-directory/image.png"
-        val states = collectStates()
+        } returns "fake-reverse-null-directory/image.png"
 
         // When
         viewModel.startToGenerateMapArt(
-            directory = File("fake-reverse-error-directory"),
+            directory = File("fake-reverse-null-directory"),
             canvasToDrawArtWidth = 500,
             canvasToDrawArtHeight = 500
         )
         advanceUntilIdle()
 
         // Then
-        assertEquals(4, states.size)
-        assertSame(CreateNewMapArtUiState.Idle, states[0])
-        assertEquals(fakeAccessingLocationLoading, states[1])
-        assertEquals(fakeDownloadingImageLoading, states[2])
-        val errorState = assertInstanceOf(CreateNewMapArtUiState.Error::class.java, states[3])
-        assertSame(fakeFailure, errorState.failure)
+        val imageDownloadedState = assertInstanceOf(
+            CreateNewMapArtUiState.ImageDownloaded::class.java,
+            viewModel.state.value
+        )
+        assertEquals("", imageDownloadedState.title)
+        coVerify(exactly = 1) { repository.getReversedAddressFromApi(11.5, 12.5) }
     }
 
     @Test

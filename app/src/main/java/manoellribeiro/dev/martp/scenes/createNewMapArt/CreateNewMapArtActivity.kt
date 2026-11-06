@@ -236,10 +236,10 @@ class CreateNewMapArtActivity: AppCompatActivity() {
            SetUserInfoBottomSheetFragment(
                 userInfo = state.user,
                 onSaveAnonymously = {
-                    saveArt(state.user)
+                    saveArt(state.user, state.title)
                 },
                 onSaveWithMyName = { updatedUser ->
-                    saveArt(updatedUser)
+                    saveArt(updatedUser, state.title)
                 }
             ).apply {
                 show(supportFragmentManager, "SetUserInfoBottomSheetFragment")
@@ -305,12 +305,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         longTV.visible()
         latTV.text = getString(R.string.latitude_value, state.latitude.toString())
         longTV.text = getString(R.string.longitude_value, state.longitude.toString())
-        if(state.title.isEmpty()) {
-            cityCountryTV.gone()
-        } else {
-            cityCountryTV.visible()
-            cityCountryTV.text = state.title
-        }
+        cityCountryTV.visible()
+        cityCountryTV.text = state.title.ifEmpty { getString(R.string.unknown_location) }
         stateErrorS.gone()
         errorImageIV.gone()
         errorTextTV.gone()
@@ -319,13 +315,13 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         actionMB.isClickable = true
         actionMB.title = getString(R.string.save_art)
         actionMB.setOnClickListener {
-            saveArt(state.user)
+            saveArt(state.user, state.title)
         }
     }
 
-    private fun saveArt(user: UserInfoEntity) = with(binding) {
+    private fun saveArt(user: UserInfoEntity, title: String) {
         viewModel.saveArt(
-            title = cityCountryTV.text.toString(),
+            title = title,
             description = "", //todo: dropar essa coluna do banco
             directory = this@CreateNewMapArtActivity.filesDir,
             mapLayersColors = mapLayersColors,

@@ -391,7 +391,7 @@ class MartpRepository @Inject constructor(
     suspend fun getReversedAddressFromApi(
         latitude: Double,
         longitude: Double
-    ): RemoteReversedAddress {
+    ): RemoteReversedAddress? {
         try {
             return martpApiService.reverseGeocode(
                 latitude = latitude,
@@ -402,7 +402,7 @@ class MartpRepository @Inject constructor(
             throw e
         } catch (e: Exception) {
             errorLogger.logNonFatal(e, "MartpRepository.getReversedAddressFromApi")
-            throw MartpApiErrorFailure(originalExceptionMessage = e.message)
+            return null
         }
     }
 }

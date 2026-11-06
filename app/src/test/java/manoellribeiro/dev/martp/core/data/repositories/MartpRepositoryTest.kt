@@ -44,7 +44,6 @@ import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.MapLayersColors
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
-import manoellribeiro.dev.martp.core.models.failures.MartpApiErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.services.ConnectivityService
@@ -1739,19 +1738,16 @@ class MartpRepositoryTest {
     }
 
     @Test
-    fun `if martp api throws an exception when reverse geocoding should log it and throw MartpApiErrorFailure`() = runTest {
+    fun `if martp api throws an exception when reverse geocoding should log it and return null`() = runTest {
         // Given
-        val fakeErrorMessage = "fake reverse geocode error"
-        coEvery { martpApiService.reverseGeocode(any(), any(), any()) } throws IOException(fakeErrorMessage)
+        coEvery { martpApiService.reverseGeocode(any(), any(), any()) } throws IOException("fake reverse geocode error")
         every { errorLogger.logNonFatal(any(), any()) } just runs
 
         // When
-        val failure = assertThrows<MartpApiErrorFailure> {
-            repository.getReversedAddressFromApi(latitude = 1.5, longitude = 2.5)
-        }
+        val result = repository.getReversedAddressFromApi(latitude = 1.5, longitude = 2.5)
 
         // Then
-        assertEquals(fakeErrorMessage, failure.message)
+        assertNull(result)
         verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.getReversedAddressFromApi") }
     }
 

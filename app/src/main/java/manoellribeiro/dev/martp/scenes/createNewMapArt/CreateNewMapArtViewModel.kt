@@ -135,9 +135,9 @@ class CreateNewMapArtViewModel @Inject constructor(
         if(addressFromAndroidGeocode == null) {
             val addressFromTheApi = repository.getReversedAddressFromApi(latitude, longitude)
             return buildTitleWithAddress(
-                street = addressFromTheApi.street,
-                city = addressFromTheApi.city,
-                country = addressFromTheApi.country
+                street = addressFromTheApi?.street,
+                city = addressFromTheApi?.city,
+                country = addressFromTheApi?.country
             )
         }
         return buildTitleWithAddress(

@@ -670,4 +670,102 @@ class IntExtensionsTest {
         // Then
         assertTrue(result)
     }
+
+    // toHexColor
+
+    @Test
+    fun `if color is opaque should return it in the RRGGBB format without the alpha on toHexColor`() {
+        // Given
+        val fakeColor = 0xFF100C2D.toInt()
+
+        // When
+        val result = fakeColor.toHexColor()
+
+        // Then
+        assertEquals("#100C2D", result)
+    }
+
+    @Test
+    fun `if color has hex letters should return them in uppercase on toHexColor`() {
+        // Given
+        val fakeColor = 0xFFf27ea9.toInt()
+
+        // When
+        val result = fakeColor.toHexColor()
+
+        // Then
+        assertEquals("#F27EA9", result)
+    }
+
+    @Test
+    fun `if color is semi transparent should drop the alpha on toHexColor`() {
+        // Given
+        val fakeColor = 0x80ABCDEF.toInt()
+
+        // When
+        val result = fakeColor.toHexColor()
+
+        // Then
+        assertEquals("#ABCDEF", result)
+    }
+
+    @Test
+    fun `if color has no alpha channel should return the same rgb on toHexColor`() {
+        // Given
+        val fakeColor = 0x00ABCDEF
+
+        // When
+        val result = fakeColor.toHexColor()
+
+        // Then
+        assertEquals("#ABCDEF", result)
+    }
+
+    @Test
+    fun `if color has leading zero channels should pad it to six digits on toHexColor`() {
+        // Given
+        val fakeColor = 0xFF00000A.toInt()
+
+        // When
+        val result = fakeColor.toHexColor()
+
+        // Then
+        assertEquals("#00000A", result)
+    }
+
+    @Test
+    fun `if color is zero should return black on toHexColor`() {
+        // Given
+        val fakeColor = 0
+
+        // When
+        val result = fakeColor.toHexColor()
+
+        // Then
+        assertEquals("#000000", result)
+    }
+
+    @Test
+    fun `if color is opaque white should return white on toHexColor`() {
+        // Given
+        val fakeColor = 0xFFFFFFFF.toInt()
+
+        // When
+        val result = fakeColor.toHexColor()
+
+        // Then
+        assertEquals("#FFFFFF", result)
+    }
+
+    @Test
+    fun `if color is converted to hex and back should return the same opaque color on toHexColor`() {
+        // Given
+        val fakeColor = 0xFF896B51.toInt()
+
+        // When
+        val result = fakeColor.toHexColor().hexToColorInt()
+
+        // Then
+        assertEquals(fakeColor, result)
+    }
 }

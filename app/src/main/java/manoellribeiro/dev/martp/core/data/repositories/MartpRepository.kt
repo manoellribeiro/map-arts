@@ -401,7 +401,7 @@ class MartpRepository @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            errorLogger.logNonFatal(e, "MartpRepository.fetchColorsPalettes")
+            errorLogger.logNonFatal(e, "MartpRepository.getReversedAddressFromApi")
             throw MartpApiErrorFailure(originalExceptionMessage = e.message)
         }
     }

@@ -2,6 +2,7 @@ package manoellribeiro.dev.martp.core.extensions
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
 
 class StringExtensionsTest {
@@ -73,8 +74,11 @@ class StringExtensionsTest {
         // Given
         val fakeHexColor = "#FFF"
 
-        // When / Then
-        assertThrows<IllegalArgumentException> { fakeHexColor.hexToColorInt() }
+        // When
+        val result = assertThrows<IllegalArgumentException> { fakeHexColor.hexToColorInt() }
+
+        // Then
+        assertEquals("Expected a color in the #RRGGBB format but was #FFF", result.message)
     }
 
     @Test
@@ -82,8 +86,11 @@ class StringExtensionsTest {
         // Given
         val fakeHexColor = "#80100C2D"
 
-        // When / Then
-        assertThrows<IllegalArgumentException> { fakeHexColor.hexToColorInt() }
+        // When
+        val result = assertThrows<IllegalArgumentException> { fakeHexColor.hexToColorInt() }
+
+        // Then
+        assertEquals("Expected a color in the #RRGGBB format but was #80100C2D", result.message)
     }
 
     @Test
@@ -91,7 +98,70 @@ class StringExtensionsTest {
         // Given
         val fakeHexColor = "#GG0000"
 
-        // When / Then
-        assertThrows<NumberFormatException> { fakeHexColor.hexToColorInt() }
+        // When
+        val result = assertThrows<NumberFormatException> { fakeHexColor.hexToColorInt() }
+
+        // Then
+        assertTrue(result.message.orEmpty().contains("GG0000"))
+    }
+
+    @Test
+    fun `if hex color has mixed case letters should return the opaque color on hexToColorInt`() {
+        // Given
+        val fakeHexColor = "#aBcDeF"
+
+        // When
+        val result = fakeHexColor.hexToColorInt()
+
+        // Then
+        assertEquals(0xFFABCDEF.toInt(), result)
+    }
+
+    @Test
+    fun `if hex color has leading zeros should keep them as zero channels on hexToColorInt`() {
+        // Given
+        val fakeHexColor = "#00000A"
+
+        // When
+        val result = fakeHexColor.hexToColorInt()
+
+        // Then
+        assertEquals(0xFF00000A.toInt(), result)
+    }
+
+    @Test
+    fun `if hex color is empty should throw IllegalArgumentException on hexToColorInt`() {
+        // Given
+        val fakeHexColor = ""
+
+        // When
+        val result = assertThrows<IllegalArgumentException> { fakeHexColor.hexToColorInt() }
+
+        // Then
+        assertEquals("Expected a color in the #RRGGBB format but was ", result.message)
+    }
+
+    @Test
+    fun `if hex color is only a hash should throw IllegalArgumentException on hexToColorInt`() {
+        // Given
+        val fakeHexColor = "#"
+
+        // When
+        val result = assertThrows<IllegalArgumentException> { fakeHexColor.hexToColorInt() }
+
+        // Then
+        assertEquals("Expected a color in the #RRGGBB format but was #", result.message)
+    }
+
+    @Test
+    fun `if hex color has two hash prefixes should throw IllegalArgumentException on hexToColorInt`() {
+        // Given
+        val fakeHexColor = "##100C2D"
+
+        // When
+        val result = assertThrows<IllegalArgumentException> { fakeHexColor.hexToColorInt() }
+
+        // Then
+        assertEquals("Expected a color in the #RRGGBB format but was ##100C2D", result.message)
     }
 }

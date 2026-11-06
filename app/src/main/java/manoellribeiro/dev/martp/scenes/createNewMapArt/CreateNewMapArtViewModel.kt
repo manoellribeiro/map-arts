@@ -6,6 +6,7 @@ import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -189,6 +190,8 @@ class CreateNewMapArtViewModel @Inject constructor(
                 _events.send(CreateNewMapArtEvent.ArtCreatedSuccessfully)
             } catch (failure: Failure) {
                 emitNewState(CreateNewMapArtUiState.Error(failure))
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 emitNewState(CreateNewMapArtUiState.Error(UnknownErrorFailure(originalExceptionMessage = e.message)))
             }

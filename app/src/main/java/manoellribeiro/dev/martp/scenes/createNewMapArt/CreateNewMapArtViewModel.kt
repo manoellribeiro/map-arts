@@ -6,6 +6,7 @@ import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -18,11 +19,15 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.MartpDatabase
+import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
+import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.MapLayersColors
 import manoellribeiro.dev.martp.core.models.failures.Failure
+import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.SketchArtType
+import manoellribeiro.dev.martp.core.models.failures.UnknownErrorFailure
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
@@ -54,9 +59,8 @@ class CreateNewMapArtViewModel @Inject constructor(
     }
 
     private var currentArtLocation: Location? = null
-    private var currentArtAddress: Address? = null
     private var currentSketchArtType: SketchArtType? = null
-    private var currentColorPalette: String? = null
+    private var currentColorPalette: ColorPaletteEntity? = null
     private var generateMapArtJob: Job? = null
 
     fun startToGenerateMapArt(
@@ -68,10 +72,11 @@ class CreateNewMapArtViewModel @Inject constructor(
         generateMapArtJob = viewModelScope.launch {
             try {
                 emitNewState(CreateNewMapArtUiState.Loading(R.string.accessing_your_location))
-                val (sketchArtType, location) = coroutineScope {
+                val (sketchArtType, location, user) = coroutineScope {
                     val sketchArtType = async { repository.getArtStylePreference() }
                     val location = async { locationService.getCurrentLocation() }
-                    sketchArtType.await() to location.await()
+                    val user = async { repository.fetchCurrentUserInfo() }
+                    Triple(sketchArtType.await(), location.await(), user.await())
                 }
                 currentArtLocation = location
                 val horizontalTilesCount = 4
@@ -80,16 +85,13 @@ class CreateNewMapArtViewModel @Inject constructor(
                 val verticalPaddingsNumber = verticalTilesCount + 1
                 val padding = 20
                 emitNewState(CreateNewMapArtUiState.Loading(R.string.downloading_map_image))
-                val (address, staticImagePath, colorPalette) = coroutineScope {
-                    val address = async {
-                        getAddressService.getAddress(
-                            location.latitude,
-                            location.longitude
-                        )
+                val (title, staticImagePath, colorPalette) = coroutineScope {
+                    val title = async {
+                        getAddressTitle(location.latitude, location.longitude)
                     }
                     val colorPalette = async {
                         if(sketchArtType == SketchArtType.COLORFUL_MAP) {
-                            repository.getColorPalettePreference()
+                            repository.getSelectedColorPalette()
                         } else null
                     }
                     val staticImagePath = async {
@@ -104,19 +106,19 @@ class CreateNewMapArtViewModel @Inject constructor(
                             dir = directory
                         )
                     }
-                    Triple(address.await(), staticImagePath.await(), colorPalette.await())
+                    Triple(title.await(), staticImagePath.await(), colorPalette.await())
                 }
-                currentArtAddress = address
                 currentSketchArtType = sketchArtType
                 currentColorPalette = colorPalette
                 emitNewState(
                     CreateNewMapArtUiState.ImageDownloaded(
                         staticMapImagePath = staticImagePath,
-                        title = buildTitleWithAddress(address),
+                        title = title,
                         sketchArtType = sketchArtType,
                         colorPalette = colorPalette,
                         latitude = location.latitude,
-                        longitude = location.longitude
+                        longitude = location.longitude,
+                        user = user
                     )
                 )
             } catch (failure: Failure) {
@@ -125,22 +127,49 @@ class CreateNewMapArtViewModel @Inject constructor(
         }
     }
 
-    private fun buildTitleWithAddress(address: Address?): String {
-        return listOfNotNull(address?.thoroughfare, address?.locality, address?.countryName)
+    private suspend fun getAddressTitle(
+        latitude: Double,
+        longitude: Double
+    ): String {
+        val addressFromAndroidGeocode = getAddressService.getAddress(latitude, longitude)
+        if(addressFromAndroidGeocode == null) {
+            val addressFromTheApi = repository.getReversedAddressFromApi(latitude, longitude)
+            return buildTitleWithAddress(
+                street = addressFromTheApi?.street,
+                city = addressFromTheApi?.city,
+                country = addressFromTheApi?.country
+            )
+        }
+        return buildTitleWithAddress(
+            street = addressFromAndroidGeocode.thoroughfare,
+            city = addressFromAndroidGeocode.locality,
+            country = addressFromAndroidGeocode.countryName
+        )
+    }
+
+    private fun buildTitleWithAddress(
+        street: String?,
+        city: String?,
+        country: String?
+    ): String {
+        return listOfNotNull(street, city, country)
             .filter { it.isNotBlank() }
             .joinToString(", ")
     }
 
-    fun saveArtToLocalDatabase(
+    fun saveArt(
         title: String,
         description: String?,
-        newArtBitMap: Bitmap,
         directory: File,
-        mapLayersColors: MapLayersColors?
+        mapLayersColors: MapLayersColors?,
+        updateUserInfo: UserInfoEntity,
+        saveImage: (path: String) -> Unit
     ) {
         viewModelScope.launch {
             try {
                 emitNewState(CreateNewMapArtUiState.ActionButtonLoading)
+                repository.setUserName(updateUserInfo.username.orEmpty(), updateUserInfo.id)
+                repository.setUserEmail(updateUserInfo.email.orEmpty(), updateUserInfo.id)
                 val artId = UUID.randomUUID().toString()
                 val newMartp = MapArtEntity(
                     id = artId,
@@ -151,19 +180,20 @@ class CreateNewMapArtViewModel @Inject constructor(
                     dateInMillis = Calendar.getInstance().timeInMillis,
                     imagePathLocation = directory.path + MartpDatabase.artsDirectoryName + artId + ".png",
                     sketchArtType = currentSketchArtType,
-                    colorPalette = currentColorPalette,
+                    colorPalette = currentColorPalette?.name,
                     colorsLayers = mapLayersColors
                 )
-
+                saveImage(newMartp.imagePathLocation)
                 repository.saveMapArtEntity(newMartp)
+                repository.uploadMapArt(newMartp, updateUserInfo)
 
-                _events.send(
-                    CreateNewMapArtEvent.ArtCreatedSuccessfully(
-                        pathToStoreArtImage = newMartp.imagePathLocation
-                    )
-                )
+                _events.send(CreateNewMapArtEvent.ArtCreatedSuccessfully(newMartp.imagePathLocation))
             } catch (failure: Failure) {
                 emitNewState(CreateNewMapArtUiState.Error(failure))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                emitNewState(CreateNewMapArtUiState.Error(UnknownErrorFailure(originalExceptionMessage = e.message)))
             }
         }
     }

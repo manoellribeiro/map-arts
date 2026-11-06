@@ -118,6 +118,8 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-ai")
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
+    debugImplementation("com.google.firebase:firebase-appcheck-debug")
 
     implementation 'com.airbnb.android:lottie:6.7.1'
 
@@ -153,7 +155,9 @@ tasks.register('jacocoUnitTestReport', JacocoReport) {
             '**/core/extensions/**',
             '**/core/utils/**',
             '**/core/logging/**',
-            '**/core/models/failures/SketchArtType*.class'
+            '**/core/models/failures/SketchArtType*.class',
+            '**/core/data/local/converters/**',
+            '**/core/data/network/martp/AppCheckInterceptor*.class'
     ]
 
     classDirectories.setFrom(fileTree(layout.buildDirectory.dir('tmp/kotlin-classes/debug')) {

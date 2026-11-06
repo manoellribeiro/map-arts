@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -16,11 +18,12 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import manoellribeiro.dev.martp.R
+import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
+import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
+import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.extensions.dp
 import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
 import manoellribeiro.dev.martp.core.extensions.gone
@@ -36,9 +39,10 @@ import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.sketches.PointillismMartpSketch
 import manoellribeiro.dev.martp.core.sketches.ParticleSystemSketch
 import manoellribeiro.dev.martp.core.sketches.WaterFlowMartpSketch
-import manoellribeiro.dev.martp.core.utils.ColorPaletteProvider
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import manoellribeiro.dev.martp.databinding.LayoutMapLayerLineBinding
+import manoellribeiro.dev.martp.scenes.success.SuccessActivity
+import manoellribeiro.dev.martp.scenes.userInfoBottomSheet.SetUserInfoBottomSheetFragment
 import processing.android.PFragment
 
 
@@ -54,6 +58,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCreateNewMapArtBinding.inflate(layoutInflater)
+        enableEdgeToEdge()
         setContentView(binding.root)
         setupObservables()
         setupViews()
@@ -70,16 +75,23 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(titleTV) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.top + 16.dp(resources)
+                topMargin = insets.top + 8.dp(resources)
             }
-            WindowInsetsCompat.CONSUMED
+            windowInsets
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(mapArtsContainer) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.top + 8.dp(resources)
+            }
+            windowInsets
         }
         ViewCompat.setOnApplyWindowInsetsListener(actionMB) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = insets.bottom
+                bottomMargin = insets.bottom + 8.dp(resources)
             }
-            WindowInsetsCompat.CONSUMED
+            windowInsets
         }
     }
 
@@ -102,7 +114,10 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.events.collect { event ->
                     when(event) {
-                        is CreateNewMapArtEvent.ArtCreatedSuccessfully -> handleArtCreatedSuccessfullyState(event.pathToStoreArtImage)
+                        is CreateNewMapArtEvent.ArtCreatedSuccessfully -> {
+                            startActivity(SuccessActivity.newIntent(this@CreateNewMapArtActivity, event.imagePathLocation))
+                            finish()
+                        }
                     }
                 }
             }
@@ -116,11 +131,6 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 R.color.white
             )
         )
-    }
-
-    private fun handleArtCreatedSuccessfullyState(pathToStoreArtImage: String) {
-        sketch?.save(pathToStoreArtImage)
-        finish()
     }
 
     private fun handleStateError(failure: Failure) = with(binding) {
@@ -149,6 +159,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         mapLayersTitleTV.gone()
         mapLayersSubTitleTV.gone()
         loadingMessageTV.gone()
+        usernameInfoContainerLL.gone()
     }
 
     private fun handleLoadingState(
@@ -170,6 +181,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         longTV.gone()
         mapColorsHoldersLL.gone()
         mapLayersTitleTV.gone()
+        usernameInfoContainerLL.gone()
     }
 
     private fun addDefaultAndPointillismMapLayers() {
@@ -213,9 +225,31 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         mapArtsContainer.visible()
         loadingIndicatorLAV.gone()
         loadingMessageTV.gone()
-        titleTV.visible()
+        titleTV.gone()
         mapLayersTitleTV.visible()
         mapColorsHoldersLL.visible()
+        usernameInfoContainerLL.visible()
+        if(!state.user.username.isNullOrEmpty()) {
+            usernameTV.text = state.user.username
+            addUsernameMB.setStrokeColor(getColor(R.color.light_l3))
+            addUsernameMB.setButtonBackGroundColor(getColor(R.color.white))
+        } else {
+            usernameTV.text = getString(R.string.anonymous)
+        }
+        addUsernameMB.setOnClickListener {
+           SetUserInfoBottomSheetFragment(
+                userInfo = state.user,
+                onSaveAnonymously = {
+                    saveArt(state.user, state.title)
+                },
+                onSaveWithMyName = { updatedUser ->
+                    saveArt(updatedUser, state.title)
+                }
+            ).apply {
+                show(supportFragmentManager, "SetUserInfoBottomSheetFragment")
+            }
+        }
+
         sketch = when(state.sketchArtType) {
             SketchArtType.DEFAULT -> {
                 addDefaultAndPointillismMapLayers()
@@ -255,13 +289,13 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             SketchArtType.COLORFUL_MAP -> {
                 colorPaletteTV.visible()
                 mapLayersSubTitleTV.visible()
-                colorPaletteTV.text = getString(R.string.color_palette_value, state.colorPalette)
+                colorPaletteTV.text = getString(R.string.color_palette_value, state.colorPalette?.name)
                 ColorfulMapSketch(
                     padding = 20,
                     canvasWidth = mapArtsContainer.width.toFloat(),
                     canvasHeight = mapArtsContainer.height.toFloat(),
                     imagePath = state.staticMapImagePath,
-                    colorPalette = ColorPaletteProvider.byNameOrDefault(state.colorPalette)
+                    colorPalette = state.colorPalette!!
                 ) {
                     runOnUiThread {
                         setColorsLayersForColorfulMap(it)
@@ -275,12 +309,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         longTV.visible()
         latTV.text = getString(R.string.latitude_value, state.latitude.toString())
         longTV.text = getString(R.string.longitude_value, state.longitude.toString())
-        if(state.title.isEmpty()) {
-            cityCountryTV.gone()
-        } else {
-            cityCountryTV.visible()
-            cityCountryTV.text = state.title
-        }
+        cityCountryTV.visible()
+        cityCountryTV.text = state.title.ifEmpty { getString(R.string.unknown_location) }
         stateErrorS.gone()
         errorImageIV.gone()
         errorTextTV.gone()
@@ -289,17 +319,18 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         actionMB.isClickable = true
         actionMB.title = getString(R.string.save_art)
         actionMB.setOnClickListener {
-            saveArtToLocalDatabase()
+            saveArt(state.user, state.title)
         }
     }
 
-    private fun saveArtToLocalDatabase() = with(binding) {
-        viewModel.saveArtToLocalDatabase(
-            title = cityCountryTV.text.toString(),
+    private fun saveArt(user: UserInfoEntity, title: String) {
+        viewModel.saveArt(
+            title = title,
             description = "", //todo: dropar essa coluna do banco
             directory = this@CreateNewMapArtActivity.filesDir,
-            newArtBitMap = mapArtsContainer.toBitmap(),
-            mapLayersColors = mapLayersColors
+            mapLayersColors = mapLayersColors,
+            updateUserInfo = user,
+            saveImage = { path -> sketch?.get()?.save(path) }
         )
     }
 

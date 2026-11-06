@@ -1,6 +1,7 @@
 package manoellribeiro.dev.martp.scenes.main
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -17,6 +18,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.activityViewModels
@@ -52,10 +54,22 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setupRequireLocationPermissionLauncher()
         setupBottomNavigationBar()
+        if (savedInstanceState == null) openEditTabIfRequested(intent)
         setupViews()
         setStatusBarColor()
         setupObservables()
         viewModel.handleBadgesVisibilities()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        openEditTabIfRequested(intent)
+    }
+
+    private fun openEditTabIfRequested(intent: Intent) {
+        if (intent.getBooleanExtra(OPEN_EDIT_TAB_EXTRA, false)) {
+            binding.bottomNavigationBarBNV.selectedItemId = R.id.chooseArtStyleFragment
+        }
     }
 
     private fun setupObservables() {
@@ -88,6 +102,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             // For Android 14 and below
             window.statusBarColor = getColor(R.color.blue)
+            WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
         }
     }
 
@@ -160,5 +175,14 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    companion object {
+        private const val OPEN_EDIT_TAB_EXTRA = "open_edit_tab"
+
+        fun newIntentOpeningEditTab(context: Context): Intent =
+            Intent(context, MainActivity::class.java)
+                .putExtra(OPEN_EDIT_TAB_EXTRA, true)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
     }
 }

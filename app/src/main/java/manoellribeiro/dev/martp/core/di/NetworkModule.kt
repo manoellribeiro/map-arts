@@ -7,6 +7,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
+import manoellribeiro.dev.martp.core.data.network.martp.MartpApiService
+import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.services.ConnectivityService
 
 @Module
@@ -21,6 +23,11 @@ object NetworkModule {
     @Provides
     fun providesGeoapifyApiService(): GeoapifyApiService {
         return GeoapifyApiService()
+    }
+
+    @Provides
+    fun providesMartpApiService(errorLogger: ErrorLogger): MartpApiService {
+        return MartpApiService(errorLogger)
     }
 
     @Provides

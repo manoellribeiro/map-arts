@@ -1,24 +1,20 @@
 package manoellribeiro.dev.martp.core.sketches
 
+import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.extensions.blueValue
 import manoellribeiro.dev.martp.core.extensions.greenValue
 import manoellribeiro.dev.martp.core.extensions.isRgbColor
-import manoellribeiro.dev.martp.core.extensions.orZero
 import manoellribeiro.dev.martp.core.extensions.redValue
 import manoellribeiro.dev.martp.core.models.MapLayersColors
 import manoellribeiro.dev.martp.core.models.SketchArtType
-import manoellribeiro.dev.martp.core.services.sensors.MeasurableSensor
-import manoellribeiro.dev.martp.core.sketches.particles.Particle
-import manoellribeiro.dev.martp.scenes.artStyleSettings.ColorPalette
 import processing.core.PImage
-import processing.core.PVector
 
 class ColorfulMapSketch(
     private val padding: Int,
     canvasWidth: Float = 640.0F,
     canvasHeight: Float = 640.0F,
     private val imagePath: String,
-    private val colorPalette: ColorPalette,
+    private val colorPalette: ColorPaletteEntity,
     val onColorsShuffled: (MapLayersColors) -> Unit
 ) : MartpSketch(
     0,

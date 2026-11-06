@@ -44,8 +44,8 @@
     <string name="your_gallery">Deine Galerie</string>
     <string name="create_description_with_ai">Beschreibung mit KI erstellen</string>
     <string name="thinking">Denke nach…</string>
-    <string name="digital_exposition">Digitale Ausstellung</string>
-    <string name="digital_exposition_description">Jedes auf Martp erstellte Kunstwerk wird an unsere digitale Ausstellung gesendet – eine gemeinsame Galerie, in der alle die Kreativität unserer Community entdecken können. Wenn du deinen Namen neben deinem Kunstwerk sehen möchtest, fülle die Felder unten aus.</string>
+    <string name="digital_exhibition">Digitale Ausstellung</string>
+    <string name="digital_exhibition_description">Jedes auf Martp erstellte Kunstwerk wird an unsere digitale Ausstellung gesendet – eine gemeinsame Galerie, in der alle die Kreativität unserer Community entdecken können. Wenn du deinen Namen neben deinem Kunstwerk sehen möchtest, fülle die Felder unten aus.</string>
     <string name="email_not_mandatory_hint">Nicht verpflichtend! Der einzige Nachteil ist, dass ich dich nicht kontaktieren kann, wenn mir dein Kunstwerk richtig gut gefällt :)</string>
     <string name="save_my_info">Meine Infos speichern</string>
     <string name="email_optional_hint">E-Mail (optional)</string>
@@ -90,4 +90,30 @@
     <string name="error_downloading_location_image">Beim Herunterladen des Bildes deines Standorts ist ein Fehler aufgetreten, bitte versuche es erneut.</string>
     <string name="tap_map_to_shuffle_colors">Du kannst auf die Karte tippen, um die Farben neu zu mischen, bis du die beste Kombination findest.</string>
     <string name="unknown_location">Unbekannter Standort</string>
+    <string name="martp_api_failure_message">Beim Abrufen der Daten von den internen Martp-Diensten ist ein Fehler aufgetreten, bitte versuche es erneut.</string>
+    <string name="shown_in_gallery_as">In der Galerie angezeigt als</string>
+    <string name="add_name">Namen hinzufügen</string>
+    <string name="save_with_my_username">Mit meinem Benutzernamen speichern</string>
+    <string name="save_anonymously">Anonym speichern</string>
+    <string name="want_your_name_on_it">Möchtest du deinen Namen auf deinem Kunstwerk?</string>
+    <string name="anonymous">Anonym</string>
+    <string name="author_in_digital_exhibition">Autor in der Digitalen Ausstellung:</string>
+    <string name="live">Live</string>
+    <string name="visit_digital_exhibition">Digitale Ausstellung besuchen</string>
+    <string name="explore_community_artworks">Entdecke Kunstwerke, die von der Martp-Community aus aller Welt erstellt wurden.</string>
+    <string name="open_in_browser">Im Browser öffnen</string>
+
+    <!-- Success -->
+    <string name="success_saved_to_gallery">In deiner Galerie gespeichert</string>
+    <string name="success_title">Dein Kunstwerk ist auf dem Weg in die Digitale Ausstellung</string>
+    <string name="success_saved_art_description">Dein gespeichertes Kunstwerk</string>
+    <string name="success_awaiting_approval">Wartet auf Freigabe</string>
+    <string name="success_awaiting_approval_description">Es kommt in die Digitale Ausstellung, sobald es freigegeben ist</string>
+    <string name="success_share">Teilen</string>
+    <string name="success_remix_title">Gleicher Ort, eine ganz neue Kreation</string>
+    <string name="success_remix_body">Ändere diese Einstellungen im Tab %1$s vor deinem nächsten Kunstwerk.</string>
+    <string name="success_remix_art_style_description">%1$s, %2$s oder %3$s</string>
+    <string name="success_remix_color_palette_description">Gleiche Straßen, eine ganz neue Stimmung</string>
+    <string name="success_remix_map_zoom_description">Details aus der Nähe oder die ganze Gegend</string>
+    <string name="success_create_another_art">Weiteres Kunstwerk erstellen</string>
 </resources>

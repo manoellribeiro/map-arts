@@ -15,26 +15,40 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import manoellribeiro.dev.martp.core.data.local.daos.ColorPalettesDao
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
+import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.network.geoapify.GeoapifyApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
 import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
+import manoellribeiro.dev.martp.core.data.network.martp.MartpApiService
+import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteColorPalette
+import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteColorPalettesResponse
+import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteMapLayersColors
+import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteReversedAddress
+import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteSaveMapArtRequest
 import manoellribeiro.dev.martp.core.logging.ErrorLogger
+import manoellribeiro.dev.martp.core.models.MapLayersColors
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.NoInternetConnectionFailure
 import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.services.ConnectivityService
 import manoellribeiro.dev.martp.infra.MainDispatcherExtension
+import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -50,6 +64,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.io.IOException
+import java.util.Locale
 import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -59,6 +74,9 @@ class MartpRepositoryTest {
     private lateinit var repository: MartpRepository
     private lateinit var mapboxApiService: MapboxApiService
     private lateinit var geoapifyApiService: GeoapifyApiService
+    private lateinit var martpApiService: MartpApiService
+    private lateinit var colorPalettesDao: ColorPalettesDao
+    private lateinit var applicationScope: CoroutineScope
     private lateinit var mapArtsDao: MapArtsDao
     private lateinit var connectivityService: ConnectivityService
     private lateinit var userInfoDao: UserInfoDao
@@ -70,24 +88,45 @@ class MartpRepositoryTest {
     private val fakeMapZoomKey = floatPreferencesKey("MAP_ZOOM_KEY")
     private val fakeColorPaletteKey = stringPreferencesKey("SELECTED_COLOR_PALETTE")
 
+    // Same values as the FALLBACK_COLOR_PALETTES of MartpRepository
+    private val fakeFallbackColorPalette = ColorPaletteEntity(
+        name = "Martp",
+        colors = listOf(
+            0xFF100C2D.toInt(),
+            0xFF120D31.toInt(),
+            0xFF4E3C41.toInt(),
+            0xFF896B51.toInt(),
+            0xFFFFC971.toInt(),
+            0xFFFFCE7E.toInt()
+        )
+    )
+
     @BeforeEach
     fun setup() {
         mapboxApiService = mockk()
         geoapifyApiService = mockk()
+        martpApiService = mockk()
+        colorPalettesDao = mockk()
         mapArtsDao = mockk()
         connectivityService = mockk()
         userInfoDao = mockk()
         artSettingsDataSore = mockk()
         errorLogger = mockk()
+        // Shares the scheduler of runTest (see MainDispatcherExtension), so the work launched in the
+        // background only runs when the test advances the scheduler
+        applicationScope = CoroutineScope(SupervisorJob() + StandardTestDispatcher())
 
         repository = MartpRepository(
             mapboxApiService = mapboxApiService,
             geoapifyApiService = geoapifyApiService,
+            martpApiService = martpApiService,
             connectivityService = connectivityService,
             mapArtDao = mapArtsDao,
             userInfoDao = userInfoDao,
+            colorPalettesDao = colorPalettesDao,
             artSettingsDataSore = artSettingsDataSore,
             ioDispatcher = UnconfinedTestDispatcher(),
+            applicationScope = applicationScope,
             errorLogger = errorLogger
         )
     }
@@ -1018,6 +1057,709 @@ class MartpRepositoryTest {
         // When
         val thrown = assertThrows<CancellationException> {
             repository.saveMapArtEntity(createFakeMapArt())
+        }
+
+        // Then
+        assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    @Test
+    fun `if mapArtDao inserts the map art should not upload it to the martp api`() = runTest {
+        // Given
+        coEvery { mapArtsDao.insert(any()) } just runs
+
+        // When
+        repository.saveMapArtEntity(createFakeMapArt(id = "fake-map-art-id-not-uploaded"))
+        advanceUntilIdle()
+
+        // Then
+        coVerify(exactly = 1) { mapArtsDao.insert(any()) }
+        coVerify(exactly = 0) { martpApiService.saveMapArt(any(), any()) }
+    }
+
+    // endregion
+
+    // region uploadMapArt
+
+    @Test
+    fun `if uploadMapArt is called should not upload the map art before the application scope runs`() = runTest {
+        // Given
+        val fakeUserInfo = UserInfoEntity(id = "fake-pending-user-id", username = null, email = null)
+        coEvery { martpApiService.saveMapArt(any(), any()) } just runs
+
+        // When
+        repository.uploadMapArt(createFakeMapArt(id = "fake-pending-upload-id"), fakeUserInfo)
+
+        // Then
+        coVerify(exactly = 0) { martpApiService.saveMapArt(any(), any()) }
+    }
+
+    @Test
+    fun `if the map art has art style, color palette and layer colors should upload them with the colors in hex`() = runTest {
+        // Given
+        val fakeMapArt = createFakeMapArt(id = "fake-colorful-upload-id").copy(
+            sketchArtType = SketchArtType.COLORFUL_MAP,
+            colorPalette = "Fake Upload Palette",
+            colorsLayers = MapLayersColors(
+                roadsColor = 0xFF100C2D.toInt(),
+                buildingStrokeColor = 0xFF120D31.toInt(),
+                buildingColor = 0x804E3C41.toInt(),
+                roadsPathColor = 0x00896B51,
+                waterColor = 0xFFffc971.toInt(),
+                landOthersColor = 0xFF00000A.toInt()
+            )
+        )
+        val fakeUserInfo = UserInfoEntity(
+            id = "fake-uploader-id",
+            username = "Fake Uploader",
+            email = "fake.uploader@example.com"
+        )
+        val requestSlot = slot<RemoteSaveMapArtRequest>()
+        coEvery { martpApiService.saveMapArt(capture(requestSlot), any()) } just runs
+
+        // When
+        repository.uploadMapArt(fakeMapArt, fakeUserInfo)
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(
+            RemoteSaveMapArtRequest(
+                id = "fake-colorful-upload-id",
+                title = fakeMapArt.title,
+                latitude = fakeMapArt.latitude.toDouble(),
+                longitude = fakeMapArt.longitude.toDouble(),
+                dateInMillis = fakeMapArt.dateInMillis,
+                sketchArtType = "COLORFUL_MAP",
+                colorPalette = "Fake Upload Palette",
+                colorsLayers = RemoteMapLayersColors(
+                    roadsColor = "#100C2D",
+                    buildingStrokeColor = "#120D31",
+                    buildingColor = "#4E3C41",
+                    roadsPathColor = "#896B51",
+                    waterColor = "#FFC971",
+                    landOthersColor = "#00000A"
+                ),
+                email = "fake.uploader@example.com",
+                username = "Fake Uploader"
+            ),
+            requestSlot.captured
+        )
+        coVerify(exactly = 1) { martpApiService.saveMapArt(any(), any()) }
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    @Test
+    fun `if the map art has no art style, color palette or layer colors should upload them as null`() = runTest {
+        // Given
+        val fakeMapArt = createFakeMapArt(id = "fake-plain-upload-id")
+        val fakeUserInfo = UserInfoEntity(id = "fake-anonymous-user-id", username = null, email = null)
+        val requestSlot = slot<RemoteSaveMapArtRequest>()
+        coEvery { martpApiService.saveMapArt(capture(requestSlot), any()) } just runs
+
+        // When
+        repository.uploadMapArt(fakeMapArt, fakeUserInfo)
+        advanceUntilIdle()
+
+        // Then
+        assertNull(requestSlot.captured.sketchArtType)
+        assertNull(requestSlot.captured.colorPalette)
+        assertEquals(RemoteMapLayersColors(), requestSlot.captured.colorsLayers)
+        assertNull(requestSlot.captured.email)
+        assertNull(requestSlot.captured.username)
+    }
+
+    @Test
+    fun `if the map art has only some layer colors should upload the missing ones as null`() = runTest {
+        // Given
+        val fakeMapArt = createFakeMapArt(id = "fake-partial-colors-upload-id").copy(
+            colorsLayers = MapLayersColors(waterColor = 0xFF1A2B3C.toInt())
+        )
+        val fakeUserInfo = UserInfoEntity(id = "fake-partial-user-id", username = "Fake Partial", email = null)
+        val requestSlot = slot<RemoteSaveMapArtRequest>()
+        coEvery { martpApiService.saveMapArt(capture(requestSlot), any()) } just runs
+
+        // When
+        repository.uploadMapArt(fakeMapArt, fakeUserInfo)
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(RemoteMapLayersColors(waterColor = "#1A2B3C"), requestSlot.captured.colorsLayers)
+        assertEquals("Fake Partial", requestSlot.captured.username)
+        assertNull(requestSlot.captured.email)
+    }
+
+    @Test
+    fun `if uploadMapArt is called should send the image file as a png form data part named image`() = runTest {
+        // Given
+        val fakeMapArt = createFakeMapArt(id = "fake-image-upload-id").copy(
+            imagePathLocation = "/fake/arts/fake-image-upload-id.png"
+        )
+        val fakeUserInfo = UserInfoEntity(id = "fake-image-user-id", username = null, email = null)
+        val imageSlot = slot<MultipartBody.Part>()
+        coEvery { martpApiService.saveMapArt(any(), capture(imageSlot)) } just runs
+
+        // When
+        repository.uploadMapArt(fakeMapArt, fakeUserInfo)
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(
+            "form-data; name=\"image\"; filename=\"fake-image-upload-id.png\"",
+            imageSlot.captured.headers?.get("Content-Disposition")
+        )
+        assertEquals("image/png", imageSlot.captured.body.contentType().toString())
+    }
+
+    @Test
+    fun `if martp api throws an exception when uploading should log it without throwing`() = runTest {
+        // Given
+        coEvery { martpApiService.saveMapArt(any(), any()) } throws IOException("fake upload error")
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        repository.uploadMapArt(
+            createFakeMapArt(id = "fake-failing-upload-id"),
+            UserInfoEntity(id = "fake-failing-user-id", username = null, email = null)
+        )
+        advanceUntilIdle()
+
+        // Then
+        coVerify(exactly = 1) { martpApiService.saveMapArt(any(), any()) }
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.uploadMapArt") }
+    }
+
+    @Test
+    fun `if uploading the map art is cancelled should not log the CancellationException`() = runTest {
+        // Given
+        coEvery { martpApiService.saveMapArt(any(), any()) } throws CancellationException("fake upload cancellation")
+
+        // When
+        repository.uploadMapArt(
+            createFakeMapArt(id = "fake-cancelled-upload-id"),
+            UserInfoEntity(id = "fake-cancelled-user-id", username = null, email = null)
+        )
+        advanceUntilIdle()
+
+        // Then
+        coVerify(exactly = 1) { martpApiService.saveMapArt(any(), any()) }
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    // endregion
+
+    // region getColorsPalettes
+
+    @Test
+    fun `if colorPalettesDao has palettes should return them and refresh them from the martp api in the background`() = runTest {
+        // Given
+        val fakeLocalColorPalettes = listOf(
+            ColorPaletteEntity(name = "Fake Local Palette", colors = listOf(0xFF010203.toInt()))
+        )
+        val fakeRemoteColorPalettesResponse = RemoteColorPalettesResponse(
+            palettes = listOf(RemoteColorPalette(name = "Fake Remote Palette", colors = listOf("#0A0B0C")))
+        )
+        val replacedPalettesSlot = slot<List<ColorPaletteEntity>>()
+        coEvery { colorPalettesDao.getAll() } returns fakeLocalColorPalettes
+        coEvery { martpApiService.getColorPalettes() } returns fakeRemoteColorPalettesResponse
+        coEvery { colorPalettesDao.replaceAll(capture(replacedPalettesSlot)) } just runs
+
+        // When
+        val result = repository.getColorsPalettes()
+
+        // Then
+        assertEquals(fakeLocalColorPalettes, result)
+        coVerify(exactly = 0) { martpApiService.getColorPalettes() }
+        advanceUntilIdle()
+        coVerify(exactly = 1) { martpApiService.getColorPalettes() }
+        assertEquals(
+            listOf(ColorPaletteEntity(name = "Fake Remote Palette", colors = listOf(0xFF0A0B0C.toInt()))),
+            replacedPalettesSlot.captured
+        )
+        coVerify(exactly = 1) { colorPalettesDao.replaceAll(any()) }
+    }
+
+    @Test
+    fun `if colorPalettesDao has palettes and the background refresh fails should still return the local palettes`() = runTest {
+        // Given
+        val fakeLocalColorPalettes = listOf(
+            ColorPaletteEntity(name = "Fake Kept Palette", colors = listOf(0xFF111213.toInt(), 0xFF141516.toInt()))
+        )
+        coEvery { colorPalettesDao.getAll() } returns fakeLocalColorPalettes
+        coEvery { martpApiService.getColorPalettes() } throws IOException("fake background refresh error")
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val result = repository.getColorsPalettes()
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(fakeLocalColorPalettes, result)
+        coVerify(exactly = 0) { colorPalettesDao.replaceAll(any()) }
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.fetchColorsPalettes") }
+    }
+
+    @Test
+    fun `if colorPalettesDao has no palettes should return the palettes fetched from the martp api`() = runTest {
+        // Given
+        val fakeRemoteColorPalettesResponse = RemoteColorPalettesResponse(
+            palettes = listOf(
+                RemoteColorPalette(name = "Fake First Remote Palette", colors = listOf("#102030", "#405060")),
+                RemoteColorPalette(name = "Fake Second Remote Palette", colors = listOf("#708090"))
+            )
+        )
+        val fakeExpectedColorPalettes = listOf(
+            ColorPaletteEntity(
+                name = "Fake First Remote Palette",
+                colors = listOf(0xFF102030.toInt(), 0xFF405060.toInt())
+            ),
+            ColorPaletteEntity(name = "Fake Second Remote Palette", colors = listOf(0xFF708090.toInt()))
+        )
+        coEvery { colorPalettesDao.getAll() } returns emptyList()
+        coEvery { martpApiService.getColorPalettes() } returns fakeRemoteColorPalettesResponse
+        coEvery { colorPalettesDao.replaceAll(any()) } just runs
+
+        // When
+        val result = repository.getColorsPalettes()
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(fakeExpectedColorPalettes, result)
+        coVerify(exactly = 1) { martpApiService.getColorPalettes() }
+        coVerify(exactly = 1) { colorPalettesDao.replaceAll(fakeExpectedColorPalettes) }
+    }
+
+    @Test
+    fun `if colorPalettesDao has no palettes and the martp api fails should return the fallback Martp palette`() = runTest {
+        // Given
+        coEvery { colorPalettesDao.getAll() } returns emptyList()
+        coEvery { martpApiService.getColorPalettes() } throws IOException("fake no palettes anywhere error")
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val result = repository.getColorsPalettes()
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(listOf(fakeFallbackColorPalette), result)
+        coVerify(exactly = 1) { martpApiService.getColorPalettes() }
+        coVerify(exactly = 0) { colorPalettesDao.replaceAll(any()) }
+    }
+
+    @Test
+    fun `if colorPalettesDao throws an exception when getting the palettes should log it and return the palettes fetched from the martp api`() = runTest {
+        // Given
+        val fakeRemoteColorPalettesResponse = RemoteColorPalettesResponse(
+            palettes = listOf(RemoteColorPalette(name = "Fake Rescue Palette", colors = listOf("#ABCDEF")))
+        )
+        coEvery { colorPalettesDao.getAll() } throws IllegalStateException("fake get all palettes error")
+        coEvery { martpApiService.getColorPalettes() } returns fakeRemoteColorPalettesResponse
+        coEvery { colorPalettesDao.replaceAll(any()) } just runs
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val result = repository.getColorsPalettes()
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(
+            listOf(ColorPaletteEntity(name = "Fake Rescue Palette", colors = listOf(0xFFABCDEF.toInt()))),
+            result
+        )
+        verify(exactly = 1) {
+            errorLogger.logNonFatal(ofType<IllegalStateException>(), "MartpRepository.getColorsPalettes")
+        }
+        coVerify(exactly = 1) { martpApiService.getColorPalettes() }
+    }
+
+    @Test
+    fun `if getting the local palettes is cancelled should rethrow the CancellationException without calling the martp api`() = runTest {
+        // Given
+        val fakeCancellation = CancellationException("fake get all palettes cancellation")
+        coEvery { colorPalettesDao.getAll() } throws fakeCancellation
+
+        // When
+        val thrown = assertThrows<CancellationException> {
+            repository.getColorsPalettes()
+        }
+        advanceUntilIdle()
+
+        // Then
+        assertSame(fakeCancellation, thrown)
+        coVerify(exactly = 0) { martpApiService.getColorPalettes() }
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    // endregion
+
+    // region fetchColorsPalettes
+
+    @Test
+    fun `if martp api returns palettes should return them with the hex colors as opaque color ints and save them`() = runTest {
+        // Given
+        val fakeRemoteColorPalettesResponse = RemoteColorPalettesResponse(
+            palettes = listOf(
+                RemoteColorPalette(name = "Fake Hex Palette", colors = listOf("#f27ea9", "000000", "#FFFFFF"))
+            )
+        )
+        val fakeExpectedColorPalettes = listOf(
+            ColorPaletteEntity(
+                name = "Fake Hex Palette",
+                colors = listOf(0xFFF27EA9.toInt(), 0xFF000000.toInt(), 0xFFFFFFFF.toInt())
+            )
+        )
+        coEvery { martpApiService.getColorPalettes() } returns fakeRemoteColorPalettesResponse
+        coEvery { colorPalettesDao.replaceAll(any()) } just runs
+
+        // When
+        val result = repository.fetchColorsPalettes()
+
+        // Then
+        assertEquals(fakeExpectedColorPalettes, result)
+        coVerify(exactly = 1) { colorPalettesDao.replaceAll(fakeExpectedColorPalettes) }
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    @Test
+    fun `if martp api returns a palette without colors should return and save it with an empty color list`() = runTest {
+        // Given
+        val fakeRemoteColorPalettesResponse = RemoteColorPalettesResponse(
+            palettes = listOf(RemoteColorPalette(name = "Fake Colorless Palette", colors = emptyList()))
+        )
+        coEvery { martpApiService.getColorPalettes() } returns fakeRemoteColorPalettesResponse
+        coEvery { colorPalettesDao.replaceAll(any()) } just runs
+
+        // When
+        val result = repository.fetchColorsPalettes()
+
+        // Then
+        val fakeExpectedColorPalettes = listOf(ColorPaletteEntity(name = "Fake Colorless Palette", colors = emptyList()))
+        assertEquals(fakeExpectedColorPalettes, result)
+        coVerify(exactly = 1) { colorPalettesDao.replaceAll(fakeExpectedColorPalettes) }
+    }
+
+    @Test
+    fun `if martp api returns an empty list should return the fallback Martp palette without saving it`() = runTest {
+        // Given
+        coEvery { martpApiService.getColorPalettes() } returns RemoteColorPalettesResponse(palettes = emptyList())
+
+        // When
+        val result = repository.fetchColorsPalettes()
+
+        // Then
+        assertEquals(listOf(fakeFallbackColorPalette), result)
+        coVerify(exactly = 0) { colorPalettesDao.replaceAll(any()) }
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    @Test
+    fun `if martp api throws an exception should log it and return the fallback Martp palette without saving it`() = runTest {
+        // Given
+        coEvery { martpApiService.getColorPalettes() } throws IOException("fake color palettes api error")
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val result = repository.fetchColorsPalettes()
+
+        // Then
+        assertEquals(listOf(fakeFallbackColorPalette), result)
+        coVerify(exactly = 0) { colorPalettesDao.replaceAll(any()) }
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.fetchColorsPalettes") }
+    }
+
+    @Test
+    fun `if martp api returns a color that is not in the RRGGBB format should log it and return the fallback Martp palette`() = runTest {
+        // Given
+        val fakeRemoteColorPalettesResponse = RemoteColorPalettesResponse(
+            palettes = listOf(
+                RemoteColorPalette(name = "Fake Valid Palette", colors = listOf("#123456")),
+                RemoteColorPalette(name = "Fake Short Hex Palette", colors = listOf("#FFF"))
+            )
+        )
+        coEvery { martpApiService.getColorPalettes() } returns fakeRemoteColorPalettesResponse
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val result = repository.fetchColorsPalettes()
+
+        // Then
+        assertEquals(listOf(fakeFallbackColorPalette), result)
+        coVerify(exactly = 0) { colorPalettesDao.replaceAll(any()) }
+        verify(exactly = 1) {
+            errorLogger.logNonFatal(ofType<IllegalArgumentException>(), "MartpRepository.fetchColorsPalettes")
+        }
+    }
+
+    @Test
+    fun `if colorPalettesDao throws an exception when saving the palettes should log it and still return the fetched palettes`() = runTest {
+        // Given
+        val fakeRemoteColorPalettesResponse = RemoteColorPalettesResponse(
+            palettes = listOf(RemoteColorPalette(name = "Fake Unsaved Palette", colors = listOf("#C0FFEE")))
+        )
+        coEvery { martpApiService.getColorPalettes() } returns fakeRemoteColorPalettesResponse
+        coEvery { colorPalettesDao.replaceAll(any()) } throws IllegalStateException("fake replace palettes error")
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val result = repository.fetchColorsPalettes()
+
+        // Then
+        assertEquals(
+            listOf(ColorPaletteEntity(name = "Fake Unsaved Palette", colors = listOf(0xFFC0FFEE.toInt()))),
+            result
+        )
+        verify(exactly = 1) {
+            errorLogger.logNonFatal(ofType<IllegalStateException>(), "MartpRepository.fetchColorsPalettes")
+        }
+    }
+
+    @Test
+    fun `if fetching the palettes from the martp api is cancelled should rethrow the CancellationException`() = runTest {
+        // Given
+        val fakeCancellation = CancellationException("fake color palettes api cancellation")
+        coEvery { martpApiService.getColorPalettes() } throws fakeCancellation
+
+        // When
+        val thrown = assertThrows<CancellationException> {
+            repository.fetchColorsPalettes()
+        }
+
+        // Then
+        assertSame(fakeCancellation, thrown)
+        coVerify(exactly = 0) { colorPalettesDao.replaceAll(any()) }
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    @Test
+    fun `if saving the fetched palettes is cancelled should rethrow the CancellationException`() = runTest {
+        // Given
+        val fakeCancellation = CancellationException("fake replace palettes cancellation")
+        coEvery { martpApiService.getColorPalettes() } returns RemoteColorPalettesResponse(
+            palettes = listOf(RemoteColorPalette(name = "Fake Cancelled Save Palette", colors = listOf("#BADA55")))
+        )
+        coEvery { colorPalettesDao.replaceAll(any()) } throws fakeCancellation
+
+        // When
+        val thrown = assertThrows<CancellationException> {
+            repository.fetchColorsPalettes()
+        }
+
+        // Then
+        assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    // endregion
+
+    // region getSelectedColorPalette
+
+    @Test
+    fun `if colorPalettesDao has the saved color palette should return it without loading all palettes`() = runTest {
+        // Given
+        val fakeColorPaletteName = "Fake Selected Palette"
+        val fakeColorPalette = ColorPaletteEntity(name = fakeColorPaletteName, colors = listOf(0xFF212223.toInt()))
+        every { artSettingsDataSore.data } returns flowOf(preferencesOf(fakeColorPaletteKey to fakeColorPaletteName))
+        coEvery { colorPalettesDao.getByName(any()) } returns fakeColorPalette
+
+        // When
+        val result = repository.getSelectedColorPalette()
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(fakeColorPalette, result)
+        coVerify(exactly = 1) { colorPalettesDao.getByName(fakeColorPaletteName) }
+        coVerify(exactly = 0) { colorPalettesDao.getAll() }
+        coVerify(exactly = 0) { martpApiService.getColorPalettes() }
+    }
+
+    @Test
+    fun `if there is no saved color palette should look for the Martp palette`() = runTest {
+        // Given
+        val fakeMartpColorPalette = ColorPaletteEntity(name = "Martp", colors = listOf(0xFF313233.toInt()))
+        every { artSettingsDataSore.data } returns flowOf(emptyPreferences())
+        coEvery { colorPalettesDao.getByName(any()) } returns fakeMartpColorPalette
+
+        // When
+        val result = repository.getSelectedColorPalette()
+
+        // Then
+        assertEquals(fakeMartpColorPalette, result)
+        coVerify(exactly = 1) { colorPalettesDao.getByName("Martp") }
+    }
+
+    @Test
+    fun `if colorPalettesDao does not have the saved color palette should return the first local palette`() = runTest {
+        // Given
+        val fakeLocalColorPalettes = listOf(
+            ColorPaletteEntity(name = "Fake First Local Palette", colors = listOf(0xFF414243.toInt())),
+            ColorPaletteEntity(name = "Fake Second Local Palette", colors = listOf(0xFF444546.toInt()))
+        )
+        every { artSettingsDataSore.data } returns flowOf(preferencesOf(fakeColorPaletteKey to "Fake Deleted Palette"))
+        coEvery { colorPalettesDao.getByName(any()) } returns null
+        coEvery { colorPalettesDao.getAll() } returns fakeLocalColorPalettes
+        coEvery { martpApiService.getColorPalettes() } returns RemoteColorPalettesResponse(
+            palettes = listOf(RemoteColorPalette(name = "Fake Refreshed Palette", colors = listOf("#474849")))
+        )
+        coEvery { colorPalettesDao.replaceAll(any()) } just runs
+
+        // When
+        val result = repository.getSelectedColorPalette()
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(fakeLocalColorPalettes.first(), result)
+        coVerify(exactly = 1) { colorPalettesDao.getByName("Fake Deleted Palette") }
+        coVerify(exactly = 1) { colorPalettesDao.getAll() }
+        coVerify(exactly = 1) { martpApiService.getColorPalettes() }
+    }
+
+    @Test
+    fun `if colorPalettesDao does not have the saved color palette and has no palettes should return the first palette from the martp api`() = runTest {
+        // Given
+        every { artSettingsDataSore.data } returns flowOf(preferencesOf(fakeColorPaletteKey to "Fake Missing Palette"))
+        coEvery { colorPalettesDao.getByName(any()) } returns null
+        coEvery { colorPalettesDao.getAll() } returns emptyList()
+        coEvery { martpApiService.getColorPalettes() } returns RemoteColorPalettesResponse(
+            palettes = listOf(
+                RemoteColorPalette(name = "Fake First Api Palette", colors = listOf("#515253")),
+                RemoteColorPalette(name = "Fake Second Api Palette", colors = listOf("#545556"))
+            )
+        )
+        coEvery { colorPalettesDao.replaceAll(any()) } just runs
+
+        // When
+        val result = repository.getSelectedColorPalette()
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(ColorPaletteEntity(name = "Fake First Api Palette", colors = listOf(0xFF515253.toInt())), result)
+        coVerify(exactly = 1) { martpApiService.getColorPalettes() }
+    }
+
+    @Test
+    fun `if no palette is found locally and the martp api fails should return the fallback Martp palette`() = runTest {
+        // Given
+        every { artSettingsDataSore.data } returns flowOf(preferencesOf(fakeColorPaletteKey to "Fake Offline Palette"))
+        coEvery { colorPalettesDao.getByName(any()) } returns null
+        coEvery { colorPalettesDao.getAll() } returns emptyList()
+        coEvery { martpApiService.getColorPalettes() } throws IOException("fake offline palettes error")
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val result = repository.getSelectedColorPalette()
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(fakeFallbackColorPalette, result)
+    }
+
+    @Test
+    fun `if colorPalettesDao throws an exception when getting the saved color palette should log it and return the first local palette`() = runTest {
+        // Given
+        val fakeLocalColorPalettes = listOf(
+            ColorPaletteEntity(name = "Fake Recovered Palette", colors = listOf(0xFF616263.toInt()))
+        )
+        every { artSettingsDataSore.data } returns flowOf(preferencesOf(fakeColorPaletteKey to "Fake Broken Palette"))
+        coEvery { colorPalettesDao.getByName(any()) } throws IllegalStateException("fake get palette by name error")
+        coEvery { colorPalettesDao.getAll() } returns fakeLocalColorPalettes
+        coEvery { martpApiService.getColorPalettes() } returns RemoteColorPalettesResponse(palettes = emptyList())
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val result = repository.getSelectedColorPalette()
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(fakeLocalColorPalettes.first(), result)
+        verify(exactly = 1) {
+            errorLogger.logNonFatal(ofType<IllegalStateException>(), "MartpRepository.getSelectedColorPalette")
+        }
+    }
+
+    @Test
+    fun `if getting the saved color palette is cancelled should rethrow the CancellationException`() = runTest {
+        // Given
+        val fakeCancellation = CancellationException("fake get palette by name cancellation")
+        every { artSettingsDataSore.data } returns flowOf(preferencesOf(fakeColorPaletteKey to "Fake Cancelled Palette"))
+        coEvery { colorPalettesDao.getByName(any()) } throws fakeCancellation
+
+        // When
+        val thrown = assertThrows<CancellationException> {
+            repository.getSelectedColorPalette()
+        }
+
+        // Then
+        assertSame(fakeCancellation, thrown)
+        coVerify(exactly = 0) { colorPalettesDao.getAll() }
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    // endregion
+
+    // region getReversedAddressFromApi
+
+    @Test
+    fun `if martp api returns the address should return it and send the location and the device language`() = runTest {
+        // Given
+        val fakeLatitude = -12.9714
+        val fakeLongitude = -38.5014
+        val fakeReversedAddress = RemoteReversedAddress(
+            street = "Fake Api Street",
+            city = "Fake Api City",
+            country = "Fake Api Country"
+        )
+        coEvery { martpApiService.reverseGeocode(any(), any(), any()) } returns fakeReversedAddress
+
+        // When
+        val result = repository.getReversedAddressFromApi(latitude = fakeLatitude, longitude = fakeLongitude)
+
+        // Then
+        assertEquals(fakeReversedAddress, result)
+        coVerify(exactly = 1) {
+            martpApiService.reverseGeocode(
+                latitude = fakeLatitude,
+                longitude = fakeLongitude,
+                language = Locale.getDefault().language
+            )
+        }
+    }
+
+    @Test
+    fun `if martp api returns an address without street, city and country should return it as it is`() = runTest {
+        // Given
+        val fakeEmptyReversedAddress = RemoteReversedAddress(street = null, city = null, country = null)
+        coEvery { martpApiService.reverseGeocode(any(), any(), any()) } returns fakeEmptyReversedAddress
+
+        // When
+        val result = repository.getReversedAddressFromApi(latitude = 0.5, longitude = -160.5)
+
+        // Then
+        assertEquals(fakeEmptyReversedAddress, result)
+    }
+
+    @Test
+    fun `if martp api throws an exception when reverse geocoding should log it and return null`() = runTest {
+        // Given
+        coEvery { martpApiService.reverseGeocode(any(), any(), any()) } throws IOException("fake reverse geocode error")
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val result = repository.getReversedAddressFromApi(latitude = 1.5, longitude = 2.5)
+
+        // Then
+        assertNull(result)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.getReversedAddressFromApi") }
+    }
+
+    @Test
+    fun `if reverse geocoding is cancelled should rethrow the CancellationException`() = runTest {
+        // Given
+        val fakeCancellation = CancellationException("fake reverse geocode cancellation")
+        coEvery { martpApiService.reverseGeocode(any(), any(), any()) } throws fakeCancellation
+
+        // When
+        val thrown = assertThrows<CancellationException> {
+            repository.getReversedAddressFromApi(latitude = 3.5, longitude = 4.5)
         }
 
         // Then

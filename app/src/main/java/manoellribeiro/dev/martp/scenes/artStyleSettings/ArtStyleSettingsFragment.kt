@@ -69,9 +69,8 @@ import manoellribeiro.dev.martp.core.components.compose.theme.LightL1
 import manoellribeiro.dev.martp.core.components.compose.theme.LightL5
 import manoellribeiro.dev.martp.core.components.compose.theme.LightYellow
 import manoellribeiro.dev.martp.core.components.compose.theme.White
-import manoellribeiro.dev.martp.core.data.network.mapbox.models.MapboxMapStyle
+import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.models.SketchArtType
-import manoellribeiro.dev.martp.core.utils.ColorPaletteProvider
 import manoellribeiro.dev.martp.scenes.main.MainViewModel
 import kotlin.getValue
 
@@ -122,7 +121,7 @@ class ArtStyleSettingsFragment : Fragment() {
 
                             var selectedArtStyle by remember { mutableStateOf(state.mapArtStyle) }
                             var selectedColorPaletteName by remember {
-                                mutableStateOf(ColorPaletteProvider.byNameOrDefault(state.colorPaletteSelected).name)
+                                mutableStateOf(state.colorPaletteSelected)
                             }
                             // The slider holds its position (0..1) instead of the zoom itself, so switching to an
                             // art style with another zoom range keeps the thumb where it was
@@ -148,6 +147,7 @@ class ArtStyleSettingsFragment : Fragment() {
 
                             if(selectedArtStyle == SketchArtType.COLORFUL_MAP) {
                                 ColorPaletteSelectors(
+                                    colorPalettes = state.colorsPalettes,
                                     selectedColorPaletteName = selectedColorPaletteName,
                                     onColorPaletteSelected = { colorPaletteName ->
                                         selectedColorPaletteName = colorPaletteName
@@ -261,41 +261,6 @@ private fun ZoomSlider(
     )
 }
 
-private val artStyleModels = listOf(
-    MapArtStyleModel(
-        titleId = R.string.colorful_map,
-        descriptionId = R.string.colorful_map_description,
-        drawableImageId = R.drawable.ic_colorful_map,
-        sketchArtType = SketchArtType.COLORFUL_MAP
-    ),
-    MapArtStyleModel(
-        titleId = R.string.classic,
-        descriptionId = R.string.classic_description,
-        drawableImageId = R.drawable.ic_martp_logo,
-        sketchArtType = SketchArtType.DEFAULT
-    ),
-    MapArtStyleModel(
-        titleId = R.string.pointillism,
-        descriptionId = R.string.pointillism_colorful_description,
-        drawableImageId = R.drawable.ic_pointllism,
-        sketchArtType = SketchArtType.POINTILLISM
-    ),
-    //Still work in progress
-//    MapArtStyleModel(
-//        titleId = R.string.water_flow,
-//        descriptionId = R.string.water_flow_description,
-//        drawableImageId = R.drawable.ic_water_flow,
-//        sketchArtType = SketchArtType.WATER_FLOW
-//    ),
-    //Still work in progress
-//    MapArtStyleModel(
-//        titleId = R.string.walking_people,
-//        descriptionId = R.string.walking_people_description,
-//        drawableImageId = R.drawable.ic_walking_people,
-//        sketchArtType = SketchArtType.PARTICLE_SYSTEM
-//    ),
-)
-
 @Composable
 fun ArtStyleSelectors(
     selectedArtStyle: SketchArtType,
@@ -336,6 +301,7 @@ fun ArtStyleSelectors(
 
 @Composable
 fun ColorPaletteSelectors(
+    colorPalettes: List<ColorPaletteEntity>,
     selectedColorPaletteName: String,
     onColorPaletteSelected: (String) -> Unit
 ) {
@@ -364,7 +330,7 @@ fun ColorPaletteSelectors(
             modifier = Modifier.padding(bottom = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            for(colorPalette in ColorPaletteProvider.all) {
+            for(colorPalette in colorPalettes) {
                 ColorPaletteCardSelector(
                     colorPalette = colorPalette,
                     isSelected = colorPalette.name == selectedColorPaletteName,
@@ -443,7 +409,7 @@ fun ArtStyleCardSelector(
 
 @Composable
 fun ColorPaletteCardSelector(
-    colorPalette: ColorPalette,
+    colorPalette: ColorPaletteEntity,
     isSelected: Boolean,
     onSelect: (String) -> Unit,
 ) {

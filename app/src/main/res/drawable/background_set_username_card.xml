@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#22000000">
+    <item android:id="@+id/martpButtonShape">
+        <shape>
+            <corners android:radius="8dp" />
+            <solid android:color="@color/white" />
+            <stroke
+                android:width="@dimen/border_width_hairline"
+                android:color="@color/light_l3" />
+        </shape>
+    </item>
+</ripple>

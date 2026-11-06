@@ -19,6 +19,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
@@ -74,6 +75,13 @@ class MainViewModelTest {
             id = "fake-user-id",
             username = username,
             email = email
+        )
+    }
+
+    private fun createFakeColorPalette(name: String): ColorPaletteEntity {
+        return ColorPaletteEntity(
+            name = name,
+            colors = listOf(0xFF102030.toInt(), 0xFF405060.toInt())
         )
     }
 
@@ -234,6 +242,7 @@ class MainViewModelTest {
 
         // Then
         assertEquals(ArtStyleSettingsUiState.Loading, viewModel.artStyleSettingsState.value)
+        coVerify(exactly = 0) { repository.getColorsPalettes() }
         coVerify(exactly = 0) { repository.getMapZoomPreference() }
         coVerify(exactly = 0) { repository.getArtStylePreference() }
         coVerify(exactly = 0) { repository.getColorPalettePreference() }
@@ -245,6 +254,11 @@ class MainViewModelTest {
         val fakeMapZoom = 14.5f
         val fakeArtStyle = SketchArtType.POINTILLISM
         val fakeColorPaletteName = "Fake Settings Palette"
+        val fakeColorPalettes = listOf(
+            createFakeColorPalette(name = "Fake Other Settings Palette"),
+            createFakeColorPalette(name = fakeColorPaletteName)
+        )
+        coEvery { repository.getColorsPalettes() } returns fakeColorPalettes
         coEvery { repository.getMapZoomPreference() } returns fakeMapZoom
         coEvery { repository.getArtStylePreference() } returns fakeArtStyle
         coEvery { repository.getColorPalettePreference() } returns fakeColorPaletteName
@@ -261,14 +275,66 @@ class MainViewModelTest {
                 ArtStyleSettingsUiState.SettingsLoaded(
                     mapZoom = fakeMapZoom,
                     mapArtStyle = fakeArtStyle,
+                    colorsPalettes = fakeColorPalettes,
                     colorPaletteSelected = fakeColorPaletteName
                 )
             ),
             states
         )
+        coVerify(exactly = 1) { repository.getColorsPalettes() }
         coVerify(exactly = 1) { repository.getMapZoomPreference() }
         coVerify(exactly = 1) { repository.getArtStylePreference() }
         coVerify(exactly = 1) { repository.getColorPalettePreference() }
+    }
+
+    @Test
+    fun `if the saved color palette is not in the loaded palettes should select the first loaded palette`() = runTest {
+        // Given
+        val fakeColorPalettes = listOf(
+            createFakeColorPalette(name = "Fake First Loaded Palette"),
+            createFakeColorPalette(name = "Fake Second Loaded Palette")
+        )
+        coEvery { repository.getColorsPalettes() } returns fakeColorPalettes
+        coEvery { repository.getMapZoomPreference() } returns 15.5f
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.COLORFUL_MAP
+        coEvery { repository.getColorPalettePreference() } returns "Fake Removed Palette"
+
+        // When
+        viewModel.getArtStyleSettings()
+        advanceUntilIdle()
+
+        // Then
+        val settingsLoadedState = assertInstanceOf(
+            ArtStyleSettingsUiState.SettingsLoaded::class.java,
+            viewModel.artStyleSettingsState.value
+        )
+        assertEquals("Fake First Loaded Palette", settingsLoadedState.colorPaletteSelected)
+        assertEquals(fakeColorPalettes, settingsLoadedState.colorsPalettes)
+    }
+
+    @Test
+    fun `if repository returns only the fallback Martp palette should select it`() = runTest {
+        // Given
+        val fakeColorPalettes = listOf(createFakeColorPalette(name = "Martp"))
+        coEvery { repository.getColorsPalettes() } returns fakeColorPalettes
+        coEvery { repository.getMapZoomPreference() } returns 16.5f
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.COLORFUL_MAP
+        coEvery { repository.getColorPalettePreference() } returns "Martp"
+
+        // When
+        viewModel.getArtStyleSettings()
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(
+            ArtStyleSettingsUiState.SettingsLoaded(
+                mapZoom = 16.5f,
+                mapArtStyle = SketchArtType.COLORFUL_MAP,
+                colorsPalettes = fakeColorPalettes,
+                colorPaletteSelected = "Martp"
+            ),
+            viewModel.artStyleSettingsState.value
+        )
     }
 
     @Test
@@ -280,6 +346,11 @@ class MainViewModelTest {
         val fakeSecondArtStyle = SketchArtType.POINTILLISM
         val fakeFirstColorPaletteName = "Fake First Palette"
         val fakeSecondColorPaletteName = "Fake Second Palette"
+        val fakeColorPalettes = listOf(
+            createFakeColorPalette(name = fakeFirstColorPaletteName),
+            createFakeColorPalette(name = fakeSecondColorPaletteName)
+        )
+        coEvery { repository.getColorsPalettes() } returns fakeColorPalettes
         coEvery { repository.getMapZoomPreference() } returnsMany listOf(fakeFirstMapZoom, fakeSecondMapZoom)
         coEvery { repository.getArtStylePreference() } returnsMany listOf(fakeFirstArtStyle, fakeSecondArtStyle)
         coEvery { repository.getColorPalettePreference() } returnsMany listOf(fakeFirstColorPaletteName, fakeSecondColorPaletteName)
@@ -298,17 +369,20 @@ class MainViewModelTest {
                 ArtStyleSettingsUiState.SettingsLoaded(
                     mapZoom = fakeFirstMapZoom,
                     mapArtStyle = fakeFirstArtStyle,
+                    colorsPalettes = fakeColorPalettes,
                     colorPaletteSelected = fakeFirstColorPaletteName
                 ),
                 ArtStyleSettingsUiState.Loading,
                 ArtStyleSettingsUiState.SettingsLoaded(
                     mapZoom = fakeSecondMapZoom,
                     mapArtStyle = fakeSecondArtStyle,
+                    colorsPalettes = fakeColorPalettes,
                     colorPaletteSelected = fakeSecondColorPaletteName
                 )
             ),
             states
         )
+        coVerify(exactly = 2) { repository.getColorsPalettes() }
         coVerify(exactly = 2) { repository.getMapZoomPreference() }
         coVerify(exactly = 2) { repository.getArtStylePreference() }
         coVerify(exactly = 2) { repository.getColorPalettePreference() }
@@ -327,7 +401,7 @@ class MainViewModelTest {
 
         // When
         viewModel.setUserName(fakeUsername, fakeUserId)
-        advanceTimeBy(1999)
+        advanceTimeBy(999)
         runCurrent()
 
         // Then
@@ -335,7 +409,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `if the username debounce of 2000 milliseconds has ended should save the username`() = runTest {
+    fun `if the username debounce of 1000 milliseconds has ended should save the username`() = runTest {
         // Given
         val fakeUserId = "fake-user-id-2"
         val fakeUsername = "Fake Saved User"
@@ -343,7 +417,7 @@ class MainViewModelTest {
 
         // When
         viewModel.setUserName(fakeUsername, fakeUserId)
-        advanceTimeBy(2000)
+        advanceTimeBy(1000)
         runCurrent()
 
         // Then
@@ -361,7 +435,7 @@ class MainViewModelTest {
 
         // When
         viewModel.setUserName(fakeFirstUsername, fakeUserId)
-        advanceTimeBy(1999)
+        advanceTimeBy(999)
         viewModel.setUserName(fakeLastUsername, fakeUserId)
         advanceUntilIdle()
 
@@ -402,7 +476,7 @@ class MainViewModelTest {
 
         // When
         viewModel.setUserEmail(fakeEmail, fakeUserId)
-        advanceTimeBy(1999)
+        advanceTimeBy(999)
         runCurrent()
 
         // Then
@@ -410,7 +484,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `if the email debounce of 2000 milliseconds has ended should save the email`() = runTest {
+    fun `if the email debounce of 1000 milliseconds has ended should save the email`() = runTest {
         // Given
         val fakeUserId = "fake-user-id-6"
         val fakeEmail = "fake.saved@example.com"
@@ -418,7 +492,7 @@ class MainViewModelTest {
 
         // When
         viewModel.setUserEmail(fakeEmail, fakeUserId)
-        advanceTimeBy(2000)
+        advanceTimeBy(1000)
         runCurrent()
 
         // Then
@@ -436,7 +510,7 @@ class MainViewModelTest {
 
         // When
         viewModel.setUserEmail(fakeFirstEmail, fakeUserId)
-        advanceTimeBy(1999)
+        advanceTimeBy(999)
         viewModel.setUserEmail(fakeLastEmail, fakeUserId)
         advanceUntilIdle()
 
@@ -495,7 +569,7 @@ class MainViewModelTest {
 
         // When
         viewModel.setMapZoom(fakeMapZoom)
-        advanceTimeBy(1499)
+        advanceTimeBy(999)
         runCurrent()
 
         // Then
@@ -503,14 +577,14 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `if the map zoom debounce of 1500 milliseconds has ended should save the map zoom`() = runTest {
+    fun `if the map zoom debounce of 1000 milliseconds has ended should save the map zoom`() = runTest {
         // Given
         val fakeMapZoom = 13.5f
         coEvery { repository.setMapZoomPreference(any()) } just runs
 
         // When
         viewModel.setMapZoom(fakeMapZoom)
-        advanceTimeBy(1500)
+        advanceTimeBy(1000)
         runCurrent()
 
         // Then
@@ -527,7 +601,7 @@ class MainViewModelTest {
 
         // When
         viewModel.setMapZoom(fakeFirstMapZoom)
-        advanceTimeBy(1499)
+        advanceTimeBy(999)
         viewModel.setMapZoom(fakeLastMapZoom)
         advanceUntilIdle()
 
@@ -566,7 +640,7 @@ class MainViewModelTest {
 
         // When
         viewModel.setMapStyle(fakeArtStyle)
-        advanceTimeBy(1499)
+        advanceTimeBy(999)
         runCurrent()
 
         // Then
@@ -574,14 +648,14 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `if the map style debounce of 1500 milliseconds has ended should save the map style`() = runTest {
+    fun `if the map style debounce of 1000 milliseconds has ended should save the map style`() = runTest {
         // Given
         val fakeArtStyle = SketchArtType.POINTILLISM
         coEvery { repository.setMapArtStylePreference(any()) } just runs
 
         // When
         viewModel.setMapStyle(fakeArtStyle)
-        advanceTimeBy(1500)
+        advanceTimeBy(1000)
         runCurrent()
 
         // Then
@@ -598,7 +672,7 @@ class MainViewModelTest {
 
         // When
         viewModel.setMapStyle(fakeFirstArtStyle)
-        advanceTimeBy(1499)
+        advanceTimeBy(999)
         viewModel.setMapStyle(fakeLastArtStyle)
         advanceUntilIdle()
 
@@ -655,7 +729,7 @@ class MainViewModelTest {
 
         // When
         viewModel.setColorPalette(fakeColorPaletteName)
-        advanceTimeBy(1499)
+        advanceTimeBy(999)
         runCurrent()
 
         // Then
@@ -663,14 +737,14 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `if the color palette debounce of 1500 milliseconds has ended should save the color palette`() = runTest {
+    fun `if the color palette debounce of 1000 milliseconds has ended should save the color palette`() = runTest {
         // Given
         val fakeColorPaletteName = "Fake Saved Palette"
         coEvery { repository.setColorPalettePreference(any()) } just runs
 
         // When
         viewModel.setColorPalette(fakeColorPaletteName)
-        advanceTimeBy(1500)
+        advanceTimeBy(1000)
         runCurrent()
 
         // Then
@@ -688,7 +762,7 @@ class MainViewModelTest {
 
         // When
         viewModel.setColorPalette(fakeFirstColorPaletteName)
-        advanceTimeBy(1499)
+        advanceTimeBy(999)
         viewModel.setColorPalette(fakeLastColorPaletteName)
         advanceUntilIdle()
 

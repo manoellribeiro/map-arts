@@ -41,3 +41,7 @@ fun Int.greenValue(): Int {
 fun Int.blueValue(): Int {
     return this and 0xFF
 }
+
+private const val RGB_MASK = 0xFFFFFF
+
+fun Int.toHexColor(): String = "#%06X".format(this and RGB_MASK)

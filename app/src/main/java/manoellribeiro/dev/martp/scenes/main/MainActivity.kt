@@ -35,6 +35,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.navigation.NavigationBarView
 import manoellribeiro.dev.martp.R
+import manoellribeiro.dev.martp.scenes.onboarding.OnboardingActivity
 import manoellribeiro.dev.martp.core.extensions.dp
 import manoellribeiro.dev.martp.core.extensions.isPositive
 import kotlin.getValue
@@ -48,8 +49,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        // Reading the onboarding flag takes a few milliseconds; the splash hides the screen meanwhile
+        splashScreen.setKeepOnScreenCondition {
+            viewModel.onboardingCheckState.value == OnboardingCheckUiState.Checking
+        }
+        if (viewModel.onboardingCheckState.value == OnboardingCheckUiState.Checking) viewModel.checkOnboarding()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupRequireLocationPermissionLauncher()
@@ -75,11 +81,23 @@ class MainActivity : AppCompatActivity() {
     private fun setupObservables() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.isUserInfoBadgeVisible.collect { visible ->
-                    setupUserInfoBadgeVisibility(visible)
+                launch {
+                    viewModel.isUserInfoBadgeVisible.collect { visible ->
+                        setupUserInfoBadgeVisibility(visible)
+                    }
+                }
+                launch {
+                    viewModel.onboardingCheckState.collect { state ->
+                        if (state == OnboardingCheckUiState.ShowOnboarding) openOnboarding()
+                    }
                 }
             }
         }
+    }
+
+    private fun openOnboarding() {
+        startActivity(OnboardingActivity.newIntent(this))
+        finish()
     }
 
     private fun setupUserInfoBadgeVisibility(visible: Boolean) {

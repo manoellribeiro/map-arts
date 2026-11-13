@@ -74,6 +74,19 @@ class MainViewModel @Inject constructor(
     private val _isUserInfoBadgeVisible: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isUserInfoBadgeVisible: StateFlow<Boolean> = _isUserInfoBadgeVisible.asStateFlow()
 
+    private val _onboardingCheckState: MutableStateFlow<OnboardingCheckUiState> = MutableStateFlow(OnboardingCheckUiState.Checking)
+    val onboardingCheckState: StateFlow<OnboardingCheckUiState> = _onboardingCheckState.asStateFlow()
+
+    fun checkOnboarding() {
+        viewModelScope.launch {
+            _onboardingCheckState.value = if (repository.hasSeenOnboarding()) {
+                OnboardingCheckUiState.OnboardingAlreadySeen
+            } else {
+                OnboardingCheckUiState.ShowOnboarding
+            }
+        }
+    }
+
     fun tryToGetUserInfo() {
         viewModelScope.launch {
             _isUserInfoBadgeVisible.value = false

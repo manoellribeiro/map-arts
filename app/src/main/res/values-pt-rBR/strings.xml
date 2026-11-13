@@ -116,4 +116,21 @@
     <string name="success_remix_color_palette_description">Mesmas ruas, um clima totalmente novo</string>
     <string name="success_remix_map_zoom_description">Detalhes de perto ou a área inteira</string>
     <string name="success_create_another_art">Criar outra arte</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step_count">%1$d de %2$d</string>
+    <string name="onboarding_skip">Pular</string>
+    <string name="onboarding_next">Próximo</string>
+    <string name="onboarding_start_creating">Começar a criar</string>
+    <string name="onboarding_art_title">Localização transformada em arte</string>
+    <string name="onboarding_art_description">O Martp transforma as ruas ao seu redor em uma arte abstrata de mapa.</string>
+    <string name="onboarding_choices_title">E você escolhe como ela fica</string>
+    <string name="onboarding_choices_description">Mude isso quando quiser na aba %1$s.</string>
+    <string name="onboarding_signature_title">Assine suas artes, se quiser</string>
+    <string name="onboarding_signature_description">Adicione um nome de usuário e um e-mail na aba %1$s. Eles são enviados com suas artes, e os dois são opcionais.</string>
+    <string name="onboarding_example_username">@usuario</string>
+    <string name="onboarding_exhibition_title">Toda arte entra na Exposição Digital</string>
+    <string name="onboarding_exhibition_description">Depois de uma revisão rápida, sua arte fica exposta na sala do seu continente, ao lado de artes do mundo todo. Visite quando quiser em martp.app/exhibition.</string>
+    <string name="onboarding_example_art_description">Um exemplo de arte de mapa</string>
+    <string name="onboarding_globe_description">Um globo com as artes da Exposição Digital</string>
 </resources>

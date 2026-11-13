@@ -49,6 +49,9 @@
         <activity
             android:name=".scenes.success.SuccessActivity"
             android:exported="false"/>
+        <activity
+            android:name=".scenes.onboarding.OnboardingActivity"
+            android:exported="false"/>
     </application>
 
 </manifest>

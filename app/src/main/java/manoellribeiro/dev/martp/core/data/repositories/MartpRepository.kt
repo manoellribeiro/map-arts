@@ -3,6 +3,7 @@ package manoellribeiro.dev.martp.core.data.repositories
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import manoellribeiro.dev.martp.core.data.network.mapbox.MapboxApiService
@@ -65,6 +66,7 @@ class MartpRepository @Inject constructor(
         private const val MAP_ZOOM_KEY = "MAP_ZOOM_KEY"
         private const val MAP_ART_STYLE_KEY = "MAP_ART_STYLE_KEY"
         private const val SELECTED_COLOR_PALETTE = "SELECTED_COLOR_PALETTE"
+        private const val HAS_SEEN_ONBOARDING_KEY = "HAS_SEEN_ONBOARDING_KEY"
         private val FALLBACK_COLOR_PALETTES = listOf(
             ColorPaletteEntity(
                 name = "Martp",
@@ -166,6 +168,35 @@ class MartpRepository @Inject constructor(
         } catch (e: Exception) {
             errorLogger.logNonFatal(e, "MartpRepository.getMapZoomPreference")
             return defaultZoom
+        }
+    }
+
+    suspend fun setOnboardingSeen() {
+        try {
+            val hasSeenOnboardingKey = booleanPreferencesKey(HAS_SEEN_ONBOARDING_KEY)
+            artSettingsDataSore.edit { preferences ->
+                preferences[hasSeenOnboardingKey] = true
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.setOnboardingSeen")
+            throw LocalStorageErrorFailure(e.message)
+        }
+    }
+
+    suspend fun hasSeenOnboarding(): Boolean {
+        try {
+            val hasSeenOnboardingKey = booleanPreferencesKey(HAS_SEEN_ONBOARDING_KEY)
+            return artSettingsDataSore.data.map { preferences ->
+                preferences[hasSeenOnboardingKey]
+            }.first() ?: false
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            errorLogger.logNonFatal(e, "MartpRepository.hasSeenOnboarding")
+            // An unreadable store would otherwise show the onboarding on every launch
+            return true
         }
     }
 

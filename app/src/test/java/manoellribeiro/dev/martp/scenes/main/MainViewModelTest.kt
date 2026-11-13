@@ -933,4 +933,51 @@ class MainViewModelTest {
 
     // endregion
 
+    // region checkOnboarding
+
+    @Test
+    fun `if checkOnboarding was not called should keep the Checking state without reading the repository`() = runTest {
+        // Given
+        // Nothing: the activity calls checkOnboarding()
+
+        // When
+        val states = collectStates(viewModel.onboardingCheckState)
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(listOf(OnboardingCheckUiState.Checking), states)
+        coVerify(exactly = 0) { repository.hasSeenOnboarding() }
+    }
+
+    @Test
+    fun `if the onboarding was not seen should emit ShowOnboarding after Checking`() = runTest {
+        // Given
+        coEvery { repository.hasSeenOnboarding() } returns false
+
+        // When
+        val states = collectStates(viewModel.onboardingCheckState)
+        viewModel.checkOnboarding()
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(listOf(OnboardingCheckUiState.Checking, OnboardingCheckUiState.ShowOnboarding), states)
+        coVerify(exactly = 1) { repository.hasSeenOnboarding() }
+    }
+
+    @Test
+    fun `if the onboarding was already seen should emit OnboardingAlreadySeen after Checking`() = runTest {
+        // Given
+        coEvery { repository.hasSeenOnboarding() } returns true
+
+        // When
+        val states = collectStates(viewModel.onboardingCheckState)
+        viewModel.checkOnboarding()
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(listOf(OnboardingCheckUiState.Checking, OnboardingCheckUiState.OnboardingAlreadySeen), states)
+        coVerify(exactly = 1) { repository.hasSeenOnboarding() }
+    }
+
+    // endregion
 }

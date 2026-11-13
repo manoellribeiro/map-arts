@@ -117,4 +117,21 @@
     <string name="success_remix_color_palette_description">Same streets, a whole new mood</string>
     <string name="success_remix_map_zoom_description">Close-up details or the whole area</string>
     <string name="success_create_another_art">Create another art</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step_count">%1$d of %2$d</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_start_creating">Start creating</string>
+    <string name="onboarding_art_title">Location turned into art</string>
+    <string name="onboarding_art_description">Martp turns the streets around you into an abstract map art.</string>
+    <string name="onboarding_choices_title">And you choose how it looks</string>
+    <string name="onboarding_choices_description">Change these anytime in the %1$s tab.</string>
+    <string name="onboarding_signature_title">Sign your arts, if you want</string>
+    <string name="onboarding_signature_description">Add a username and an email in the %1$s tab. They\'re sent with your arts, and both are optional.</string>
+    <string name="onboarding_example_username">@username</string>
+    <string name="onboarding_exhibition_title">Every art joins the Digital Exhibition</string>
+    <string name="onboarding_exhibition_description">After a quick review, your art hangs in the room of its continent, next to arts from all over the world. Visit it anytime at martp.app/exhibition.</string>
+    <string name="onboarding_example_art_description">An example of a map art</string>
+    <string name="onboarding_globe_description">A globe with the arts of the Digital Exhibition</string>
 </resources>

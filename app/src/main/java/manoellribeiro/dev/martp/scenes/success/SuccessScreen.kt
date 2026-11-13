@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,7 +38,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
@@ -56,29 +54,21 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import manoellribeiro.dev.martp.R
+import manoellribeiro.dev.martp.core.components.compose.ArtSettingRow
+import manoellribeiro.dev.martp.core.components.compose.ArtStyleIndicator
+import manoellribeiro.dev.martp.core.components.compose.ColorPaletteIndicator
+import manoellribeiro.dev.martp.core.components.compose.MapZoomIndicator
+import manoellribeiro.dev.martp.core.components.compose.MartpPrimaryButton
 import manoellribeiro.dev.martp.core.components.compose.theme.Blue
-import manoellribeiro.dev.martp.core.components.compose.theme.BlueAlpha12
-import manoellribeiro.dev.martp.core.components.compose.theme.BlueAlpha8
 import manoellribeiro.dev.martp.core.components.compose.theme.BlueAlpha80
-import manoellribeiro.dev.martp.core.components.compose.theme.ChipShape
-import manoellribeiro.dev.martp.core.components.compose.theme.ErrorMedium
-import manoellribeiro.dev.martp.core.components.compose.theme.Green
-import manoellribeiro.dev.martp.core.components.compose.theme.GreenDarker
-import manoellribeiro.dev.martp.core.components.compose.theme.LightYellow
-import manoellribeiro.dev.martp.core.components.compose.theme.RoundedButtonShape
 import manoellribeiro.dev.martp.core.components.compose.theme.TextGraySubTitle
 import manoellribeiro.dev.martp.core.components.compose.theme.TextScreenTitle
 import manoellribeiro.dev.martp.core.components.compose.theme.TextTitle
 import manoellribeiro.dev.martp.core.components.compose.theme.WhiteAlpha80
-import manoellribeiro.dev.martp.core.components.compose.theme.DarkD4
-import manoellribeiro.dev.martp.core.components.compose.theme.DarkD5
 import manoellribeiro.dev.martp.core.components.compose.theme.LightCream
-import manoellribeiro.dev.martp.core.components.compose.theme.LightL2
-import manoellribeiro.dev.martp.core.components.compose.theme.LightL3
 import manoellribeiro.dev.martp.core.components.compose.theme.White
 import manoellribeiro.dev.martp.core.components.compose.theme.Yellow
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
-import manoellribeiro.dev.martp.scenes.artStyleSettings.artStyleModels
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -140,7 +130,8 @@ private fun SuccessContent(
             )
         ) {
             RemixSection(modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp))
-            CreateAnotherArtButton(
+            MartpPrimaryButton(
+                text = stringResource(R.string.success_create_another_art),
                 onClick = onCreateAnotherArtClick,
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 16.dp)
             )
@@ -324,7 +315,7 @@ private fun RemixSection(modifier: Modifier = Modifier) {
             lineHeight = 18.sp,
             modifier = Modifier.padding(top = 2.dp, bottom = 4.dp)
         )
-        RemixTipRow(
+        ArtSettingRow(
             title = stringResource(R.string.art_style),
             description = stringResource(
                 R.string.success_remix_art_style_description,
@@ -336,175 +327,20 @@ private fun RemixSection(modifier: Modifier = Modifier) {
         ) {
             ArtStyleIndicator()
         }
-        RemixTipRow(
+        ArtSettingRow(
             title = stringResource(R.string.color_palette),
             description = stringResource(R.string.success_remix_color_palette_description),
             showTopDivider = true
         ) {
             ColorPaletteIndicator()
         }
-        RemixTipRow(
+        ArtSettingRow(
             title = stringResource(R.string.map_zoom),
             description = stringResource(R.string.success_remix_map_zoom_description),
             showTopDivider = true
         ) {
             MapZoomIndicator()
         }
-    }
-}
-
-@Composable
-private fun RemixTipRow(
-    title: String,
-    description: String,
-    showTopDivider: Boolean,
-    indicator: @Composable () -> Unit
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(if (showTopDivider) Modifier.topDivider(BlueAlpha8) else Modifier)
-            .padding(vertical = 10.dp)
-            .semantics(mergeDescendants = true) {}
-    ) {
-        Box(modifier = Modifier.width(80.dp)) {
-            indicator()
-        }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 14.dp)
-        ) {
-            Text(text = title, style = TextTitle, color = Blue)
-            Text(text = description, style = TextGraySubTitle)
-        }
-    }
-}
-
-private fun Modifier.topDivider(color: Color) = drawBehind {
-    drawLine(
-        color = color,
-        start = Offset.Zero,
-        end = Offset(size.width, 0f),
-        strokeWidth = 1.dp.toPx()
-    )
-}
-
-@Composable
-private fun ArtStyleIndicator() {
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        artStyleModels.forEachIndexed { index, artStyleModel ->
-            val isHighlighted = index == 0
-            Icon(
-                painter = painterResource(artStyleModel.drawableImageId),
-                contentDescription = null,
-                tint = if (isHighlighted) Blue else DarkD4,
-                modifier = Modifier
-                    .size(24.dp)
-                    .background(if (isHighlighted) Yellow else LightL3, ChipShape)
-                    .padding(5.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun ColorPaletteIndicator() {
-    val swatchBorderColor = BlueAlpha12
-    val colorsRows = listOf(
-        listOf(Blue, Yellow, Green),
-        listOf(ErrorMedium, GreenDarker, LightYellow)
-    )
-    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-        for (colorsRow in colorsRows) {
-            Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                for (color in colorsRow) {
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .background(color, CircleShape)
-                            .border(1.dp, swatchBorderColor, CircleShape)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun MapZoomIndicator() {
-    val activeColor = Yellow
-    val inactiveColor = LightL2
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_zoom_out),
-            contentDescription = null,
-            tint = DarkD5,
-            modifier = Modifier.size(12.dp)
-        )
-        Spacer(
-            modifier = Modifier
-                .weight(1f)
-                .height(12.dp)
-                .drawBehind {
-                    val centerY = size.height / 2f
-                    val thumbX = size.width / 2f
-                    val trackHeight = 3.dp.toPx()
-                    drawLine(
-                        color = activeColor,
-                        start = Offset(0f, centerY),
-                        end = Offset(thumbX, centerY),
-                        strokeWidth = trackHeight,
-                        cap = StrokeCap.Round
-                    )
-                    drawLine(
-                        color = inactiveColor,
-                        start = Offset(thumbX, centerY),
-                        end = Offset(size.width, centerY),
-                        strokeWidth = trackHeight,
-                        cap = StrokeCap.Round
-                    )
-                    drawCircle(
-                        color = activeColor,
-                        radius = size.height / 2f,
-                        center = Offset(thumbX, centerY)
-                    )
-                }
-        )
-        Icon(
-            painter = painterResource(R.drawable.ic_zoom_in),
-            contentDescription = null,
-            tint = DarkD5,
-            modifier = Modifier.size(12.dp)
-        )
-    }
-}
-
-@Composable
-private fun CreateAnotherArtButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Button(
-        onClick = onClick,
-        shape = RoundedButtonShape,
-        colors = ButtonDefaults.buttonColors(containerColor = Blue, contentColor = White),
-        modifier = modifier
-            .fillMaxWidth()
-            .height(52.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.success_create_another_art),
-            style = TextTitle,
-            fontSize = 16.sp,
-            color = White,
-            modifier = Modifier.padding(start = 8.dp)
-        )
     }
 }
 

@@ -116,4 +116,21 @@
     <string name="success_remix_color_palette_description">Gleiche Straßen, eine ganz neue Stimmung</string>
     <string name="success_remix_map_zoom_description">Details aus der Nähe oder die ganze Gegend</string>
     <string name="success_create_another_art">Weiteres Kunstwerk erstellen</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step_count">%1$d von %2$d</string>
+    <string name="onboarding_skip">Überspringen</string>
+    <string name="onboarding_next">Weiter</string>
+    <string name="onboarding_start_creating">Jetzt loslegen</string>
+    <string name="onboarding_art_title">Dein Standort wird zu Kunst</string>
+    <string name="onboarding_art_description">Martp verwandelt die Straßen um dich herum in ein abstraktes Kartenkunstwerk.</string>
+    <string name="onboarding_choices_title">Und du entscheidest, wie es aussieht</string>
+    <string name="onboarding_choices_description">Ändere das jederzeit im Tab %1$s.</string>
+    <string name="onboarding_signature_title">Signiere deine Kunstwerke, wenn du möchtest</string>
+    <string name="onboarding_signature_description">Füge im Tab %1$s einen Benutzernamen und eine E-Mail hinzu. Sie werden mit deinen Kunstwerken gesendet und sind beide optional.</string>
+    <string name="onboarding_example_username">@benutzername</string>
+    <string name="onboarding_exhibition_title">Jedes Kunstwerk kommt in die Digitale Ausstellung</string>
+    <string name="onboarding_exhibition_description">Nach einer kurzen Prüfung hängt dein Kunstwerk im Raum seines Kontinents, neben Kunstwerken aus aller Welt. Besuche es jederzeit auf martp.app/exhibition.</string>
+    <string name="onboarding_example_art_description">Ein Beispiel für ein Kartenkunstwerk</string>
+    <string name="onboarding_globe_description">Ein Globus mit den Kunstwerken der Digitalen Ausstellung</string>
 </resources>

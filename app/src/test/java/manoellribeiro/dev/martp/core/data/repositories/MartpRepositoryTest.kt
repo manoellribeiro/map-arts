@@ -2,6 +2,7 @@ package manoellribeiro.dev.martp.core.data.repositories
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.preferencesOf
@@ -87,6 +88,7 @@ class MartpRepositoryTest {
     private val fakeMapArtStyleKey = stringPreferencesKey("MAP_ART_STYLE_KEY")
     private val fakeMapZoomKey = floatPreferencesKey("MAP_ZOOM_KEY")
     private val fakeColorPaletteKey = stringPreferencesKey("SELECTED_COLOR_PALETTE")
+    private val fakeHasSeenOnboardingKey = booleanPreferencesKey("HAS_SEEN_ONBOARDING_KEY")
 
     // Same values as the FALLBACK_COLOR_PALETTES of MartpRepository
     private val fakeFallbackColorPalette = ColorPaletteEntity(
@@ -566,6 +568,142 @@ class MartpRepositoryTest {
         // When
         val thrown = assertThrows<CancellationException> {
             repository.getMapZoomPreference()
+        }
+
+        // Then
+        assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    // endregion
+
+    // region setOnboardingSeen
+
+    @Test
+    fun `if data store is empty should save true in the has seen onboarding key`() = runTest {
+        // Given
+        val fakeCurrentPreferences = emptyPreferences()
+        val transformSlot = slot<suspend (Preferences) -> Preferences>()
+        coEvery { artSettingsDataSore.updateData(capture(transformSlot)) } coAnswers {
+            transformSlot.captured(fakeCurrentPreferences)
+        }
+
+        // When
+        repository.setOnboardingSeen()
+
+        // Then
+        val updatedPreferences = transformSlot.captured(fakeCurrentPreferences)
+        assertEquals(true, updatedPreferences[fakeHasSeenOnboardingKey])
+        coVerify(exactly = 1) { artSettingsDataSore.updateData(any()) }
+    }
+
+    @Test
+    fun `if data store already has art settings should save the onboarding as seen and keep them`() = runTest {
+        // Given
+        val fakeCurrentPreferences = preferencesOf(
+            fakeMapArtStyleKey to "DEFAULT",
+            fakeMapZoomKey to 15.75f
+        )
+        val transformSlot = slot<suspend (Preferences) -> Preferences>()
+        coEvery { artSettingsDataSore.updateData(capture(transformSlot)) } coAnswers {
+            transformSlot.captured(fakeCurrentPreferences)
+        }
+
+        // When
+        repository.setOnboardingSeen()
+
+        // Then
+        val updatedPreferences = transformSlot.captured(fakeCurrentPreferences)
+        assertEquals(true, updatedPreferences[fakeHasSeenOnboardingKey])
+        assertEquals("DEFAULT", updatedPreferences[fakeMapArtStyleKey])
+        assertEquals(15.75f, updatedPreferences[fakeMapZoomKey])
+    }
+
+    @Test
+    fun `if data store throws an exception when saving the onboarding as seen should throw LocalStorageErrorFailure`() = runTest {
+        // Given
+        val fakeErrorMessage = "fake onboarding write error"
+        coEvery { artSettingsDataSore.updateData(any()) } throws IOException(fakeErrorMessage)
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val failure = assertThrows<LocalStorageErrorFailure> {
+            repository.setOnboardingSeen()
+        }
+
+        // Then
+        assertEquals(fakeErrorMessage, failure.message)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.setOnboardingSeen") }
+    }
+
+    @Test
+    fun `if saving the onboarding as seen is cancelled should rethrow the CancellationException`() = runTest {
+        // Given
+        val fakeCancellation = CancellationException("fake onboarding write cancellation")
+        coEvery { artSettingsDataSore.updateData(any()) } throws fakeCancellation
+
+        // When
+        val thrown = assertThrows<CancellationException> {
+            repository.setOnboardingSeen()
+        }
+
+        // Then
+        assertSame(fakeCancellation, thrown)
+        verify(exactly = 0) { errorLogger.logNonFatal(any(), any()) }
+    }
+
+    // endregion
+
+    // region hasSeenOnboarding
+
+    @Test
+    fun `if data store has the onboarding saved as seen should return true`() = runTest {
+        // Given
+        every { artSettingsDataSore.data } returns flowOf(preferencesOf(fakeHasSeenOnboardingKey to true))
+
+        // When
+        val result = repository.hasSeenOnboarding()
+
+        // Then
+        assertTrue(result)
+        verify(exactly = 1) { artSettingsDataSore.data }
+    }
+
+    @Test
+    fun `if data store has nothing saved about the onboarding should return false`() = runTest {
+        // Given
+        every { artSettingsDataSore.data } returns flowOf(emptyPreferences())
+
+        // When
+        val result = repository.hasSeenOnboarding()
+
+        // Then
+        assertFalse(result)
+    }
+
+    @Test
+    fun `if data store throws an exception when reading the onboarding should return true so it is not shown on every launch`() = runTest {
+        // Given
+        every { artSettingsDataSore.data } returns flow { throw IOException("fake onboarding read error") }
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+
+        // When
+        val result = repository.hasSeenOnboarding()
+
+        // Then
+        assertTrue(result)
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IOException>(), "MartpRepository.hasSeenOnboarding") }
+    }
+
+    @Test
+    fun `if reading the onboarding is cancelled should rethrow the CancellationException`() = runTest {
+        // Given
+        val fakeCancellation = CancellationException("fake onboarding read cancellation")
+        every { artSettingsDataSore.data } returns flow { throw fakeCancellation }
+
+        // When
+        val thrown = assertThrows<CancellationException> {
+            repository.hasSeenOnboarding()
         }
 
         // Then

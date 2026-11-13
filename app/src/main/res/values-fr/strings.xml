@@ -116,4 +116,21 @@
     <string name="success_remix_color_palette_description">Mêmes rues, une toute nouvelle ambiance</string>
     <string name="success_remix_map_zoom_description">Des détails de près ou toute la zone</string>
     <string name="success_create_another_art">Créer une autre œuvre</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step_count">%1$d sur %2$d</string>
+    <string name="onboarding_skip">Passer</string>
+    <string name="onboarding_next">Suivant</string>
+    <string name="onboarding_start_creating">Commencer à créer</string>
+    <string name="onboarding_art_title">Votre position devient de l\'art</string>
+    <string name="onboarding_art_description">Martp transforme les rues autour de vous en une œuvre cartographique abstraite.</string>
+    <string name="onboarding_choices_title">Et vous choisissez son apparence</string>
+    <string name="onboarding_choices_description">Modifiez-les quand vous voulez dans l\'onglet %1$s.</string>
+    <string name="onboarding_signature_title">Signez vos œuvres, si vous le souhaitez</string>
+    <string name="onboarding_signature_description">Ajoutez un nom d\'utilisateur et un e-mail dans l\'onglet %1$s. Ils sont envoyés avec vos œuvres et sont tous deux facultatifs.</string>
+    <string name="onboarding_example_username">@utilisateur</string>
+    <string name="onboarding_exhibition_title">Chaque œuvre rejoint l\'Exposition Numérique</string>
+    <string name="onboarding_exhibition_description">Après une rapide vérification, votre œuvre est exposée dans la salle de son continent, à côté d\'œuvres du monde entier. Visitez-la quand vous voulez sur martp.app/exhibition.</string>
+    <string name="onboarding_example_art_description">Un exemple d\'œuvre cartographique</string>
+    <string name="onboarding_globe_description">Un globe avec les œuvres de l\'Exposition Numérique</string>
 </resources>

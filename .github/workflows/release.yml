@@ -44,16 +44,25 @@ jobs:
       - name: Calculate Version Code
         id: version
         run: |
-          VERSION=${{ github.ref_name }}
+          TAG=${{ github.ref_name }}
+          VERSION=${TAG%%-*}
           IFS='.' read -r a b c <<< "$VERSION"
           VERSION_CODE=$((a * 1000 + b * 100 + c))
+          case "$TAG" in
+            *-internal) TRACK=internal ;;
+            *-alpha)    TRACK=alpha ;;
+            *-beta)     TRACK=beta ;;
+            *)          TRACK=production ;;
+          esac
+          echo "VERSION_NAME=$VERSION" >> $GITHUB_OUTPUT
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "TRACK=$TRACK" >> $GITHUB_OUTPUT
 
       - name: Handle Version Code/Name
         uses: chkfung/android-version-actions@v1.2.3
         with:
           gradlePath: app/build.gradle
-          versionName: ${{ github.ref_name }}
+          versionName: ${{ steps.version.outputs.VERSION_NAME }}
           versionCode: ${{ steps.version.outputs.VERSION_CODE }}
 
       - name: Grant execute permissions for gradlew
@@ -80,6 +89,6 @@ jobs:
           serviceAccountJson: service_account.json
           packageName: manoellribeiro.dev.martp
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
-          track: production
+          track: ${{ steps.version.outputs.TRACK }}
           status: 'completed'
           whatsNewDirectory: distribution

@@ -57,7 +57,7 @@ class UserInfoFragment : Fragment() {
         }
 
         openInBrowserMB.setOnClickListener {
-            Intent(Intent.ACTION_VIEW, "https://manoellribeiro.github.io/martp-webpwa/edit".toUri()).apply {
+            Intent(Intent.ACTION_VIEW, "https://martp.app/exhibition".toUri()).apply {
                 startActivity(this)
             }
         }

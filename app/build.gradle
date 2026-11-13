@@ -40,6 +40,7 @@ android {
         debug {
             buildConfigField("String", "MAPBOX_API_KEY", "\"${System.getenv("MAPBOX_API_KEY") ?: localProperties.getProperty("MAPBOX_API_KEY")}\"")
             buildConfigField("String", "GEOAPIFY_API_KEY", "\"${System.getenv("GEOAPIFY_API_KEY") ?: localProperties.getProperty("GEOAPIFY_API_KEY")}\"")
+            buildConfigField("String", "MARTP_API_BASE_URL", "\"${localProperties.getProperty("MARTP_API_BASE_URL") ?: "http://localhost:8080/"}\"")
 
             testCoverageEnabled true
         }
@@ -51,6 +52,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField("String", "MAPBOX_API_KEY", "\"${System.getenv("MAPBOX_API_KEY") ?: localProperties.getProperty("MAPBOX_API_KEY")}\"")
             buildConfigField("String", "GEOAPIFY_API_KEY", "\"${System.getenv("GEOAPIFY_API_KEY") ?: localProperties.getProperty("GEOAPIFY_API_KEY")}\"")
+            buildConfigField("String", "MARTP_API_BASE_URL", "\"https://api.martp.app/\"")
         }
     }
     compileOptions {

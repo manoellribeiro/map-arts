@@ -27,6 +27,7 @@ import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.network.martp.models.RemoteReversedAddress
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
+import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.failures.LocationPermissionNotGrantedFailure
 import manoellribeiro.dev.martp.core.models.failures.MapboxApiErrorFailure
@@ -60,6 +61,7 @@ class CreateNewMapArtViewModelTest {
     private lateinit var getAddressService: GetAddressService
     private lateinit var generateAIContentService: GenerateAIContentService
     private lateinit var promptGenerator: PromptGenerator
+    private lateinit var errorLogger: ErrorLogger
     private lateinit var viewModel: CreateNewMapArtViewModel
 
     // 2 * MartpSketch.frameThickness (30) + 2 * MartpSketch.framePadding (30)
@@ -73,6 +75,7 @@ class CreateNewMapArtViewModelTest {
         getAddressService = mockk()
         generateAIContentService = mockk()
         promptGenerator = mockk()
+        errorLogger = mockk()
 
         // Create the class under test
         viewModel = CreateNewMapArtViewModel(
@@ -80,7 +83,8 @@ class CreateNewMapArtViewModelTest {
             locationService = locationService,
             getAddressService = getAddressService,
             generateAIContentService = generateAIContentService,
-            promptGenerator = promptGenerator
+            promptGenerator = promptGenerator,
+            errorLogger = errorLogger
         )
     }
 
@@ -1014,7 +1018,7 @@ class CreateNewMapArtViewModelTest {
             directory = File("fake-save-directory"),
             mapLayersColors = null,
             updateUserInfo = fakeUserInfo,
-            saveImage = {}
+            saveImage = { true }
         )
         advanceUntilIdle()
 
@@ -1051,7 +1055,10 @@ class CreateNewMapArtViewModelTest {
             directory = fakeDirectory,
             mapLayersColors = null,
             updateUserInfo = fakeUserInfo,
-            saveImage = { path -> fakeSavedImagePaths.add(path) }
+            saveImage = { path ->
+                fakeSavedImagePaths.add(path)
+                true
+            }
         )
         advanceUntilIdle()
 
@@ -1083,7 +1090,7 @@ class CreateNewMapArtViewModelTest {
             directory = File("fake-ordered-directory"),
             mapLayersColors = null,
             updateUserInfo = fakeUserInfo,
-            saveImage = {}
+            saveImage = { true }
         )
         advanceUntilIdle()
 
@@ -1115,7 +1122,7 @@ class CreateNewMapArtViewModelTest {
             directory = File("fake-anonymous-directory"),
             mapLayersColors = null,
             updateUserInfo = fakeUserInfo,
-            saveImage = {}
+            saveImage = { true }
         )
         advanceUntilIdle()
 
@@ -1165,7 +1172,7 @@ class CreateNewMapArtViewModelTest {
             directory = File("fake-located-directory"),
             mapLayersColors = null,
             updateUserInfo = createFakeUserInfo(),
-            saveImage = {}
+            saveImage = { true }
         )
         advanceUntilIdle()
 
@@ -1195,7 +1202,7 @@ class CreateNewMapArtViewModelTest {
             directory = File("fake-unlocated-directory"),
             mapLayersColors = null,
             updateUserInfo = createFakeUserInfo(),
-            saveImage = {}
+            saveImage = { true }
         )
         advanceUntilIdle()
 
@@ -1221,7 +1228,7 @@ class CreateNewMapArtViewModelTest {
             directory = File("fake-no-description-directory"),
             mapLayersColors = null,
             updateUserInfo = createFakeUserInfo(),
-            saveImage = {}
+            saveImage = { true }
         )
         advanceUntilIdle()
 
@@ -1248,7 +1255,7 @@ class CreateNewMapArtViewModelTest {
             directory = fakeDirectory,
             mapLayersColors = null,
             updateUserInfo = createFakeUserInfo(),
-            saveImage = {}
+            saveImage = { true }
         )
         viewModel.saveArt(
             title = "Fake Second Art Title",
@@ -1256,7 +1263,7 @@ class CreateNewMapArtViewModelTest {
             directory = fakeDirectory,
             mapLayersColors = null,
             updateUserInfo = createFakeUserInfo(),
-            saveImage = {}
+            saveImage = { true }
         )
         advanceUntilIdle()
 
@@ -1292,7 +1299,10 @@ class CreateNewMapArtViewModelTest {
             directory = File("fake-failing-directory"),
             mapLayersColors = null,
             updateUserInfo = createFakeUserInfo(),
-            saveImage = { path -> fakeSavedImagePaths.add(path) }
+            saveImage = { path ->
+                fakeSavedImagePaths.add(path)
+                true
+            }
         )
         advanceUntilIdle()
 
@@ -1313,6 +1323,7 @@ class CreateNewMapArtViewModelTest {
         val fakeErrorMessage = "fake save image error"
         coEvery { repository.setUserName(any(), any()) } just runs
         coEvery { repository.setUserEmail(any(), any()) } just runs
+        every { errorLogger.logNonFatal(any(), any()) } just runs
         val states = collectStates()
         val events = collectEvents()
 
@@ -1336,6 +1347,43 @@ class CreateNewMapArtViewModelTest {
         assertTrue(events.isEmpty())
         coVerify(exactly = 0) { repository.saveMapArtEntity(any()) }
         verify(exactly = 0) { repository.uploadMapArt(any(), any()) }
+        verify(exactly = 1) {
+            errorLogger.logNonFatal(ofType<IllegalStateException>(), "CreateNewMapArtViewModel.saveArt")
+        }
+    }
+
+    @Test
+    fun `if saving the image returns false should log and emit Error ui state with LocalStorageErrorFailure and not save or upload the art`() = runTest {
+        // Given
+        coEvery { repository.setUserName(any(), any()) } just runs
+        coEvery { repository.setUserEmail(any(), any()) } just runs
+        every { errorLogger.logNonFatal(any(), any()) } just runs
+        val states = collectStates()
+        val events = collectEvents()
+
+        // When
+        viewModel.saveArt(
+            title = "Fake Not Saved Image Art Title",
+            description = null,
+            directory = File("fake-not-saved-image-directory"),
+            mapLayersColors = null,
+            updateUserInfo = createFakeUserInfo(),
+            saveImage = { false }
+        )
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(3, states.size)
+        assertSame(CreateNewMapArtUiState.ActionButtonLoading, states[1])
+        val errorState = assertInstanceOf(CreateNewMapArtUiState.Error::class.java, states[2])
+        val localStorageErrorFailure = assertInstanceOf(LocalStorageErrorFailure::class.java, errorState.failure)
+        assertTrue(localStorageErrorFailure.message.orEmpty().startsWith("Could not save the art image at fake-not-saved-image-directory/map-arts/"))
+        assertTrue(events.isEmpty())
+        coVerify(exactly = 0) { repository.saveMapArtEntity(any()) }
+        verify(exactly = 0) { repository.uploadMapArt(any(), any()) }
+        verify(exactly = 1) {
+            errorLogger.logNonFatal(localStorageErrorFailure, "CreateNewMapArtViewModel.saveArt.saveImage")
+        }
     }
 
     @Test
@@ -1412,7 +1460,7 @@ class CreateNewMapArtViewModelTest {
             directory = File("fake-colorful-directory"),
             mapLayersColors = fakeMapLayersColors,
             updateUserInfo = createFakeUserInfo(),
-            saveImage = {}
+            saveImage = { true }
         )
         advanceUntilIdle()
 
@@ -1455,7 +1503,7 @@ class CreateNewMapArtViewModelTest {
             directory = File("fake-default-directory"),
             mapLayersColors = null,
             updateUserInfo = createFakeUserInfo(),
-            saveImage = {}
+            saveImage = { true }
         )
         advanceUntilIdle()
 
@@ -1481,7 +1529,7 @@ class CreateNewMapArtViewModelTest {
             directory = File("fake-ungenerated-directory"),
             mapLayersColors = null,
             updateUserInfo = createFakeUserInfo(),
-            saveImage = {}
+            saveImage = { true }
         )
         advanceUntilIdle()
 

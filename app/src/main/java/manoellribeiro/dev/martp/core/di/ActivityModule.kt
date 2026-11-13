@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
+import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
@@ -31,10 +32,11 @@ object ActivityModule {
         locationService: LocationService,
         getAddressService: GetAddressService,
         generateAIContentService: GenerateAIContentService,
-        promptGenerator: PromptGenerator
+        promptGenerator: PromptGenerator,
+        errorLogger: ErrorLogger
     ): CreateNewMapArtViewModel {
         return CreateNewMapArtViewModel(
-            repository, locationService, getAddressService, generateAIContentService, promptGenerator
+            repository, locationService, getAddressService, generateAIContentService, promptGenerator, errorLogger
         )
     }
 

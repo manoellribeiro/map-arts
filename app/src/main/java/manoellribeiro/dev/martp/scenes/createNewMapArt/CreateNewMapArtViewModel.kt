@@ -23,6 +23,7 @@ import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
+import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.core.models.MapLayersColors
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
@@ -45,7 +46,8 @@ class CreateNewMapArtViewModel @Inject constructor(
     private val locationService: LocationService,
     private val getAddressService: GetAddressService,
     private val generateAIContentService: GenerateAIContentService,
-    private val promptGenerator: PromptGenerator
+    private val promptGenerator: PromptGenerator,
+    private val errorLogger: ErrorLogger
 ): ViewModel() {
 
     private val _state: MutableStateFlow<CreateNewMapArtUiState> = MutableStateFlow(CreateNewMapArtUiState.Idle)
@@ -163,7 +165,7 @@ class CreateNewMapArtViewModel @Inject constructor(
         directory: File,
         mapLayersColors: MapLayersColors?,
         updateUserInfo: UserInfoEntity,
-        saveImage: (path: String) -> Unit
+        saveImage: (path: String) -> Boolean
     ) {
         viewModelScope.launch {
             try {
@@ -183,7 +185,13 @@ class CreateNewMapArtViewModel @Inject constructor(
                     colorPalette = currentColorPalette?.name,
                     colorsLayers = mapLayersColors
                 )
-                saveImage(newMartp.imagePathLocation)
+                if (!saveImage(newMartp.imagePathLocation)) {
+                    val imageNotSavedFailure = LocalStorageErrorFailure(
+                        originalExceptionMessage = "Could not save the art image at ${newMartp.imagePathLocation}"
+                    )
+                    errorLogger.logNonFatal(imageNotSavedFailure, "CreateNewMapArtViewModel.saveArt.saveImage")
+                    throw imageNotSavedFailure
+                }
                 repository.saveMapArtEntity(newMartp)
                 repository.uploadMapArt(newMartp, updateUserInfo)
 
@@ -193,6 +201,7 @@ class CreateNewMapArtViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                errorLogger.logNonFatal(e, "CreateNewMapArtViewModel.saveArt")
                 emitNewState(CreateNewMapArtUiState.Error(UnknownErrorFailure(originalExceptionMessage = e.message)))
             }
         }

@@ -44,6 +44,7 @@ import manoellribeiro.dev.martp.databinding.LayoutMapLayerLineBinding
 import manoellribeiro.dev.martp.scenes.success.SuccessActivity
 import manoellribeiro.dev.martp.scenes.userInfoBottomSheet.SetUserInfoBottomSheetFragment
 import processing.android.PFragment
+import java.io.File
 
 
 @AndroidEntryPoint
@@ -142,6 +143,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         titleTV.gone()
         loadingIndicatorLAV.gone()
         actionMB.visible()
+        actionMB.disableLoadingState()
         actionMB.isEnabled = true
         actionMB.isClickable = true
         actionMB.title = getString(R.string.try_again)
@@ -160,6 +162,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         mapLayersSubTitleTV.gone()
         loadingMessageTV.gone()
         usernameInfoContainerLL.gone()
+        colorPaletteTV.gone()
     }
 
     private fun handleLoadingState(
@@ -330,7 +333,10 @@ class CreateNewMapArtActivity: AppCompatActivity() {
             directory = this@CreateNewMapArtActivity.filesDir,
             mapLayersColors = mapLayersColors,
             updateUserInfo = user,
-            saveImage = { path -> sketch?.get()?.save(path) }
+            saveImage = { path ->
+                File(path).parentFile?.mkdirs()
+                sketch?.get()?.save(path) == true
+            }
         )
     }
 

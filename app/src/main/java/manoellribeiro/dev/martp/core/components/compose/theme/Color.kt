@@ -34,3 +34,9 @@ val ErrorDark @Composable get() = colorResource(id = R.color.error_dark)
 val ErrorMedium @Composable get() = colorResource(id = R.color.error_medium)
 val ErrorLight @Composable get() = colorResource(id = R.color.error_light)
 val ErrorLightest @Composable get() = colorResource(id = R.color.error_lightest)
+
+// Translucent
+val BlueAlpha8 @Composable get() = colorResource(id = R.color.blue_alpha_8)
+val BlueAlpha12 @Composable get() = colorResource(id = R.color.blue_alpha_12)
+val BlueAlpha80 @Composable get() = colorResource(id = R.color.blue_alpha_80)
+val WhiteAlpha80 @Composable get() = colorResource(id = R.color.white_alpha_80)

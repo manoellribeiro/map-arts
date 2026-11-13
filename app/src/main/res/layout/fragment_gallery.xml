@@ -1,50 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    tools:context=".scenes.gallery.GalleryFragment"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/light_cream"
+    tools:context=".scenes.gallery.GalleryFragment">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/galleryHeaderABL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/light_cream"
+        android:stateListAnimator="@null"
+        app:liftOnScroll="false">
+
+        <LinearLayout
+            android:id="@+id/galleryHeaderLL"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="16dp"
+            app:layout_scrollFlags="scroll">
+
+            <ImageView
+                android:id="@+id/logoIV"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="11dp"
+                android:src="@drawable/ic_martp_logo" />
+
+            <TextView
+                android:id="@+id/galleryTV"
+                style="@style/Text.ScreenTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/your_gallery"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/drawer_layout"
+        android:id="@+id/galleryStatesCL"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/light_cream"
-        android:paddingTop="16dp"
-        tools:context=".scenes.gallery.GalleryFragment">
-
-        <ImageView
-            android:id="@+id/logoIV"
-            android:layout_width="100dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="11dp"
-            android:src="@drawable/ic_martp_logo"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/galleryTV"
-            style="@style/Text.ScreenTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="16dp"
-            android:text="@string/your_gallery"
-            android:textSize="20sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/logoIV" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <ImageView
             android:id="@+id/emptyGalleryImageIV"
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:layout_gravity="center"
             android:layout_marginTop="56dp"
             android:src="@drawable/ic_adventure_map"
             app:layout_constraintBottom_toTopOf="@id/emptyListTV"
-            app:layout_constraintTop_toBottomOf="@id/galleryTV"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -77,47 +89,35 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:theme="@style/Theme.GenerateMapArts.ProgressBarTheme"
-            app:layout_constraintBottom_toTopOf="@+id/bottomNavigationBarContainerCV"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/galleryTV" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/mapArtsRV"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="16dp"
-            android:paddingBottom="16dp"
-            android:clipToPadding="false"
-            android:overScrollMode="never"
-            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/galleryTV"
-
-            tools:itemCount="5"
-            tools:listitem="@layout/item_gallery_art"
-            tools:visibility="gone" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:id="@+id/bottomNavigationBarContainerCV"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:cardCornerRadius="40dp"
-            android:background="@color/white"
-
-            app:strokeColor="@color/white"
-            app:cardElevation="8dp"
-            android:layout_height="wrap_content">
-
-
-        </com.google.android.material.card.MaterialCardView>
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</RelativeLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/mapArtsRV"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="4dp"
+        android:paddingBottom="16dp"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:visibility="gone"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:itemCount="5"
+        tools:listitem="@layout/item_gallery_art"
+        tools:visibility="gone" />
+
+    <View
+        android:id="@+id/statusScrimV"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="top"
+        android:alpha="0"
+        android:elevation="1dp"
+        android:outlineProvider="none"
+        android:background="@drawable/background_status_bar_scrim" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

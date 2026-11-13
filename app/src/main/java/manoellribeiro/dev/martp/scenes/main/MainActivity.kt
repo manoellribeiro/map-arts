@@ -1,6 +1,7 @@
 package manoellribeiro.dev.martp.scenes.main
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -17,6 +18,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.activityViewModels
@@ -33,6 +35,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.navigation.NavigationBarView
 import manoellribeiro.dev.martp.R
+import manoellribeiro.dev.martp.scenes.onboarding.OnboardingActivity
 import manoellribeiro.dev.martp.core.extensions.dp
 import manoellribeiro.dev.martp.core.extensions.isPositive
 import kotlin.getValue
@@ -46,26 +49,55 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        // Reading the onboarding flag takes a few milliseconds; the splash hides the screen meanwhile
+        splashScreen.setKeepOnScreenCondition {
+            viewModel.onboardingCheckState.value == OnboardingCheckUiState.Checking
+        }
+        if (viewModel.onboardingCheckState.value == OnboardingCheckUiState.Checking) viewModel.checkOnboarding()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupRequireLocationPermissionLauncher()
         setupBottomNavigationBar()
+        if (savedInstanceState == null) openEditTabIfRequested(intent)
         setupViews()
         setStatusBarColor()
         setupObservables()
         viewModel.handleBadgesVisibilities()
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        openEditTabIfRequested(intent)
+    }
+
+    private fun openEditTabIfRequested(intent: Intent) {
+        if (intent.getBooleanExtra(OPEN_EDIT_TAB_EXTRA, false)) {
+            binding.bottomNavigationBarBNV.selectedItemId = R.id.chooseArtStyleFragment
+        }
+    }
+
     private fun setupObservables() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.isUserInfoBadgeVisible.collect { visible ->
-                    setupUserInfoBadgeVisibility(visible)
+                launch {
+                    viewModel.isUserInfoBadgeVisible.collect { visible ->
+                        setupUserInfoBadgeVisibility(visible)
+                    }
+                }
+                launch {
+                    viewModel.onboardingCheckState.collect { state ->
+                        if (state == OnboardingCheckUiState.ShowOnboarding) openOnboarding()
+                    }
                 }
             }
         }
+    }
+
+    private fun openOnboarding() {
+        startActivity(OnboardingActivity.newIntent(this))
+        finish()
     }
 
     private fun setupUserInfoBadgeVisibility(visible: Boolean) {
@@ -88,6 +120,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             // For Android 14 and below
             window.statusBarColor = getColor(R.color.blue)
+            WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
         }
     }
 
@@ -160,5 +193,14 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    companion object {
+        private const val OPEN_EDIT_TAB_EXTRA = "open_edit_tab"
+
+        fun newIntentOpeningEditTab(context: Context): Intent =
+            Intent(context, MainActivity::class.java)
+                .putExtra(OPEN_EDIT_TAB_EXTRA, true)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
     }
 }

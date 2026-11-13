@@ -1,5 +1,7 @@
 package manoellribeiro.dev.martp.scenes.userInfo
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -24,6 +26,7 @@ import manoellribeiro.dev.martp.core.extensions.gone
 import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.databinding.FragmentUserInfoBinding
 import manoellribeiro.dev.martp.scenes.main.MainViewModel
+import androidx.core.net.toUri
 
 
 @AndroidEntryPoint
@@ -51,6 +54,12 @@ class UserInfoFragment : Fragment() {
                 topMargin = insets.top
             }
             WindowInsetsCompat.CONSUMED
+        }
+
+        openInBrowserMB.setOnClickListener {
+            Intent(Intent.ACTION_VIEW, "https://martp.app/exhibition".toUri()).apply {
+                startActivity(this)
+            }
         }
     }
 

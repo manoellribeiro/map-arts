@@ -44,8 +44,8 @@
     <string name="your_gallery">Sua galeria</string>
     <string name="create_description_with_ai">Criar descrição com IA</string>
     <string name="thinking">Pensando…</string>
-    <string name="digital_exposition">Exposição Digital</string>
-    <string name="digital_exposition_description">Toda arte criada no Martp é enviada para a nossa exposição digital — uma galeria compartilhada onde todos podem explorar a criatividade da nossa comunidade. Se você quer o seu nome junto com a sua arte, preencha os campos abaixo.</string>
+    <string name="digital_exhibition">Exposição Digital</string>
+    <string name="digital_exhibition_description">Toda arte criada no Martp é enviada para a nossa exposição digital — uma galeria compartilhada onde todos podem explorar a criatividade da nossa comunidade. Se você quer o seu nome junto com a sua arte, preencha os campos abaixo.</string>
     <string name="email_not_mandatory_hint">Não é obrigatório! O único lado negativo é que não vou conseguir entrar em contato se eu realmente gostar da sua arte :)</string>
     <string name="save_my_info">Salvar minhas informações</string>
     <string name="email_optional_hint">Email (opcional)</string>
@@ -90,4 +90,47 @@
     <string name="error_downloading_location_image">Um erro aconteceu ao baixar a imagem da sua localização, tente novamente.</string>
     <string name="tap_map_to_shuffle_colors">Você pode tocar no mapa para embaralhar as cores até encontrar a melhor combinação.</string>
     <string name="unknown_location">Localização desconhecida</string>
+    <string name="martp_api_failure_message">Um erro aconteceu ao buscar os dados dos serviços internos do Martp, tente novamente.</string>
+    <string name="shown_in_gallery_as">Aparece na galeria como</string>
+    <string name="add_name">Adicionar nome</string>
+    <string name="save_with_my_username">Salvar com meu nome de usuário</string>
+    <string name="save_anonymously">Salvar anonimamente</string>
+    <string name="want_your_name_on_it">Quer seu nome na sua arte?</string>
+    <string name="anonymous">Anônimo</string>
+    <string name="author_in_digital_exhibition">Autor na Exposição Digital:</string>
+    <string name="live">Ao vivo</string>
+    <string name="visit_digital_exhibition">Visite a Exposição Digital</string>
+    <string name="explore_community_artworks">Explore artes criadas pela comunidade do Martp de todo o mundo.</string>
+    <string name="open_in_browser">Abrir no navegador</string>
+
+    <!-- Success -->
+    <string name="success_saved_to_gallery">Salva na sua galeria</string>
+    <string name="success_title">Sua arte está a caminho da Exposição Digital</string>
+    <string name="success_saved_art_description">Sua arte salva</string>
+    <string name="success_awaiting_approval">Aguardando aprovação</string>
+    <string name="success_awaiting_approval_description">Ela entra na Exposição Digital assim que for aprovada</string>
+    <string name="success_share">Compartilhar</string>
+    <string name="success_remix_title">Mesmo lugar, uma criação totalmente nova</string>
+    <string name="success_remix_body">Experimente mudar estas opções na aba %1$s antes da próxima.</string>
+    <string name="success_remix_art_style_description">%1$s, %2$s ou %3$s</string>
+    <string name="success_remix_color_palette_description">Mesmas ruas, um clima totalmente novo</string>
+    <string name="success_remix_map_zoom_description">Detalhes de perto ou a área inteira</string>
+    <string name="success_create_another_art">Criar outra arte</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step_count">%1$d de %2$d</string>
+    <string name="onboarding_skip">Pular</string>
+    <string name="onboarding_next">Próximo</string>
+    <string name="onboarding_start_creating">Começar a criar</string>
+    <string name="onboarding_art_title">Localização transformada em arte</string>
+    <string name="onboarding_art_description">O Martp transforma as ruas ao seu redor em uma arte abstrata de mapa.</string>
+    <string name="onboarding_choices_title">E você escolhe como ela fica</string>
+    <string name="onboarding_choices_description">Mude isso quando quiser na aba %1$s.</string>
+    <string name="onboarding_signature_title">Assine suas artes, se quiser</string>
+    <string name="onboarding_signature_description">Adicione um nome de usuário e um e-mail na aba %1$s. Eles são enviados com suas artes, e os dois são opcionais.</string>
+    <string name="onboarding_example_username">@usuario</string>
+    <string name="onboarding_exhibition_title">Toda arte entra na Exposição Digital</string>
+    <string name="onboarding_exhibition_description">Depois de uma revisão rápida, sua arte fica exposta na sala do seu continente, ao lado de artes do mundo todo. Visite quando quiser em martp.app/exhibition.</string>
+    <string name="onboarding_example_art_description">Um exemplo de arte de mapa</string>
+    <string name="onboarding_globe_description">Um globo com as artes da Exposição Digital</string>
 </resources>

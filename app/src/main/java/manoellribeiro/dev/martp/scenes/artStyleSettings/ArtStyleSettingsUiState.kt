@@ -1,5 +1,6 @@
 package manoellribeiro.dev.martp.scenes.artStyleSettings
 
+import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.models.SketchArtType
 
 sealed interface ArtStyleSettingsUiState {
@@ -8,6 +9,7 @@ sealed interface ArtStyleSettingsUiState {
     data class SettingsLoaded(
         val mapZoom: Float,
         val mapArtStyle: SketchArtType,
+        val colorsPalettes: List<ColorPaletteEntity>,
         val colorPaletteSelected: String
     ): ArtStyleSettingsUiState
 

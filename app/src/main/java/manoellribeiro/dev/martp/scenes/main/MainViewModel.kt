@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -72,6 +74,19 @@ class MainViewModel @Inject constructor(
     private val _isUserInfoBadgeVisible: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isUserInfoBadgeVisible: StateFlow<Boolean> = _isUserInfoBadgeVisible.asStateFlow()
 
+    private val _onboardingCheckState: MutableStateFlow<OnboardingCheckUiState> = MutableStateFlow(OnboardingCheckUiState.Checking)
+    val onboardingCheckState: StateFlow<OnboardingCheckUiState> = _onboardingCheckState.asStateFlow()
+
+    fun checkOnboarding() {
+        viewModelScope.launch {
+            _onboardingCheckState.value = if (repository.hasSeenOnboarding()) {
+                OnboardingCheckUiState.OnboardingAlreadySeen
+            } else {
+                OnboardingCheckUiState.ShowOnboarding
+            }
+        }
+    }
+
     fun tryToGetUserInfo() {
         viewModelScope.launch {
             _isUserInfoBadgeVisible.value = false
@@ -84,15 +99,24 @@ class MainViewModel @Inject constructor(
     fun getArtStyleSettings() {
         viewModelScope.launch {
             emitNewArtStyleSettingsState(ArtStyleSettingsUiState.Loading)
-            val mapZoom = repository.getMapZoomPreference()
-            val artStyle = repository.getArtStylePreference()
-            val colorPaletteName = repository.getColorPalettePreference()
-            emitNewArtStyleSettingsState(
+            val settingsLoadedState = coroutineScope {
+                val colorPalettes = async { repository.getColorsPalettes() }
+                val mapZoom = async { repository.getMapZoomPreference() }
+                val artStyle = async { repository.getArtStylePreference() }
+                val colorPaletteName = async { repository.getColorPalettePreference() }
+                val loadedColorPalettes = colorPalettes.await()
+                val savedColorPaletteName = colorPaletteName.await()
                 ArtStyleSettingsUiState.SettingsLoaded(
-                    mapZoom = mapZoom,
-                    mapArtStyle = artStyle,
-                    colorPaletteSelected = colorPaletteName
+                    mapZoom = mapZoom.await(),
+                    mapArtStyle = artStyle.await(),
+                    colorPaletteSelected = loadedColorPalettes
+                        .firstOrNull { colorPalette -> colorPalette.name == savedColorPaletteName }
+                        ?.name ?: loadedColorPalettes.first().name,
+                    colorsPalettes = loadedColorPalettes
                 )
+            }
+            emitNewArtStyleSettingsState(
+                settingsLoadedState
             )
         }
     }
@@ -100,7 +124,7 @@ class MainViewModel @Inject constructor(
     fun setUserName(username: String, userId: String) {
         setUserNameJob?.cancel()
         setUserNameJob = viewModelScope.launch {
-            delay(2000.milliseconds)
+            delay(1000.milliseconds)
             repository.setUserName(username, userId)
         }
     }
@@ -108,7 +132,7 @@ class MainViewModel @Inject constructor(
     fun setUserEmail(email: String, userId: String) {
         setUserEmailJob?.cancel()
         setUserEmailJob = viewModelScope.launch {
-            delay(2000.milliseconds)
+            delay(1000.milliseconds)
             repository.setUserEmail(email, userId)
         }
     }
@@ -116,7 +140,7 @@ class MainViewModel @Inject constructor(
     fun setMapZoom(mapZoom: Float) {
         setMapZoomJob?.cancel()
         setMapZoomJob = viewModelScope.launch {
-            delay(1500.milliseconds)
+            delay(1000.milliseconds)
             repository.setMapZoomPreference(mapZoom)
         }
     }
@@ -124,7 +148,7 @@ class MainViewModel @Inject constructor(
     fun setMapStyle(sketchArtType: SketchArtType) {
         setMapStyleJob?.cancel()
         setMapStyleJob = viewModelScope.launch {
-            delay(1500.milliseconds)
+            delay(1000.milliseconds)
             repository.setMapArtStylePreference(sketchArtType)
         }
     }
@@ -132,7 +156,7 @@ class MainViewModel @Inject constructor(
     fun setColorPalette(name: String) {
         setColorPaletteJob?.cancel()
         setColorPaletteJob = viewModelScope.launch {
-            delay(1500.milliseconds)
+            delay(1000.milliseconds)
             repository.setColorPalettePreference(name)
         }
     }

@@ -2,20 +2,26 @@ package manoellribeiro.dev.martp.core.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import manoellribeiro.dev.martp.core.data.local.converters.ColorsConverter
+import manoellribeiro.dev.martp.core.data.local.daos.ColorPalettesDao
 import manoellribeiro.dev.martp.core.data.local.daos.MapArtsDao
 import manoellribeiro.dev.martp.core.data.local.daos.UserInfoDao
+import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 
 @Database(
     entities = [
         MapArtEntity::class,
-        UserInfoEntity::class
+        UserInfoEntity::class,
+        ColorPaletteEntity::class
     ],
-    version = 3
+    version = 4
 )
+@TypeConverters(ColorsConverter::class)
 abstract class MartpDatabase: RoomDatabase() {
     companion object {
 
@@ -44,11 +50,23 @@ abstract class MartpDatabase: RoomDatabase() {
             }
         }
 
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `color_palettes` (
+                            `name` TEXT NOT NULL PRIMARY KEY,
+                            `colors` TEXT NOT NULL
+                        )
+                """)
+            }
+        }
+
         const val databaseName = "martp-database.db"
         const val artsDirectoryName = "/map-arts/"
     }
 
     abstract fun mapArtDao(): MapArtsDao
     abstract fun userEntityDao(): UserInfoDao
+    abstract fun colorPalettesDao(): ColorPalettesDao
 
 }

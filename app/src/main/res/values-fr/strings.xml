@@ -44,8 +44,8 @@
     <string name="your_gallery">Votre galerie</string>
     <string name="create_description_with_ai">Créer une description avec l\'IA</string>
     <string name="thinking">Réflexion en cours…</string>
-    <string name="digital_exposition">Exposition Numérique</string>
-    <string name="digital_exposition_description">Chaque œuvre créée sur Martp est envoyée à notre exposition numérique — une galerie partagée où chacun peut explorer la créativité de notre communauté. Si vous souhaitez que votre nom accompagne votre art, remplissez les champs ci-dessous.</string>
+    <string name="digital_exhibition">Exposition Numérique</string>
+    <string name="digital_exhibition_description">Chaque œuvre créée sur Martp est envoyée à notre exposition numérique — une galerie partagée où chacun peut explorer la créativité de notre communauté. Si vous souhaitez que votre nom accompagne votre art, remplissez les champs ci-dessous.</string>
     <string name="email_not_mandatory_hint">Pas obligatoire ! Le seul inconvénient est que je ne pourrai pas vous contacter si j\'aime vraiment votre art :)</string>
     <string name="save_my_info">Enregistrer mes informations</string>
     <string name="email_optional_hint">Email (optionnel)</string>
@@ -90,4 +90,47 @@
     <string name="error_downloading_location_image">Une erreur s’est produite lors du téléchargement de l’image de votre position, veuillez réessayer.</string>
     <string name="tap_map_to_shuffle_colors">Vous pouvez toucher la carte pour mélanger les couleurs jusqu\'à trouver la meilleure combinaison.</string>
     <string name="unknown_location">Position inconnue</string>
+    <string name="martp_api_failure_message">Une erreur s’est produite lors de la récupération des données des services internes de Martp, veuillez réessayer.</string>
+    <string name="shown_in_gallery_as">Apparaît dans la galerie sous le nom de</string>
+    <string name="add_name">Ajouter un nom</string>
+    <string name="save_with_my_username">Enregistrer avec mon nom d\'utilisateur</string>
+    <string name="save_anonymously">Enregistrer anonymement</string>
+    <string name="want_your_name_on_it">Vous voulez votre nom sur votre œuvre ?</string>
+    <string name="anonymous">Anonyme</string>
+    <string name="author_in_digital_exhibition">Auteur dans l\'Exposition Numérique :</string>
+    <string name="live">En direct</string>
+    <string name="visit_digital_exhibition">Visiter l\'Exposition Numérique</string>
+    <string name="explore_community_artworks">Explorez les œuvres créées par la communauté Martp du monde entier.</string>
+    <string name="open_in_browser">Ouvrir dans le navigateur</string>
+
+    <!-- Success -->
+    <string name="success_saved_to_gallery">Enregistrée dans votre galerie</string>
+    <string name="success_title">Votre œuvre est en route vers l\'Exposition Numérique</string>
+    <string name="success_saved_art_description">Votre œuvre enregistrée</string>
+    <string name="success_awaiting_approval">En attente d\'approbation</string>
+    <string name="success_awaiting_approval_description">Elle rejoindra l\'Exposition Numérique une fois approuvée</string>
+    <string name="success_share">Partager</string>
+    <string name="success_remix_title">Même endroit, une toute nouvelle création</string>
+    <string name="success_remix_body">Essayez de modifier ces options dans l\'onglet %1$s avant la prochaine.</string>
+    <string name="success_remix_art_style_description">%1$s, %2$s ou %3$s</string>
+    <string name="success_remix_color_palette_description">Mêmes rues, une toute nouvelle ambiance</string>
+    <string name="success_remix_map_zoom_description">Des détails de près ou toute la zone</string>
+    <string name="success_create_another_art">Créer une autre œuvre</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step_count">%1$d sur %2$d</string>
+    <string name="onboarding_skip">Passer</string>
+    <string name="onboarding_next">Suivant</string>
+    <string name="onboarding_start_creating">Commencer à créer</string>
+    <string name="onboarding_art_title">Votre position devient de l\'art</string>
+    <string name="onboarding_art_description">Martp transforme les rues autour de vous en une œuvre cartographique abstraite.</string>
+    <string name="onboarding_choices_title">Et vous choisissez son apparence</string>
+    <string name="onboarding_choices_description">Modifiez-les quand vous voulez dans l\'onglet %1$s.</string>
+    <string name="onboarding_signature_title">Signez vos œuvres, si vous le souhaitez</string>
+    <string name="onboarding_signature_description">Ajoutez un nom d\'utilisateur et un e-mail dans l\'onglet %1$s. Ils sont envoyés avec vos œuvres et sont tous deux facultatifs.</string>
+    <string name="onboarding_example_username">@utilisateur</string>
+    <string name="onboarding_exhibition_title">Chaque œuvre rejoint l\'Exposition Numérique</string>
+    <string name="onboarding_exhibition_description">Après une rapide vérification, votre œuvre est exposée dans la salle de son continent, à côté d\'œuvres du monde entier. Visitez-la quand vous voulez sur martp.app/exhibition.</string>
+    <string name="onboarding_example_art_description">Un exemple d\'œuvre cartographique</string>
+    <string name="onboarding_globe_description">Un globe avec les œuvres de l\'Exposition Numérique</string>
 </resources>

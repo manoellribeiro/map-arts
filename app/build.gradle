@@ -40,6 +40,7 @@ android {
         debug {
             buildConfigField("String", "MAPBOX_API_KEY", "\"${System.getenv("MAPBOX_API_KEY") ?: localProperties.getProperty("MAPBOX_API_KEY")}\"")
             buildConfigField("String", "GEOAPIFY_API_KEY", "\"${System.getenv("GEOAPIFY_API_KEY") ?: localProperties.getProperty("GEOAPIFY_API_KEY")}\"")
+            buildConfigField("String", "MARTP_API_BASE_URL", "\"${localProperties.getProperty("MARTP_API_BASE_URL") ?: "http://localhost:8080/"}\"")
 
             testCoverageEnabled true
         }
@@ -51,6 +52,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField("String", "MAPBOX_API_KEY", "\"${System.getenv("MAPBOX_API_KEY") ?: localProperties.getProperty("MAPBOX_API_KEY")}\"")
             buildConfigField("String", "GEOAPIFY_API_KEY", "\"${System.getenv("GEOAPIFY_API_KEY") ?: localProperties.getProperty("GEOAPIFY_API_KEY")}\"")
+            buildConfigField("String", "MARTP_API_BASE_URL", "\"https://api.martp.app/\"")
         }
     }
     compileOptions {
@@ -118,6 +120,8 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-ai")
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
+    debugImplementation("com.google.firebase:firebase-appcheck-debug")
 
     implementation 'com.airbnb.android:lottie:6.7.1'
 
@@ -153,7 +157,9 @@ tasks.register('jacocoUnitTestReport', JacocoReport) {
             '**/core/extensions/**',
             '**/core/utils/**',
             '**/core/logging/**',
-            '**/core/models/failures/SketchArtType*.class'
+            '**/core/models/failures/SketchArtType*.class',
+            '**/core/data/local/converters/**',
+            '**/core/data/network/martp/AppCheckInterceptor*.class'
     ]
 
     classDirectories.setFrom(fileTree(layout.buildDirectory.dir('tmp/kotlin-classes/debug')) {

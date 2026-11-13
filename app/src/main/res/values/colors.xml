@@ -6,6 +6,7 @@
     <color name="blue">#120d31</color>
     <color name="yellow">#ffc971</color>
     <color name="light_cream">#FFF8E8</color>
+    <color name="light_cream_transparent">#00FFF8E8</color>
     <color name="light_yellow">#fff0e5</color>
     <color name="green">#47c09c</color>
     <color name="green_darker">#347667</color>
@@ -28,5 +29,10 @@
     <color name="error_medium">#F53C5A</color>
     <color name="error_light">#FA8C8C</color>
     <color name="error_lightest">#FFE1D7</color>
+
+    <color name="blue_alpha_8">#14120d31</color>
+    <color name="blue_alpha_12">#1F120d31</color>
+    <color name="blue_alpha_80">#CC120d31</color>
+    <color name="white_alpha_80">#CCFFFFFF</color>
 
 </resources>

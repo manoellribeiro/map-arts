@@ -25,6 +25,19 @@ android {
         multiDexEnabled true
     }
 
+    flavorDimensions = ["distribution"]
+
+    productFlavors {
+        normalApp {
+            dimension "distribution"
+        }
+        posPrinterApp {
+            dimension "distribution"
+            versionNameSuffix "-pos"
+            signingConfig signingConfigs.debug
+        }
+    }
+
     buildFeatures {
         buildConfig = true
         viewBinding = true
@@ -70,7 +83,7 @@ android {
 dependencies {
 
     implementation project(':core')
-    implementation project(':printer-hardware')
+    posPrinterAppImplementation project(':printer-hardware')
 
     def composeBom = platform('androidx.compose:compose-bom:2026.06.01')
     implementation composeBom
@@ -125,6 +138,7 @@ dependencies {
     implementation("com.google.firebase:firebase-ai")
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     debugImplementation("com.google.firebase:firebase-appcheck-debug")
+    posPrinterAppImplementation("com.google.firebase:firebase-appcheck-debug")
 
     implementation 'com.airbnb.android:lottie:6.7.1'
 

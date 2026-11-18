@@ -1,0 +1,25 @@
+// Applied by every module with unit tests. Before applying it, the module sets:
+//   ext.jacocoVariant         the variant whose unit tests feed the report, e.g. 'normalAppDebug' or 'debug'
+//   ext.jacocoCoveredClasses  the class patterns that count for coverage
+apply plugin: 'jacoco'
+
+def variant = project.ext.jacocoVariant
+
+tasks.register('jacocoUnitTestReport', JacocoReport) {
+    group = 'verification'
+    description = "Generates the unit test coverage report for the $variant variant, limited to the classes we unit test."
+    dependsOn "test${variant.capitalize()}UnitTest"
+
+    reports {
+        html.required = true
+        xml.required = true
+    }
+
+    classDirectories.setFrom(fileTree(layout.buildDirectory.dir("tmp/kotlin-classes/$variant")) {
+        include project.ext.jacocoCoveredClasses
+    })
+    sourceDirectories.setFrom(files('src/main/java'))
+    executionData.setFrom(fileTree(layout.buildDirectory) {
+        include "outputs/unit_test_code_coverage/${variant}UnitTest/*.exec"
+    })
+}

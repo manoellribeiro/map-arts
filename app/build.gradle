@@ -69,6 +69,9 @@ android {
 
 dependencies {
 
+    implementation project(':core')
+    implementation project(':printer-hardware')
+
     def composeBom = platform('androidx.compose:compose-bom:2026.06.01')
     implementation composeBom
     androidTestImplementation composeBom

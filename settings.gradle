@@ -14,3 +14,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Generate Map Arts"
 include ':app'
+include ':core'
+include ':printer-hardware'

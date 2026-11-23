@@ -101,6 +101,9 @@ dependencies {
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation files('libs/processing-core.jar')
+    // processing-core.jar references WatchFaceService, and some Android versions (seen on Android 11) reject its classes when it is missing
+    posPrinterAppImplementation 'com.google.android.support:wearable:2.9.0'
+    posPrinterAppCompileOnly 'com.google.android.wearable:wearable:2.9.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation "androidx.core:core-splashscreen:1.2.0"
     implementation("androidx.room:room-runtime:2.8.4")

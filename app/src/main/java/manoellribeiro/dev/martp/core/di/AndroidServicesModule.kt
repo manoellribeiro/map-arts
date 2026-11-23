@@ -2,6 +2,7 @@ package manoellribeiro.dev.martp.core.di
 
 import android.content.Context
 import android.location.Geocoder
+import android.location.LocationManager
 import android.net.ConnectivityManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -35,6 +36,13 @@ object AndroidServicesModule {
         @ApplicationContext context: Context
     ): FusedLocationProviderClient {
         return LocationServices.getFusedLocationProviderClient(context)
+    }
+
+    @Provides
+    fun provideLocationManager(
+        @ApplicationContext context: Context
+    ): LocationManager {
+        return context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
 
     @Provides

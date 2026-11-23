@@ -169,7 +169,7 @@ class MartpTextInput(
         icon = customAttributes.getDrawable(R.styleable.MartpTextInput_icon)
 
         iconColor = customAttributes.getColor(
-            R.styleable.MartpTextInput_iconColor,
+            R.styleable.MartpTextInput_inputIconColor,
             ContextCompat.getColor(context, R.color.dark_d2)
         )
 

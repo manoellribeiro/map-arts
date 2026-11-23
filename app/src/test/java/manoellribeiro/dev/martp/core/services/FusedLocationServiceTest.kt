@@ -34,9 +34,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @ExtendWith(MainDispatcherExtension::class)
-class LocationServiceTest {
+class FusedLocationServiceTest {
 
-    private lateinit var locationService: LocationService
+    private lateinit var locationService: FusedLocationService
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var fakeLocationTask: Task<Location>
     private lateinit var errorLogger: ErrorLogger
@@ -47,7 +47,7 @@ class LocationServiceTest {
         fakeLocationTask = mockk()
         errorLogger = mockk()
 
-        locationService = LocationService(
+        locationService = FusedLocationService(
             fusedLocationClient = fusedLocationClient,
             errorLogger = errorLogger
         )
@@ -110,7 +110,7 @@ class LocationServiceTest {
 
         // Then
         assertNull(failure.message)
-        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "LocationService.getCurrentLocation") }
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "FusedLocationService.getCurrentLocation") }
     }
 
     @Test
@@ -137,7 +137,7 @@ class LocationServiceTest {
             R.string.location_permission_not_granted_failure_error,
             failure.messageToBeDisplayedToUserId
         )
-        verify(exactly = 1) { errorLogger.logNonFatal(fakeTaskException, "LocationService.getCurrentLocation") }
+        verify(exactly = 1) { errorLogger.logNonFatal(fakeTaskException, "FusedLocationService.getCurrentLocation") }
     }
 
     @Test
@@ -158,7 +158,7 @@ class LocationServiceTest {
 
         // Then
         assertNull(failure.message)
-        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "LocationService.getCurrentLocation") }
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "FusedLocationService.getCurrentLocation") }
     }
 
     @Test
@@ -182,7 +182,7 @@ class LocationServiceTest {
             R.string.location_permission_not_granted_failure_error,
             failure.messageToBeDisplayedToUserId
         )
-        verify(exactly = 1) { errorLogger.logNonFatal(fakeSecurityException, "LocationService.getCurrentLocation") }
+        verify(exactly = 1) { errorLogger.logNonFatal(fakeSecurityException, "FusedLocationService.getCurrentLocation") }
     }
 
     @Test
@@ -202,7 +202,7 @@ class LocationServiceTest {
         // Then
         assertEquals(fakeErrorMessage, failure.message)
         assertEquals(R.string.unknown_error_failure, failure.messageToBeDisplayedToUserId)
-        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "LocationService.getCurrentLocation") }
+        verify(exactly = 1) { errorLogger.logNonFatal(ofType<IllegalStateException>(), "FusedLocationService.getCurrentLocation") }
     }
 
     @Test

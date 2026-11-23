@@ -3,6 +3,7 @@ package manoellribeiro.dev.martp.core.services
 import android.graphics.Bitmap
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,10 +19,11 @@ class UnavailableMapArtPrinterServiceTest {
     }
 
     @Test
-    fun `isAvailable and isConnected should be false`() {
+    fun `isAvailable, isConnected and printableWidthPixels should report no printer`() {
         // Then
         assertFalse(mapArtPrinterService.isAvailable)
         assertFalse(mapArtPrinterService.isConnected())
+        assertEquals(0, mapArtPrinterService.printableWidthPixels)
     }
 
     @Test

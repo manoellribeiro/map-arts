@@ -17,6 +17,7 @@
     <string name="add_a_description_for_you_map_art">Add a description to your map art</string>
     <string name="save_art">Save art</string>
     <string name="print">Print</string>
+    <string name="made_with">Made with:</string>
     <string name="unknown_error_failure">An unknown error occurred. Please try again.</string>
     <string name="location_permission_not_granted_failure_error">To proceed with this action, you need to grant access to your location.</string>
     <string name="this_is_your_new_art">This is your new art!</string>
@@ -83,6 +84,7 @@
     <string name="layer_water">Water</string>
     <string name="layer_road_paths">Footpaths</string>
     <string name="layer_roads_tunnels_bridges">Roads, tunnels and bridges</string>
+    <string name="layer_buildings_water_roads_footpaths">Buildings, water, roads, tunnels, bridges and footpaths</string>
     <string name="layer_building_delimitations">Building delimitations</string>
     <string name="layer_roads_bridges_footpaths">Roads, bridges, footpaths</string>
     <string name="layer_everything_else">Everything else</string>
@@ -93,6 +95,7 @@
     <string name="downloading_map_image">Downloading the map image…</string>
     <string name="error_downloading_location_image">An error occurred while downloading the image of your location, please try again.</string>
     <string name="tap_map_to_shuffle_colors">You can tap on the map to shuffle the colors until you find the best match.</string>
+    <string name="tap_map_to_invert_colors">You can tap on the map to invert the black and white colors.</string>
     <string name="unknown_location">Unknown Location</string>
     <string name="martp_api_failure_message">An error occurred while fetching data from the Martp internal services, please try again.</string>
     <string name="shown_in_gallery_as">Shown in the gallery as</string>
@@ -132,9 +135,10 @@
     <string name="onboarding_choices_description">Change these anytime in the %1$s tab.</string>
     <string name="onboarding_signature_title">Sign your arts, if you want</string>
     <string name="onboarding_signature_description">Add a username and an email in the %1$s tab. They\'re sent with your arts, and both are optional.</string>
-    <string name="onboarding_example_username">@username</string>
+    <string name="onboarding_example_username">\@username</string>
     <string name="onboarding_exhibition_title">Every art joins the Digital Exhibition</string>
     <string name="onboarding_exhibition_description">After a quick review, your art hangs in the room of its continent, next to arts from all over the world. Visit it anytime at martp.app/exhibition.</string>
     <string name="onboarding_example_art_description">An example of a map art</string>
     <string name="onboarding_globe_description">A globe with the arts of the Digital Exhibition</string>
+    <string name="martp_app_social_media" translatable="false">\@martp.app</string>
 </resources>

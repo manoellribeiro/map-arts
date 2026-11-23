@@ -38,6 +38,7 @@ import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
+import manoellribeiro.dev.martp.core.services.MapArtPrinterService
 import manoellribeiro.dev.martp.core.utils.PromptGenerator
 import manoellribeiro.dev.martp.infra.MainDispatcherExtension
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -62,6 +63,7 @@ class CreateNewMapArtViewModelTest {
     private lateinit var generateAIContentService: GenerateAIContentService
     private lateinit var promptGenerator: PromptGenerator
     private lateinit var errorLogger: ErrorLogger
+    private lateinit var printerService: MapArtPrinterService
     private lateinit var viewModel: CreateNewMapArtViewModel
 
     // 2 * MartpSketch.frameThickness (30) + 2 * MartpSketch.framePadding (30)
@@ -76,6 +78,7 @@ class CreateNewMapArtViewModelTest {
         generateAIContentService = mockk()
         promptGenerator = mockk()
         errorLogger = mockk()
+        printerService = mockk()
 
         // Create the class under test
         viewModel = CreateNewMapArtViewModel(
@@ -84,7 +87,8 @@ class CreateNewMapArtViewModelTest {
             getAddressService = getAddressService,
             generateAIContentService = generateAIContentService,
             promptGenerator = promptGenerator,
-            errorLogger = errorLogger
+            errorLogger = errorLogger,
+            printerService = printerService
         )
     }
 
@@ -203,6 +207,8 @@ class CreateNewMapArtViewModelTest {
         assertEquals(fakeLatitude, imageDownloadedState.latitude)
         assertEquals(fakeLongitude, imageDownloadedState.longitude)
         assertEquals(fakeUserInfo, imageDownloadedState.user)
+        assertEquals(1000, imageDownloadedState.canvasWidth)
+        assertEquals(1000, imageDownloadedState.canvasHeight)
         coVerify(exactly = 1) { repository.fetchCurrentUserInfo() }
     }
 
@@ -324,6 +330,103 @@ class CreateNewMapArtViewModelTest {
                 dir = fakeDirectory
             )
         }
+    }
+
+    @Test
+    fun `if the art style is PRINTABLE_MAP and the printer is available should fetch a square map with the printer width and no frame`() = runTest {
+        // Given
+        val fakeDirectory = File("fake-printable-directory")
+        val fakeLatitude = -12.9714
+        val fakeLongitude = -38.5014
+        val fakePrintableWidth = 384
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.PRINTABLE_MAP
+        coEvery { locationService.getCurrentLocation() } returns createFakeLocation(fakeLatitude, fakeLongitude)
+        coEvery { repository.fetchCurrentUserInfo() } returns createFakeUserInfo()
+        coEvery { getAddressService.getAddress(any(), any()) } returns createFakeAddress(
+            thoroughfare = "Fake Printable Street",
+            locality = "Fake City",
+            countryName = "Fake Country"
+        )
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-printable-directory/image.png"
+        every { printerService.isAvailable } returns true
+        every { printerService.printableWidthPixels } returns fakePrintableWidth
+        val states = collectStates()
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = fakeDirectory,
+            canvasToDrawArtWidth = 1000,
+            canvasToDrawArtHeight = 900
+        )
+        advanceUntilIdle()
+
+        // Then
+        coVerify(exactly = 1) {
+            repository.fetchStaticMapImage(
+                sketchArtType = SketchArtType.PRINTABLE_MAP,
+                latitude = fakeLatitude,
+                longitude = fakeLongitude,
+                mapWidth = fakePrintableWidth,
+                mapHeight = fakePrintableWidth,
+                dir = fakeDirectory
+            )
+        }
+        val imageDownloadedState = assertInstanceOf(
+            CreateNewMapArtUiState.ImageDownloaded::class.java,
+            states.last()
+        )
+        assertEquals(fakePrintableWidth, imageDownloadedState.canvasWidth)
+        assertEquals(fakePrintableWidth, imageDownloadedState.canvasHeight)
+    }
+
+    @Test
+    fun `if the art style is PRINTABLE_MAP and the printer is not available should fetch the map with the canvas size minus the frame`() = runTest {
+        // Given
+        val fakeDirectory = File("fake-unavailable-printer-directory")
+        val fakeLatitude = -12.9714
+        val fakeLongitude = -38.5014
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.PRINTABLE_MAP
+        coEvery { locationService.getCurrentLocation() } returns createFakeLocation(fakeLatitude, fakeLongitude)
+        coEvery { repository.fetchCurrentUserInfo() } returns createFakeUserInfo()
+        coEvery { getAddressService.getAddress(any(), any()) } returns createFakeAddress(
+            thoroughfare = "Fake Unavailable Street",
+            locality = "Fake City",
+            countryName = "Fake Country"
+        )
+        coEvery {
+            repository.fetchStaticMapImage(any(), any(), any(), any(), any(), any())
+        } returns "fake-unavailable-printer-directory/image.png"
+        every { printerService.isAvailable } returns false
+        val states = collectStates()
+
+        // When
+        viewModel.startToGenerateMapArt(
+            directory = fakeDirectory,
+            canvasToDrawArtWidth = 1000,
+            canvasToDrawArtHeight = 900
+        )
+        advanceUntilIdle()
+
+        // Then
+        coVerify(exactly = 1) {
+            repository.fetchStaticMapImage(
+                sketchArtType = SketchArtType.PRINTABLE_MAP,
+                latitude = fakeLatitude,
+                longitude = fakeLongitude,
+                mapWidth = 1000 - fakeFrameSize,
+                mapHeight = 900 - fakeFrameSize,
+                dir = fakeDirectory
+            )
+        }
+        verify(exactly = 0) { printerService.printableWidthPixels }
+        val imageDownloadedState = assertInstanceOf(
+            CreateNewMapArtUiState.ImageDownloaded::class.java,
+            states.last()
+        )
+        assertEquals(1000, imageDownloadedState.canvasWidth)
+        assertEquals(900, imageDownloadedState.canvasHeight)
     }
 
     @Test

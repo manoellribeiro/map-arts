@@ -17,6 +17,7 @@
     <string name="add_a_description_for_you_map_art">Añade una descripción a tu arte del mapa</string>
     <string name="save_art">Guardar arte</string>
     <string name="print">Imprimir</string>
+    <string name="made_with">Hecho con:</string>
     <string name="location_permission_not_granted_failure_error">Para proceder con esta acción, necesitas conceder acceso a tu ubicación.</string>
     <string name="unknown_error_failure">Ocurrió un error desconocido. Inténtalo de nuevo.</string>
     <string name="this_is_your_new_art">¡Este es tu nuevo arte!</string>
@@ -82,6 +83,7 @@
     <string name="layer_water">Agua</string>
     <string name="layer_road_paths">Caminos y senderos</string>
     <string name="layer_roads_tunnels_bridges">Calles, túneles y puentes</string>
+    <string name="layer_buildings_water_roads_footpaths">Edificios, agua, calles, túneles, puentes y caminos</string>
     <string name="layer_building_delimitations">Delimitaciones de edificios</string>
     <string name="layer_roads_bridges_footpaths">Calles, puentes, caminos</string>
     <string name="layer_everything_else">Todo lo demás</string>
@@ -92,6 +94,7 @@
     <string name="downloading_map_image">Descargando la imagen del mapa…</string>
     <string name="error_downloading_location_image">Ocurrió un error al descargar la imagen de tu ubicación, inténtalo de nuevo.</string>
     <string name="tap_map_to_shuffle_colors">Puedes tocar el mapa para mezclar los colores hasta encontrar la mejor combinación.</string>
+    <string name="tap_map_to_invert_colors">Puedes tocar el mapa para invertir los colores blanco y negro.</string>
     <string name="unknown_location">Ubicación desconocida</string>
     <string name="martp_api_failure_message">Ocurrió un error al obtener los datos de los servicios internos de Martp, inténtalo de nuevo.</string>
     <string name="shown_in_gallery_as">Aparece en la galería como</string>

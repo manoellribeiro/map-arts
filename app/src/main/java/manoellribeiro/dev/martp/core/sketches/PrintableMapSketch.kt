@@ -1,7 +1,5 @@
 package manoellribeiro.dev.martp.core.sketches
 
-import android.util.Log
-import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.extensions.blueValue
 import manoellribeiro.dev.martp.core.extensions.greenValue
 import manoellribeiro.dev.martp.core.extensions.hexToColorInt
@@ -16,6 +14,7 @@ class PrintableMapSketch(
     canvasWidth: Float = 640.0F,
     canvasHeight: Float = 640.0F,
     private val imagePath: String,
+    val onColorsInverted: (MapLayersColors) -> Unit
 ) : MartpSketch(
     0,
     0,
@@ -26,6 +25,8 @@ class PrintableMapSketch(
 ) {
 
     private var mapImage: PImage? = null
+    private var tempMapImage: PImage? = null
+    private var isInverted = false
     private val whiteColor = "#FFFFFF".hexToColorInt()
     private val blackColor = "#000000".hexToColorInt()
     override fun setup() {
@@ -33,13 +34,22 @@ class PrintableMapSketch(
 
         mapImage = loadImage(imagePath)
         changePixelColors(mapImage!!)
-        drawArtFrame()
-        image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
+        image(mapImage, 0F, 0F)
         filter(ERODE)
     }
 
     override fun draw() {
-        image(mapImage, frameThickness + framePadding, frameThickness + framePadding)
+        image(mapImage, 0F, 0F)
+    }
+
+    override fun mousePressed() {
+        if (tempMapImage == null) {
+            isInverted = !isInverted
+            tempMapImage = loadImage(imagePath)
+            changePixelColors(tempMapImage!!)
+            mapImage = tempMapImage
+            tempMapImage = null
+        }
     }
 
     val buildingOriginalColor = color(255, 36, 36)
@@ -48,59 +58,43 @@ class PrintableMapSketch(
     val roadsPathOriginalColor = color(93, 249, 192)
     val waterOriginalColor = color(234, 26, 234)
 
+    private val layersOriginalColors = listOf(
+        buildingOriginalColor,
+        buildingStrokeOriginalColor,
+        roadsOriginalColor,
+        roadsPathOriginalColor,
+        waterOriginalColor
+    )
+
     private fun changePixelColors(mapImage: PImage) {
+        val layersColor = if (isInverted) blackColor else whiteColor
+        val landColor = if (isInverted) whiteColor else blackColor
         mapImage.loadPixels()
         val mapImagePixels = mapImage.pixels
         for (y in 0..<mapImage.height) {
             for (x in 0..<mapImage.width) {
-                val currentPixelColor = mapImagePixels[y*mapImage.width+x]
-                when {
+                val currentPixelColor = mapImagePixels[y * mapImage.width + x]
+                val isLayerPixel = layersOriginalColors.any { layerOriginalColor ->
                     currentPixelColor.isRgbColor(
-                        redValueToCompare = roadsOriginalColor.redValue(),
-                        greenValueToCompare = roadsOriginalColor.greenValue(),
-                        blueValueToCompare = roadsOriginalColor.blueValue()
-                    ) -> {
-                        mapImage.set(x, y, whiteColor)
-                    }
-
-                    currentPixelColor.isRgbColor(
-                        redValueToCompare = roadsPathOriginalColor.redValue(),
-                        greenValueToCompare = roadsPathOriginalColor.greenValue(),
-                        blueValueToCompare = roadsPathOriginalColor.blueValue()
-                    ) -> {
-                        mapImage.set(x, y, whiteColor)
-                    }
-
-                    currentPixelColor.isRgbColor(
-                        redValueToCompare = waterOriginalColor.redValue(),
-                        greenValueToCompare = waterOriginalColor.greenValue(),
-                        blueValueToCompare = waterOriginalColor.blueValue()
-                    ) -> {
-                        mapImage.set(x, y, whiteColor)
-                    }
-
-                    currentPixelColor.isRgbColor(
-                        redValueToCompare = buildingStrokeOriginalColor.redValue(),
-                        greenValueToCompare = buildingStrokeOriginalColor.greenValue(),
-                        blueValueToCompare = buildingStrokeOriginalColor.blueValue()
-                    ) -> {
-                        mapImage.set(x, y, whiteColor)
-                    }
-
-                    currentPixelColor.isRgbColor(
-                        redValueToCompare = buildingOriginalColor.redValue(),
-                        greenValueToCompare = buildingOriginalColor.greenValue(),
-                        blueValueToCompare = buildingOriginalColor.blueValue()
-                    ) -> {
-                        mapImage.set(x, y, whiteColor)
-                    }
-                    else -> {
-                        mapImage.set(x, y, blackColor)
-                    }
+                        redValueToCompare = layerOriginalColor.redValue(),
+                        greenValueToCompare = layerOriginalColor.greenValue(),
+                        blueValueToCompare = layerOriginalColor.blueValue()
+                    )
                 }
+                mapImage.set(x, y, if (isLayerPixel) layersColor else landColor)
             }
         }
         mapImage.updatePixels()
+        onColorsInverted(
+            MapLayersColors(
+                roadsColor = layersColor,
+                buildingStrokeColor = layersColor,
+                buildingColor = layersColor,
+                roadsPathColor = layersColor,
+                waterColor = layersColor,
+                landOthersColor = landColor
+            )
+        )
     }
 
     override val type: SketchArtType

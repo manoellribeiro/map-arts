@@ -7,6 +7,7 @@ class SunmiMapArtPrinterService(
     private val smartPosPrinterService: SmartPosPrinterService
 ) : MapArtPrinterService {
     override val isAvailable = true
+    override val printableWidthPixels get() = smartPosPrinterService.paperWidthPixels
     override fun isConnected() = smartPosPrinterService.isConnected()
     override suspend fun connect() = smartPosPrinterService.connect()
     override suspend fun printBitmap(mapBitmap: Bitmap) = smartPosPrinterService.printBitmap(mapBitmap)

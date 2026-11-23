@@ -100,6 +100,18 @@
         <item name="android:fontFamily">@font/nunito_bold</item>
     </style>
 
+    <style name="Text.PrintableTitle">
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">@font/nunito_bold</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="Text.PrintableInfo">
+        <item name="android:textSize">10sp</item>
+        <item name="android:fontFamily">@font/nunito_medium</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
     <style name="Text.GraySubTitle">
         <item name="android:textSize">12sp</item>
         <item name="android:fontFamily">@font/nunito_regular</item>

@@ -39,6 +39,8 @@ class SmartPosPrinterService(
 
     fun isConnected(): Boolean = printerService != null
 
+    val paperWidthPixels = PAPER_WIDTH_PIXELS
+
     suspend fun connect(): Boolean {
         if (isConnected()) return true
         val connection = pendingOrNewConnection()
@@ -149,6 +151,8 @@ class SmartPosPrinterService(
     }
 
     companion object {
+        // 58 mm Sunmi paper
+        private const val PAPER_WIDTH_PIXELS = 384
         private const val CONNECT_TIMEOUT_MILLIS = 5_000L
         private const val LINES_TO_FEED_AFTER_PRINT = 3
         private const val PRINT_TIMEOUT_MILLIS = 30_000L

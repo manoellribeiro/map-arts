@@ -11,6 +11,7 @@ import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import manoellribeiro.dev.martp.printerhardware.models.failures.SmartPosPrinterOutOfPaperFailure
 import manoellribeiro.dev.martp.printerhardware.services.SmartPosPrinterService
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -33,6 +34,19 @@ class SunmiMapArtPrinterServiceTest {
     fun `isAvailable should be true`() {
         // Then
         assertTrue(mapArtPrinterService.isAvailable)
+    }
+
+    @Test
+    fun `printableWidthPixels should return the paper width of the smart pos printer service`() {
+        // Given
+        every { smartPosPrinterService.paperWidthPixels } returns 384
+
+        // When
+        val printableWidthPixels = mapArtPrinterService.printableWidthPixels
+
+        // Then
+        assertEquals(384, printableWidthPixels)
+        verify(exactly = 1) { smartPosPrinterService.paperWidthPixels }
     }
 
     @Test

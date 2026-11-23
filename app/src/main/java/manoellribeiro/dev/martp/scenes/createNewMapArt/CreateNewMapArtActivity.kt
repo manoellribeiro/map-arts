@@ -1,16 +1,21 @@
 package manoellribeiro.dev.martp.scenes.createNewMapArt
 
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
+import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.scale
+import androidx.core.graphics.applyCanvas
+import androidx.core.graphics.createBitmap
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
@@ -28,6 +33,7 @@ import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.extensions.dp
 import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
+import manoellribeiro.dev.martp.core.extensions.formatDateHour
 import manoellribeiro.dev.martp.core.extensions.gone
 import manoellribeiro.dev.martp.core.extensions.hexToColorInt
 import manoellribeiro.dev.martp.core.extensions.toBitmap
@@ -45,10 +51,12 @@ import manoellribeiro.dev.martp.core.sketches.PrintableMapSketch
 import manoellribeiro.dev.martp.core.sketches.WaterFlowMartpSketch
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import manoellribeiro.dev.martp.databinding.LayoutMapLayerLineBinding
+import manoellribeiro.dev.martp.databinding.LayoutPrintableMapArtBinding
 import manoellribeiro.dev.martp.scenes.success.SuccessActivity
 import manoellribeiro.dev.martp.scenes.userInfoBottomSheet.SetUserInfoBottomSheetFragment
 import processing.android.PFragment
 import java.io.File
+import java.util.Calendar
 
 
 @AndroidEntryPoint
@@ -225,6 +233,13 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         addColorLayer(colorLayerHolder.landOthersColor, R.string.layer_land_other)
     }
 
+    private fun setColorsLayersForPrintableMap(colorLayerHolder: MapLayersColors) {
+        mapLayersColors = colorLayerHolder
+        binding.mapColorsHoldersLL.removeAllViews()
+        addColorLayer(colorLayerHolder.buildingColor, R.string.layer_buildings_water_roads_footpaths)
+        addColorLayer(colorLayerHolder.landOthersColor, R.string.layer_land_other)
+    }
+
     private fun handleImageDownloadedState(
         state: CreateNewMapArtUiState.ImageDownloaded
     ) = with(binding) {
@@ -235,7 +250,7 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         titleTV.gone()
         mapLayersTitleTV.visible()
         mapColorsHoldersLL.visible()
-        usernameInfoContainerLL.visible()
+        if(state.sketchArtType == SketchArtType.PRINTABLE_MAP) usernameInfoContainerLL.gone() else usernameInfoContainerLL.visible()
         if(!state.user.username.isNullOrEmpty()) {
             usernameTV.text = state.user.username
             addUsernameMB.setStrokeColor(getColor(R.color.light_l3))
@@ -264,8 +279,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                     horizontalTilesCount = 4,
                     verticalTilesCount = 4,
                     padding = 20,
-                    canvasWidth = mapArtsContainer.width.toFloat(),
-                    canvasHeight = mapArtsContainer.height.toFloat(),
+                    canvasWidth = state.canvasWidth.toFloat(),
+                    canvasHeight = state.canvasHeight.toFloat(),
                     imagePath = state.staticMapImagePath,
                 )
             }
@@ -275,21 +290,21 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                     horizontalTilesCount = 0,
                     verticalTilesCount = 0,
                     padding = 0,
-                    canvasWidth = mapArtsContainer.width.toFloat(),
-                    canvasHeight = mapArtsContainer.height.toFloat(),
+                    canvasWidth = state.canvasWidth.toFloat(),
+                    canvasHeight = state.canvasHeight.toFloat(),
                     imagePath = state.staticMapImagePath,
                 )
             }
             SketchArtType.WATER_FLOW -> WaterFlowMartpSketch(
                 padding = 20,
-                canvasWidth = mapArtsContainer.width.toFloat(),
-                canvasHeight = mapArtsContainer.height.toFloat(),
+                canvasWidth = state.canvasWidth.toFloat(),
+                canvasHeight = state.canvasHeight.toFloat(),
                 imagePath = state.staticMapImagePath,
             )
             SketchArtType.PARTICLE_SYSTEM -> ParticleSystemSketch(
                 padding = 20,
-                canvasWidth = mapArtsContainer.width.toFloat(),
-                canvasHeight = mapArtsContainer.height.toFloat(),
+                canvasWidth = state.canvasWidth.toFloat(),
+                canvasHeight = state.canvasHeight.toFloat(),
                 imagePath = state.staticMapImagePath,
                 gravitySensor = GravitySensor(context = this@CreateNewMapArtActivity)
             )
@@ -299,8 +314,8 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 colorPaletteTV.text = getString(R.string.color_palette_value, state.colorPalette?.name)
                 ColorfulMapSketch(
                     padding = 20,
-                    canvasWidth = mapArtsContainer.width.toFloat(),
-                    canvasHeight = mapArtsContainer.height.toFloat(),
+                    canvasWidth = state.canvasWidth.toFloat(),
+                    canvasHeight = state.canvasHeight.toFloat(),
                     imagePath = state.staticMapImagePath,
                     colorPalette = state.colorPalette!!
                 ) {
@@ -310,15 +325,24 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 }
             }
             SketchArtType.PRINTABLE_MAP -> {
-                colorPaletteTV.visible()
+                mapArtsContainer.updateLayoutParams<LinearLayout.LayoutParams> {
+                    width = state.canvasWidth
+                    height = state.canvasHeight
+                    gravity = Gravity.CENTER_HORIZONTAL
+                }
+                colorPaletteTV.gone()
                 mapLayersSubTitleTV.visible()
-                colorPaletteTV.text = getString(R.string.color_palette_value, state.colorPalette?.name)
+                mapLayersSubTitleTV.text = getString(R.string.tap_map_to_invert_colors)
                 PrintableMapSketch(
                     padding = 20,
-                    canvasWidth = mapArtsContainer.width.toFloat(),
-                    canvasHeight = mapArtsContainer.height.toFloat(),
-                    imagePath = state.staticMapImagePath,
-                )
+                    canvasWidth = state.canvasWidth.toFloat(),
+                    canvasHeight = state.canvasHeight.toFloat(),
+                    imagePath = state.staticMapImagePath
+                ) {
+                    runOnUiThread {
+                        setColorsLayersForPrintableMap(it)
+                    }
+                }
             }
         }
         val processingFragment = PFragment(sketch)
@@ -335,29 +359,49 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         titleTV.text = getString(R.string.this_is_your_new_art)
         actionMB.visible()
         actionMB.isClickable = true
-        actionMB.title = getString(R.string.save_art)
+        actionMB.title = getString(if(state.sketchArtType == SketchArtType.PRINTABLE_MAP) R.string.print else R.string.save_art)
         actionMB.setOnClickListener {
             if(state.sketchArtType == SketchArtType.PRINTABLE_MAP) {
-                printArt()
+                printArt(state)
             } else {
                 saveArt(state.user, state.title)
             }
         }
     }
 
-    private fun printArt() {
-        val printableBitmap = sketch?.toPrintableBitmap() ?: return
-        viewModel.printArt(printableBitmap)
+    private fun printArt(state: CreateNewMapArtUiState.ImageDownloaded) {
+        val mapBitmap = sketch?.toPrintableBitmap() ?: return
+        viewModel.printArt(createPrintableArtBitmap(mapBitmap, state))
+    }
+
+    private fun createPrintableArtBitmap(
+        mapBitmap: Bitmap,
+        state: CreateNewMapArtUiState.ImageDownloaded
+    ): Bitmap {
+        val printableArt = LayoutPrintableMapArtBinding.inflate(layoutInflater).apply {
+            mapIV.setImageBitmap(mapBitmap)
+            titleTV.text = state.title.ifEmpty { getString(R.string.unknown_location) }
+            latitudeTV.text = getString(R.string.latitude_value, state.latitude.toString())
+            longitudeTV.text = getString(R.string.longitude_value, state.longitude.toString())
+            dateTV.text = Calendar.getInstance().formatDateHour()
+        }.root
+        printableArt.measure(
+            View.MeasureSpec.makeMeasureSpec(state.canvasWidth, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        )
+        printableArt.layout(0, 0, printableArt.measuredWidth, printableArt.measuredHeight)
+        return createBitmap(printableArt.measuredWidth, printableArt.measuredHeight).applyCanvas {
+            drawColor(Color.WHITE)
+            printableArt.draw(this)
+        }
     }
 
     private fun MartpSketch.toPrintableBitmap(): Bitmap {
         val currentFrame = get()
         currentFrame.loadPixels()
-        val artBitmap = Bitmap.createBitmap(
+        return Bitmap.createBitmap(
             currentFrame.pixels, currentFrame.width, currentFrame.height, Bitmap.Config.ARGB_8888
         )
-        val printableHeight = artBitmap.height * PRINTABLE_WIDTH_PIXELS / artBitmap.width
-        return artBitmap.scale(PRINTABLE_WIDTH_PIXELS, printableHeight)
     }
 
     private fun saveArt(user: UserInfoEntity, title: String) {
@@ -395,9 +439,5 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 typingAnimation(view, text, length + 1, onComplete)
             }, delay)
         }
-    }
-
-    companion object {
-        private const val PRINTABLE_WIDTH_PIXELS = 384
     }
 }

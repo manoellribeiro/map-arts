@@ -24,6 +24,7 @@ import manoellribeiro.dev.martp.core.logging.ErrorLogger
 import manoellribeiro.dev.martp.printerhardware.models.failures.SmartPosPrinterNotConnectedFailure
 import manoellribeiro.dev.martp.printerhardware.models.failures.SmartPosPrinterOutOfPaperFailure
 import manoellribeiro.dev.martp.printerhardware.models.failures.SmartPosPrintingFailure
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -366,5 +367,14 @@ class SmartPosPrinterServiceTest {
             service.printBitmap(fakeMapBitmap)
         }
         verify(exactly = 1) { errorLogger.logNonFatal(any<SmartPosPrintingFailure>(), "SmartPosPrinterService.printBitmap") }
+    }
+
+    @Test
+    fun `paperWidthPixels should be the 384 dots of the 58 mm paper`() = runTest {
+        // Given
+        val service = createService()
+
+        // Then
+        assertEquals(384, service.paperWidthPixels)
     }
 }

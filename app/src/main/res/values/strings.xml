@@ -16,6 +16,7 @@
     <string name="choose_a_title_for_you_map_art">Choose a title for your new map art</string>
     <string name="add_a_description_for_you_map_art">Add a description to your map art</string>
     <string name="save_art">Save art</string>
+    <string name="print">Print</string>
     <string name="unknown_error_failure">An unknown error occurred. Please try again.</string>
     <string name="location_permission_not_granted_failure_error">To proceed with this action, you need to grant access to your location.</string>
     <string name="this_is_your_new_art">This is your new art!</string>
@@ -74,6 +75,8 @@
     <string name="walking_people_description">A colorful map with a simulation of people walking in the building areas</string>
     <string name="classic">Classic</string>
     <string name="classic_description">The first art style created in the project, generated using the fixed colors of our logo</string>
+    <string name="printable_map">Printable Map</string>
+    <string name="printable_map_description">A black-and-white map style that can be printed</string>
     <string name="latitude_value">Latitude: %s</string>
     <string name="longitude_value">Longitude: %s</string>
     <string name="layer_buildings">Buildings and constructed area</string>

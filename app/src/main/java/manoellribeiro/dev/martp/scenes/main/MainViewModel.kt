@@ -3,6 +3,7 @@ package manoellribeiro.dev.martp.scenes.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -15,11 +16,15 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
+import manoellribeiro.dev.martp.core.di.ApplicationScope
+import manoellribeiro.dev.martp.core.services.MapArtPrinterService
 import manoellribeiro.dev.martp.core.models.failures.Failure
 import manoellribeiro.dev.martp.core.models.SketchArtType
 import manoellribeiro.dev.martp.scenes.artStyleSettings.ArtStyleSettingsUiState
+import manoellribeiro.dev.martp.scenes.artStyleSettings.MapArtStyleModel
 import manoellribeiro.dev.martp.scenes.gallery.GalleryUiState
 import manoellribeiro.dev.martp.scenes.userInfo.UserInfoUiState
 import javax.inject.Inject
@@ -27,7 +32,9 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val repository: MartpRepository
+    private val repository: MartpRepository,
+    private val mapArtPrinterService: MapArtPrinterService,
+    @ApplicationScope private val applicationScope: CoroutineScope
 ): ViewModel() {
 
     private var setUserNameJob: Job? = null
@@ -87,6 +94,65 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun connectToPrinter() {
+        applicationScope.launch {
+            mapArtPrinterService.connect()
+        }
+    }
+
+    private fun getAvailableArtStyles(): List<MapArtStyleModel> {
+        return buildList {
+            if (mapArtPrinterService.isAvailable) {
+                add(
+                    MapArtStyleModel(
+                        titleId = R.string.printable_map,
+                        descriptionId = R.string.printable_map_description,
+                        drawableImageId = R.drawable.ic_printable_style,
+                        sketchArtType = SketchArtType.PRINTABLE_MAP
+                    )
+                )
+            }
+            add(
+                MapArtStyleModel(
+                    titleId = R.string.colorful_map,
+                    descriptionId = R.string.colorful_map_description,
+                    drawableImageId = R.drawable.ic_colorful_map,
+                    sketchArtType = SketchArtType.COLORFUL_MAP
+                )
+            )
+            add(
+                MapArtStyleModel(
+                    titleId = R.string.classic,
+                    descriptionId = R.string.classic_description,
+                    drawableImageId = R.drawable.ic_martp_logo,
+                    sketchArtType = SketchArtType.DEFAULT
+                )
+            )
+            add(
+                MapArtStyleModel(
+                    titleId = R.string.pointillism,
+                    descriptionId = R.string.pointillism_colorful_description,
+                    drawableImageId = R.drawable.ic_pointllism,
+                    sketchArtType = SketchArtType.POINTILLISM
+                )
+            )
+            //Still work in progress
+//    MapArtStyleModel(
+//        titleId = R.string.water_flow,
+//        descriptionId = R.string.water_flow_description,
+//        drawableImageId = R.drawable.ic_water_flow,
+//        sketchArtType = SketchArtType.WATER_FLOW
+//    ),
+            //Still work in progress
+//    MapArtStyleModel(
+//        titleId = R.string.walking_people,
+//        descriptionId = R.string.walking_people_description,
+//        drawableImageId = R.drawable.ic_walking_people,
+//        sketchArtType = SketchArtType.PARTICLE_SYSTEM
+//    ),
+        }
+    }
+
     fun tryToGetUserInfo() {
         viewModelScope.launch {
             _isUserInfoBadgeVisible.value = false
@@ -112,7 +178,8 @@ class MainViewModel @Inject constructor(
                     colorPaletteSelected = loadedColorPalettes
                         .firstOrNull { colorPalette -> colorPalette.name == savedColorPaletteName }
                         ?.name ?: loadedColorPalettes.first().name,
-                    colorsPalettes = loadedColorPalettes
+                    colorsPalettes = loadedColorPalettes,
+                    artStylesAvailable = getAvailableArtStyles()
                 )
             }
             emitNewArtStyleSettingsState(

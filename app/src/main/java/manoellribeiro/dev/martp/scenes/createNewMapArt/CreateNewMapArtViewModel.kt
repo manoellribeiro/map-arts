@@ -32,6 +32,7 @@ import manoellribeiro.dev.martp.core.models.failures.UnknownErrorFailure
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
+import manoellribeiro.dev.martp.core.services.MapArtPrinterService
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.utils.PromptGenerator
 import java.io.File
@@ -47,7 +48,8 @@ class CreateNewMapArtViewModel @Inject constructor(
     private val getAddressService: GetAddressService,
     private val generateAIContentService: GenerateAIContentService,
     private val promptGenerator: PromptGenerator,
-    private val errorLogger: ErrorLogger
+    private val errorLogger: ErrorLogger,
+    private val printerService: MapArtPrinterService
 ): ViewModel() {
 
     private val _state: MutableStateFlow<CreateNewMapArtUiState> = MutableStateFlow(CreateNewMapArtUiState.Idle)
@@ -157,6 +159,10 @@ class CreateNewMapArtViewModel @Inject constructor(
         return listOfNotNull(street, city, country)
             .filter { it.isNotBlank() }
             .joinToString(", ")
+    }
+
+    fun printArt(mapBitmap: Bitmap) = viewModelScope.launch {
+        printerService.printBitmap(mapBitmap)
     }
 
     fun saveArt(

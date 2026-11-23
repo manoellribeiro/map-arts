@@ -1,5 +1,6 @@
 package manoellribeiro.dev.martp.scenes.createNewMapArt
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.view.ViewGroup
@@ -9,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.scale
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
@@ -27,6 +29,7 @@ import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.extensions.dp
 import manoellribeiro.dev.martp.core.extensions.executeIfNotNull
 import manoellribeiro.dev.martp.core.extensions.gone
+import manoellribeiro.dev.martp.core.extensions.hexToColorInt
 import manoellribeiro.dev.martp.core.extensions.toBitmap
 import manoellribeiro.dev.martp.core.extensions.visible
 import manoellribeiro.dev.martp.core.models.MapLayersColors
@@ -38,6 +41,7 @@ import manoellribeiro.dev.martp.core.sketches.DefaultMartpSketch
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.sketches.PointillismMartpSketch
 import manoellribeiro.dev.martp.core.sketches.ParticleSystemSketch
+import manoellribeiro.dev.martp.core.sketches.PrintableMapSketch
 import manoellribeiro.dev.martp.core.sketches.WaterFlowMartpSketch
 import manoellribeiro.dev.martp.databinding.ActivityCreateNewMapArtBinding
 import manoellribeiro.dev.martp.databinding.LayoutMapLayerLineBinding
@@ -305,6 +309,17 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                     }
                 }
             }
+            SketchArtType.PRINTABLE_MAP -> {
+                colorPaletteTV.visible()
+                mapLayersSubTitleTV.visible()
+                colorPaletteTV.text = getString(R.string.color_palette_value, state.colorPalette?.name)
+                PrintableMapSketch(
+                    padding = 20,
+                    canvasWidth = mapArtsContainer.width.toFloat(),
+                    canvasHeight = mapArtsContainer.height.toFloat(),
+                    imagePath = state.staticMapImagePath,
+                )
+            }
         }
         val processingFragment = PFragment(sketch)
         processingFragment.setView(mapArtsContainer, this@CreateNewMapArtActivity)
@@ -322,8 +337,27 @@ class CreateNewMapArtActivity: AppCompatActivity() {
         actionMB.isClickable = true
         actionMB.title = getString(R.string.save_art)
         actionMB.setOnClickListener {
-            saveArt(state.user, state.title)
+            if(state.sketchArtType == SketchArtType.PRINTABLE_MAP) {
+                printArt()
+            } else {
+                saveArt(state.user, state.title)
+            }
         }
+    }
+
+    private fun printArt() {
+        val printableBitmap = sketch?.toPrintableBitmap() ?: return
+        viewModel.printArt(printableBitmap)
+    }
+
+    private fun MartpSketch.toPrintableBitmap(): Bitmap {
+        val currentFrame = get()
+        currentFrame.loadPixels()
+        val artBitmap = Bitmap.createBitmap(
+            currentFrame.pixels, currentFrame.width, currentFrame.height, Bitmap.Config.ARGB_8888
+        )
+        val printableHeight = artBitmap.height * PRINTABLE_WIDTH_PIXELS / artBitmap.width
+        return artBitmap.scale(PRINTABLE_WIDTH_PIXELS, printableHeight)
     }
 
     private fun saveArt(user: UserInfoEntity, title: String) {
@@ -361,5 +395,9 @@ class CreateNewMapArtActivity: AppCompatActivity() {
                 typingAnimation(view, text, length + 1, onComplete)
             }, delay)
         }
+    }
+
+    companion object {
+        private const val PRINTABLE_WIDTH_PIXELS = 384
     }
 }

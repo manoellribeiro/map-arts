@@ -60,7 +60,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setupRequireLocationPermissionLauncher()
         setupBottomNavigationBar()
-        if (savedInstanceState == null) openEditTabIfRequested(intent)
+        if (savedInstanceState == null) {
+            openEditTabIfRequested(intent)
+            viewModel.connectToPrinter()
+        }
         setupViews()
         setStatusBarColor()
         setupObservables()

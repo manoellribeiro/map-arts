@@ -10,7 +10,7 @@ data class MapArtStyleModel(
     val sketchArtType: SketchArtType
 )
 
-val artStyleModels = listOf(
+val mockedArtStyleModels = listOf(
     MapArtStyleModel(
         titleId = R.string.colorful_map,
         descriptionId = R.string.colorful_map_description,

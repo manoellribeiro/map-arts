@@ -16,6 +16,7 @@
     <string name="choose_a_title_for_you_map_art">Choisissez un titre pour votre nouvelle œuvre d\'art cartographique</string>
     <string name="add_a_description_for_you_map_art">Ajoutez une description à votre œuvre cartographique</string>
     <string name="save_art">Enregistrer l\'art</string>
+    <string name="print">Imprimer</string>
     <string name="location_permission_not_granted_failure_error">Pour poursuivre cette action, vous devez autoriser l\'accès à votre position.</string>
     <string name="unknown_error_failure">Une erreur inconnue s\'est produite. Veuillez réessayer.</string>
     <string name="this_is_your_new_art">Voici votre nouvelle œuvre d\'art !</string>
@@ -73,6 +74,8 @@
     <string name="walking_people_description">Une carte colorée avec une simulation de personnes marchant dans les zones des bâtiments</string>
     <string name="classic">Classique</string>
     <string name="classic_description">Le premier style artistique créé dans le projet, généré avec les couleurs fixes de notre logo</string>
+    <string name="printable_map">Carte imprimable</string>
+    <string name="printable_map_description">Un style de carte en noir et blanc qui peut être imprimé</string>
     <string name="latitude_value">Latitude\u00A0: %s</string>
     <string name="longitude_value">Longitude\u00A0: %s</string>
     <string name="layer_buildings">Bâtiments et zones construites</string>

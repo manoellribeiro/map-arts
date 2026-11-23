@@ -16,6 +16,7 @@
     <string name="choose_a_title_for_you_map_art">"Escolha um título para sua nova arte de mapa "</string>
     <string name="add_a_description_for_you_map_art">Adicione uma descrição à sua arte do mapa</string>
     <string name="save_art">Salvar arte</string>
+    <string name="print">Imprimir</string>
     <string name="location_permission_not_granted_failure_error">Para prosseguir com essa ação você precisa conceder acesso à sua localização.</string>
     <string name="unknown_error_failure">Um erro desconhecido aconteceu. Tente novamente.</string>
     <string name="this_is_your_new_art">Essa é a sua nova arte!</string>
@@ -73,6 +74,8 @@
     <string name="walking_people_description">Um mapa colorido com uma simulação de pessoas caminhando nas áreas dos prédios</string>
     <string name="classic">Clássico</string>
     <string name="classic_description">O primeiro estilo de arte criado no projeto, é gerado utilizando as cores fixas da nossa logo</string>
+    <string name="printable_map">Mapa Imprimível</string>
+    <string name="printable_map_description">Um estilo de mapa em preto e branco que pode ser impresso</string>
     <string name="latitude_value">Latitude: %s</string>
     <string name="longitude_value">Longitude: %s</string>
     <string name="layer_buildings">Edifícios e área construída</string>

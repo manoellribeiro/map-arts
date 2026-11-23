@@ -16,6 +16,7 @@
     <string name="choose_a_title_for_you_map_art">Wähle einen Titel für dein neues Karten-Kunstwerk</string>
     <string name="add_a_description_for_you_map_art">Füge deinem Karten-Kunstwerk eine Beschreibung hinzu</string>
     <string name="save_art">Kunstwerk speichern</string>
+    <string name="print">Drucken</string>
     <string name="unknown_error_failure">Ein unbekannter Fehler ist aufgetreten. Bitte versuche es erneut.</string>
     <string name="location_permission_not_granted_failure_error">Um diese Aktion fortzusetzen, musst du den Zugriff auf deinen Standort erlauben.</string>
     <string name="this_is_your_new_art">Das ist dein neues Kunstwerk!</string>
@@ -73,6 +74,8 @@
     <string name="walking_people_description">Eine bunte Karte mit einer Simulation von Menschen, die in den Gebäudeflächen gehen</string>
     <string name="classic">Klassisch</string>
     <string name="classic_description">Der erste Kunststil des Projekts, erstellt mit den festen Farben unseres Logos</string>
+    <string name="printable_map">Druckbare Karte</string>
+    <string name="printable_map_description">Ein Kartenstil in Schwarz-Weiß, der gedruckt werden kann</string>
     <string name="latitude_value">Breitengrad: %s</string>
     <string name="longitude_value">Längengrad: %s</string>
     <string name="layer_buildings">Gebäude und bebaute Flächen</string>

@@ -10,7 +10,8 @@ sealed interface ArtStyleSettingsUiState {
         val mapZoom: Float,
         val mapArtStyle: SketchArtType,
         val colorsPalettes: List<ColorPaletteEntity>,
-        val colorPaletteSelected: String
+        val colorPaletteSelected: String,
+        val artStylesAvailable: List<MapArtStyleModel>
     ): ArtStyleSettingsUiState
 
 }

@@ -25,6 +25,7 @@ import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.SketchArtType
+import manoellribeiro.dev.martp.core.services.MapArtPrinterService
 import manoellribeiro.dev.martp.infra.MainDispatcherExtension
 import manoellribeiro.dev.martp.scenes.artStyleSettings.ArtStyleSettingsUiState
 import manoellribeiro.dev.martp.scenes.gallery.GalleryUiState
@@ -44,6 +45,7 @@ class MainViewModelTest {
 
     private lateinit var viewModel: MainViewModel
     private lateinit var repository: MartpRepository
+    private lateinit var mapArtPrinterService: MapArtPrinterService
     private lateinit var fakeUserMapArtsChannel: Channel<List<MapArtEntity>>
 
     @BeforeEach
@@ -56,7 +58,13 @@ class MainViewModelTest {
         fakeUserMapArtsChannel = Channel(Channel.UNLIMITED)
         every { repository.observeUserMapArts() } returns fakeUserMapArtsChannel.receiveAsFlow()
 
-        viewModel = MainViewModel(repository = repository)
+        mapArtPrinterService = mockk()
+
+        viewModel = MainViewModel(
+            repository = repository,
+            mapArtPrinterService = mapArtPrinterService,
+            applicationScope = TestScope()
+        )
     }
 
     private fun <T> TestScope.collectStates(stateFlow: StateFlow<T>): List<T> {
@@ -977,6 +985,28 @@ class MainViewModelTest {
         // Then
         assertEquals(listOf(OnboardingCheckUiState.Checking, OnboardingCheckUiState.OnboardingAlreadySeen), states)
         coVerify(exactly = 1) { repository.hasSeenOnboarding() }
+    }
+
+    // endregion
+
+    // region connectToPrinter
+
+    @Test
+    fun `connectToPrinter should ask the printer service to connect`() = runTest {
+        // Given
+        coEvery { mapArtPrinterService.connect() } returns true
+        val viewModelWithTestApplicationScope = MainViewModel(
+            repository = repository,
+            mapArtPrinterService = mapArtPrinterService,
+            applicationScope = backgroundScope
+        )
+
+        // When
+        viewModelWithTestApplicationScope.connectToPrinter()
+        runCurrent()
+
+        // Then
+        coVerify(exactly = 1) { mapArtPrinterService.connect() }
     }
 
     // endregion

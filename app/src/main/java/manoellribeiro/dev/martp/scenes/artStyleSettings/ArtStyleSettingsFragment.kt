@@ -137,6 +137,7 @@ class ArtStyleSettingsFragment : Fragment() {
                                 }
                             )
                             ArtStyleSelectors(
+                                artStyleModels = state.artStylesAvailable,
                                 selectedArtStyle = selectedArtStyle,
                                 onArtStyleSelected = { artStyle ->
                                     selectedArtStyle = artStyle
@@ -263,8 +264,9 @@ private fun ZoomSlider(
 
 @Composable
 fun ArtStyleSelectors(
+    artStyleModels: List<MapArtStyleModel>,
     selectedArtStyle: SketchArtType,
-    onArtStyleSelected: (SketchArtType) -> Unit
+    onArtStyleSelected: (SketchArtType) -> Unit,
 ) {
     Column(
         modifier = Modifier.padding(

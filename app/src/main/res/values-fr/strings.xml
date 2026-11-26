@@ -16,6 +16,8 @@
     <string name="choose_a_title_for_you_map_art">Choisissez un titre pour votre nouvelle œuvre d\'art cartographique</string>
     <string name="add_a_description_for_you_map_art">Ajoutez une description à votre œuvre cartographique</string>
     <string name="save_art">Enregistrer l\'art</string>
+    <string name="print">Imprimer</string>
+    <string name="made_with">Réalisé avec :</string>
     <string name="location_permission_not_granted_failure_error">Pour poursuivre cette action, vous devez autoriser l\'accès à votre position.</string>
     <string name="unknown_error_failure">Une erreur inconnue s\'est produite. Veuillez réessayer.</string>
     <string name="this_is_your_new_art">Voici votre nouvelle œuvre d\'art !</string>
@@ -73,12 +75,15 @@
     <string name="walking_people_description">Une carte colorée avec une simulation de personnes marchant dans les zones des bâtiments</string>
     <string name="classic">Classique</string>
     <string name="classic_description">Le premier style artistique créé dans le projet, généré avec les couleurs fixes de notre logo</string>
+    <string name="printable_map">Carte imprimable</string>
+    <string name="printable_map_description">Un style de carte en noir et blanc qui peut être imprimé</string>
     <string name="latitude_value">Latitude\u00A0: %s</string>
     <string name="longitude_value">Longitude\u00A0: %s</string>
     <string name="layer_buildings">Bâtiments et zones construites</string>
     <string name="layer_water">Eau</string>
     <string name="layer_road_paths">Chemins et sentiers</string>
     <string name="layer_roads_tunnels_bridges">Routes, tunnels et ponts</string>
+    <string name="layer_buildings_water_roads_footpaths">Bâtiments, eau, routes, tunnels, ponts et chemins</string>
     <string name="layer_building_delimitations">Contours des bâtiments</string>
     <string name="layer_roads_bridges_footpaths">Routes, ponts, chemins</string>
     <string name="layer_everything_else">Tout le reste</string>
@@ -89,6 +94,7 @@
     <string name="downloading_map_image">Téléchargement de l’image de la carte…</string>
     <string name="error_downloading_location_image">Une erreur s’est produite lors du téléchargement de l’image de votre position, veuillez réessayer.</string>
     <string name="tap_map_to_shuffle_colors">Vous pouvez toucher la carte pour mélanger les couleurs jusqu\'à trouver la meilleure combinaison.</string>
+    <string name="tap_map_to_invert_colors">Vous pouvez toucher la carte pour inverser le noir et le blanc.</string>
     <string name="unknown_location">Position inconnue</string>
     <string name="martp_api_failure_message">Une erreur s’est produite lors de la récupération des données des services internes de Martp, veuillez réessayer.</string>
     <string name="shown_in_gallery_as">Apparaît dans la galerie sous le nom de</string>

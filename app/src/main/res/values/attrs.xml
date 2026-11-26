@@ -24,7 +24,7 @@
         <attr name="hint" format="string"/>
         <attr name="hintColor" format="color"/>
         <attr name="icon" format="reference"/>
-        <attr name="iconColor" format="reference"/>
+        <attr name="inputIconColor" format="reference"/>
         <attr name="strokeColor"/>
         <attr name="inputBackgroundColor" format="color"/>
         <attr name="obfuscated" format="boolean"/>

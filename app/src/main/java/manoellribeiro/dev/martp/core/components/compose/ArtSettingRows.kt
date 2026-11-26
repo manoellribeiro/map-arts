@@ -41,7 +41,7 @@ import manoellribeiro.dev.martp.core.components.compose.theme.LightYellow
 import manoellribeiro.dev.martp.core.components.compose.theme.TextGraySubTitle
 import manoellribeiro.dev.martp.core.components.compose.theme.TextTitle
 import manoellribeiro.dev.martp.core.components.compose.theme.Yellow
-import manoellribeiro.dev.martp.scenes.artStyleSettings.artStyleModels
+import manoellribeiro.dev.martp.scenes.artStyleSettings.mockedArtStyleModels
 
 // The art settings a user can change in the Edit tab, each with a small picture of it. Shared by
 // the success screen and the onboarding.
@@ -90,7 +90,7 @@ private fun Modifier.topDivider(color: Color) = drawBehind {
 @Composable
 fun ArtStyleIndicator() {
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        artStyleModels.forEachIndexed { index, artStyleModel ->
+        mockedArtStyleModels.forEachIndexed { index, artStyleModel ->
             val isHighlighted = index == 0
             Icon(
                 painter = painterResource(artStyleModel.drawableImageId),

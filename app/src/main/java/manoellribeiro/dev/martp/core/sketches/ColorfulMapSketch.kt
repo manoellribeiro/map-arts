@@ -57,7 +57,6 @@ class ColorfulMapSketch(
     val roadsPathOriginalColor = color(93, 249, 192)
     val waterOriginalColor = color(234, 26, 234)
 
-    // TODO: Getting the color of a single pixel with get(x, y) is easy, but not as fast as grabbing the data directly from pixels[]. The equivalent statement to get(x, y) using pixels[] is pixels[y*width+x]. See the reference for pixels[] for more information.
     private fun changePixelColors(mapImage: PImage) {
         mapImage.loadPixels()
         val mapImagePixels = mapImage.pixels

@@ -19,6 +19,8 @@ sealed interface CreateNewMapArtUiState {
         val latitude: Double,
         val longitude: Double,
         val colorPalette: ColorPaletteEntity?,
-        val user: UserInfoEntity
+        val user: UserInfoEntity,
+        val canvasWidth: Int,
+        val canvasHeight: Int
     ): CreateNewMapArtUiState
 }

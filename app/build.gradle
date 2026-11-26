@@ -7,7 +7,6 @@ plugins {
     id 'com.google.firebase.crashlytics'
     id 'org.jetbrains.kotlin.plugin.compose'
     id "de.mannodermaus.android-junit5" version "1.14.0.0"
-    id 'jacoco'
 }
 
 android {
@@ -23,6 +22,19 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+    }
+
+    flavorDimensions = ["distribution"]
+
+    productFlavors {
+        normalApp {
+            dimension "distribution"
+        }
+        posPrinterApp {
+            dimension "distribution"
+            versionNameSuffix "-pos"
+            signingConfig signingConfigs.debug
+        }
     }
 
     buildFeatures {
@@ -69,6 +81,9 @@ android {
 
 dependencies {
 
+    implementation project(':core')
+    posPrinterAppImplementation project(':printer-hardware')
+
     def composeBom = platform('androidx.compose:compose-bom:2026.06.01')
     implementation composeBom
     androidTestImplementation composeBom
@@ -86,6 +101,9 @@ dependencies {
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation files('libs/processing-core.jar')
+    // processing-core.jar references WatchFaceService, and some Android versions (seen on Android 11) reject its classes when it is missing
+    posPrinterAppImplementation 'com.google.android.support:wearable:2.9.0'
+    posPrinterAppCompileOnly 'com.google.android.wearable:wearable:2.9.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation "androidx.core:core-splashscreen:1.2.0"
     implementation("androidx.room:room-runtime:2.8.4")
@@ -122,6 +140,7 @@ dependencies {
     implementation("com.google.firebase:firebase-ai")
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     debugImplementation("com.google.firebase:firebase-appcheck-debug")
+    posPrinterAppImplementation("com.google.firebase:firebase-appcheck-debug")
 
     implementation 'com.airbnb.android:lottie:6.7.1'
 
@@ -138,35 +157,18 @@ kapt {
     correctErrorTypes true
 }
 
-tasks.register('jacocoUnitTestReport', JacocoReport) {
-    group = 'verification'
-    description = 'Generates the unit test coverage report for the debug variant, limited to the classes we unit test.'
-    dependsOn 'testDebugUnitTest'
-
-    reports {
-        html.required = true
-        xml.required = true
-    }
-
-    // Only these classes count for coverage; everything else (fragments, activities, ui states, di, models...) is left out
-    def coveredClasses = [
-            '**/scenes/**/*ViewModel.class',
-            '**/scenes/**/*ViewModel$*.class',
-            '**/core/data/repositories/**',
-            '**/core/services/**',
-            '**/core/extensions/**',
-            '**/core/utils/**',
-            '**/core/logging/**',
-            '**/core/models/failures/SketchArtType*.class',
-            '**/core/data/local/converters/**',
-            '**/core/data/network/martp/AppCheckInterceptor*.class'
-    ]
-
-    classDirectories.setFrom(fileTree(layout.buildDirectory.dir('tmp/kotlin-classes/debug')) {
-        include coveredClasses
-    })
-    sourceDirectories.setFrom(files('src/main/java'))
-    executionData.setFrom(fileTree(layout.buildDirectory) {
-        include 'outputs/unit_test_code_coverage/debugUnitTest/*.exec'
-    })
-}
+// Only these classes count for coverage; everything else (fragments, activities, ui states, di, models...) is left out
+ext.jacocoVariant = 'normalAppDebug'
+ext.jacocoCoveredClasses = [
+        '**/scenes/**/*ViewModel.class',
+        '**/scenes/**/*ViewModel$*.class',
+        '**/core/data/repositories/**',
+        '**/core/services/**',
+        '**/core/extensions/**',
+        '**/core/utils/**',
+        '**/core/logging/**',
+        '**/core/models/failures/SketchArtType*.class',
+        '**/core/data/local/converters/**',
+        '**/core/data/network/martp/AppCheckInterceptor*.class'
+]
+apply from: rootProject.file('gradle/jacoco-unit-test-report.gradle')

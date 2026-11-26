@@ -10,6 +10,7 @@ enum class SketchArtType(
     DEFAULT(MapboxMapStyle.DarkV11, minZoom = 14F, maxZoom = 15F),
     POINTILLISM(MapboxMapStyle.DarkV11, minZoom = 14F, maxZoom = 15F),
     COLORFUL_MAP(MapboxMapStyle.ColorfulMap, minZoom = 16F, maxZoom = 17F),
+    PRINTABLE_MAP(MapboxMapStyle.ColorfulMap, minZoom = 16F, maxZoom = 17F),
     WATER_FLOW(MapboxMapStyle.WaterFlow, minZoom = 14F, maxZoom = 15F), //Working in progress
     PARTICLE_SYSTEM(MapboxMapStyle.ColorfulMap, minZoom = 14F, maxZoom = 15F), // Working in progress
     //GEO_REALISTIC(MapboxMapStyle.SatelliteV9) //TODO: Mapbox does not support it yet and I did not find another service with something similar

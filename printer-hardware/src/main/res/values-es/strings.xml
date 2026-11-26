@@ -1,0 +1,5 @@
+<resources>
+    <string name="smart_pos_printer_not_connected_failure">La impresora no está conectada. Espera un momento e inténtalo de nuevo.</string>
+    <string name="smart_pos_printer_out_of_paper_failure">La impresora no tiene papel. Coloca un nuevo rollo e inténtalo de nuevo.</string>
+    <string name="smart_pos_printing_failure">No pudimos imprimir tu arte. Inténtalo de nuevo.</string>
+</resources>

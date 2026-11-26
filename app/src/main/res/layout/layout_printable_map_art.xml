@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:gravity="start"
+    android:orientation="vertical"
+    tools:ignore="Overdraw"
+    tools:layout_width="192dp">
+
+    <ImageView
+        android:id="@+id/mapIV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:importantForAccessibility="no" />
+
+    <TextView
+        android:id="@+id/titleTV"
+        style="@style/Text.PrintableTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        tools:text="Rua Fake, Salvador, Brasil" />
+
+    <TextView
+        android:id="@+id/latitudeTV"
+        style="@style/Text.PrintableInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        tools:text="Latitude: -12.9714" />
+
+    <TextView
+        android:id="@+id/longitudeTV"
+        style="@style/Text.PrintableInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Longitude: -38.5014" />
+
+    <TextView
+        android:id="@+id/dateTV"
+        style="@style/Text.PrintableInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        tools:text="23/11/2026 21:46" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:adjustViewBounds="true"
+        android:layout_marginTop="32dp"
+        android:importantForAccessibility="no"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/ic_martp_logo"
+        app:tint="@android:color/black" />
+    <TextView
+        style="@style/Text.PrintableInfo"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:text="@string/martp_app_social_media" />
+</LinearLayout>

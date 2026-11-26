@@ -19,14 +19,17 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import manoellribeiro.dev.martp.R
 import manoellribeiro.dev.martp.core.data.local.entities.ColorPaletteEntity
 import manoellribeiro.dev.martp.core.data.local.entities.MapArtEntity
 import manoellribeiro.dev.martp.core.data.local.entities.UserInfoEntity
 import manoellribeiro.dev.martp.core.data.repositories.MartpRepository
 import manoellribeiro.dev.martp.core.models.failures.LocalStorageErrorFailure
 import manoellribeiro.dev.martp.core.models.SketchArtType
+import manoellribeiro.dev.martp.core.services.MapArtPrinterService
 import manoellribeiro.dev.martp.infra.MainDispatcherExtension
 import manoellribeiro.dev.martp.scenes.artStyleSettings.ArtStyleSettingsUiState
+import manoellribeiro.dev.martp.scenes.artStyleSettings.MapArtStyleModel
 import manoellribeiro.dev.martp.scenes.gallery.GalleryUiState
 import manoellribeiro.dev.martp.scenes.userInfo.UserInfoUiState
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -44,6 +47,7 @@ class MainViewModelTest {
 
     private lateinit var viewModel: MainViewModel
     private lateinit var repository: MartpRepository
+    private lateinit var mapArtPrinterService: MapArtPrinterService
     private lateinit var fakeUserMapArtsChannel: Channel<List<MapArtEntity>>
 
     @BeforeEach
@@ -56,7 +60,13 @@ class MainViewModelTest {
         fakeUserMapArtsChannel = Channel(Channel.UNLIMITED)
         every { repository.observeUserMapArts() } returns fakeUserMapArtsChannel.receiveAsFlow()
 
-        viewModel = MainViewModel(repository = repository)
+        mapArtPrinterService = mockk()
+
+        viewModel = MainViewModel(
+            repository = repository,
+            mapArtPrinterService = mapArtPrinterService,
+            applicationScope = TestScope()
+        )
     }
 
     private fun <T> TestScope.collectStates(stateFlow: StateFlow<T>): List<T> {
@@ -77,6 +87,34 @@ class MainViewModelTest {
             email = email
         )
     }
+
+    private val fakePrintableArtStyle = MapArtStyleModel(
+        titleId = R.string.printable_map,
+        descriptionId = R.string.printable_map_description,
+        drawableImageId = R.drawable.ic_printable_style,
+        sketchArtType = SketchArtType.PRINTABLE_MAP
+    )
+
+    private val fakeArtStylesWithoutPrinter = listOf(
+        MapArtStyleModel(
+            titleId = R.string.colorful_map,
+            descriptionId = R.string.colorful_map_description,
+            drawableImageId = R.drawable.ic_colorful_map,
+            sketchArtType = SketchArtType.COLORFUL_MAP
+        ),
+        MapArtStyleModel(
+            titleId = R.string.classic,
+            descriptionId = R.string.classic_description,
+            drawableImageId = R.drawable.ic_martp_logo,
+            sketchArtType = SketchArtType.DEFAULT
+        ),
+        MapArtStyleModel(
+            titleId = R.string.pointillism,
+            descriptionId = R.string.pointillism_colorful_description,
+            drawableImageId = R.drawable.ic_pointllism,
+            sketchArtType = SketchArtType.POINTILLISM
+        )
+    )
 
     private fun createFakeColorPalette(name: String): ColorPaletteEntity {
         return ColorPaletteEntity(
@@ -262,6 +300,7 @@ class MainViewModelTest {
         coEvery { repository.getMapZoomPreference() } returns fakeMapZoom
         coEvery { repository.getArtStylePreference() } returns fakeArtStyle
         coEvery { repository.getColorPalettePreference() } returns fakeColorPaletteName
+        every { mapArtPrinterService.isAvailable } returns false
         val states = collectStates(viewModel.artStyleSettingsState)
 
         // When
@@ -276,7 +315,8 @@ class MainViewModelTest {
                     mapZoom = fakeMapZoom,
                     mapArtStyle = fakeArtStyle,
                     colorsPalettes = fakeColorPalettes,
-                    colorPaletteSelected = fakeColorPaletteName
+                    colorPaletteSelected = fakeColorPaletteName,
+                    artStylesAvailable = fakeArtStylesWithoutPrinter
                 )
             ),
             states
@@ -298,6 +338,7 @@ class MainViewModelTest {
         coEvery { repository.getMapZoomPreference() } returns 15.5f
         coEvery { repository.getArtStylePreference() } returns SketchArtType.COLORFUL_MAP
         coEvery { repository.getColorPalettePreference() } returns "Fake Removed Palette"
+        every { mapArtPrinterService.isAvailable } returns false
 
         // When
         viewModel.getArtStyleSettings()
@@ -320,6 +361,7 @@ class MainViewModelTest {
         coEvery { repository.getMapZoomPreference() } returns 16.5f
         coEvery { repository.getArtStylePreference() } returns SketchArtType.COLORFUL_MAP
         coEvery { repository.getColorPalettePreference() } returns "Martp"
+        every { mapArtPrinterService.isAvailable } returns false
 
         // When
         viewModel.getArtStyleSettings()
@@ -331,7 +373,8 @@ class MainViewModelTest {
                 mapZoom = 16.5f,
                 mapArtStyle = SketchArtType.COLORFUL_MAP,
                 colorsPalettes = fakeColorPalettes,
-                colorPaletteSelected = "Martp"
+                colorPaletteSelected = "Martp",
+                artStylesAvailable = fakeArtStylesWithoutPrinter
             ),
             viewModel.artStyleSettingsState.value
         )
@@ -354,6 +397,7 @@ class MainViewModelTest {
         coEvery { repository.getMapZoomPreference() } returnsMany listOf(fakeFirstMapZoom, fakeSecondMapZoom)
         coEvery { repository.getArtStylePreference() } returnsMany listOf(fakeFirstArtStyle, fakeSecondArtStyle)
         coEvery { repository.getColorPalettePreference() } returnsMany listOf(fakeFirstColorPaletteName, fakeSecondColorPaletteName)
+        every { mapArtPrinterService.isAvailable } returns false
         val states = collectStates(viewModel.artStyleSettingsState)
         viewModel.getArtStyleSettings()
         advanceUntilIdle()
@@ -370,14 +414,16 @@ class MainViewModelTest {
                     mapZoom = fakeFirstMapZoom,
                     mapArtStyle = fakeFirstArtStyle,
                     colorsPalettes = fakeColorPalettes,
-                    colorPaletteSelected = fakeFirstColorPaletteName
+                    colorPaletteSelected = fakeFirstColorPaletteName,
+                    artStylesAvailable = fakeArtStylesWithoutPrinter
                 ),
                 ArtStyleSettingsUiState.Loading,
                 ArtStyleSettingsUiState.SettingsLoaded(
                     mapZoom = fakeSecondMapZoom,
                     mapArtStyle = fakeSecondArtStyle,
                     colorsPalettes = fakeColorPalettes,
-                    colorPaletteSelected = fakeSecondColorPaletteName
+                    colorPaletteSelected = fakeSecondColorPaletteName,
+                    artStylesAvailable = fakeArtStylesWithoutPrinter
                 )
             ),
             states
@@ -386,6 +432,52 @@ class MainViewModelTest {
         coVerify(exactly = 2) { repository.getMapZoomPreference() }
         coVerify(exactly = 2) { repository.getArtStylePreference() }
         coVerify(exactly = 2) { repository.getColorPalettePreference() }
+    }
+
+    @Test
+    fun `if the printer is available should emit SettingsLoaded with the printable map as the first art style`() = runTest {
+        // Given
+        val fakeColorPalettes = listOf(createFakeColorPalette(name = "Fake Printer Palette"))
+        coEvery { repository.getColorsPalettes() } returns fakeColorPalettes
+        coEvery { repository.getMapZoomPreference() } returns 16f
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.PRINTABLE_MAP
+        coEvery { repository.getColorPalettePreference() } returns "Fake Printer Palette"
+        every { mapArtPrinterService.isAvailable } returns true
+
+        // When
+        viewModel.getArtStyleSettings()
+        advanceUntilIdle()
+
+        // Then
+        val settingsLoadedState = assertInstanceOf(
+            ArtStyleSettingsUiState.SettingsLoaded::class.java,
+            viewModel.artStyleSettingsState.value
+        )
+        assertEquals(listOf(fakePrintableArtStyle) + fakeArtStylesWithoutPrinter, settingsLoadedState.artStylesAvailable)
+        assertEquals(SketchArtType.PRINTABLE_MAP, settingsLoadedState.mapArtStyle)
+    }
+
+    @Test
+    fun `if the printer is not available should emit SettingsLoaded without the printable map art style`() = runTest {
+        // Given
+        val fakeColorPalettes = listOf(createFakeColorPalette(name = "Fake No Printer Palette"))
+        coEvery { repository.getColorsPalettes() } returns fakeColorPalettes
+        coEvery { repository.getMapZoomPreference() } returns 16f
+        coEvery { repository.getArtStylePreference() } returns SketchArtType.COLORFUL_MAP
+        coEvery { repository.getColorPalettePreference() } returns "Fake No Printer Palette"
+        every { mapArtPrinterService.isAvailable } returns false
+
+        // When
+        viewModel.getArtStyleSettings()
+        advanceUntilIdle()
+
+        // Then
+        val settingsLoadedState = assertInstanceOf(
+            ArtStyleSettingsUiState.SettingsLoaded::class.java,
+            viewModel.artStyleSettingsState.value
+        )
+        assertEquals(fakeArtStylesWithoutPrinter, settingsLoadedState.artStylesAvailable)
+        assertFalse(settingsLoadedState.artStylesAvailable.any { it.sketchArtType == SketchArtType.PRINTABLE_MAP })
     }
 
     // endregion
@@ -977,6 +1069,28 @@ class MainViewModelTest {
         // Then
         assertEquals(listOf(OnboardingCheckUiState.Checking, OnboardingCheckUiState.OnboardingAlreadySeen), states)
         coVerify(exactly = 1) { repository.hasSeenOnboarding() }
+    }
+
+    // endregion
+
+    // region connectToPrinter
+
+    @Test
+    fun `connectToPrinter should ask the printer service to connect`() = runTest {
+        // Given
+        coEvery { mapArtPrinterService.connect() } returns true
+        val viewModelWithTestApplicationScope = MainViewModel(
+            repository = repository,
+            mapArtPrinterService = mapArtPrinterService,
+            applicationScope = backgroundScope
+        )
+
+        // When
+        viewModelWithTestApplicationScope.connectToPrinter()
+        runCurrent()
+
+        // Then
+        coVerify(exactly = 1) { mapArtPrinterService.connect() }
     }
 
     // endregion

@@ -1,0 +1,5 @@
+<resources>
+    <string name="smart_pos_printer_not_connected_failure">Der Drucker ist nicht verbunden. Warte einen Moment und versuche es erneut.</string>
+    <string name="smart_pos_printer_out_of_paper_failure">Der Drucker hat kein Papier mehr. Lege eine neue Rolle ein und versuche es erneut.</string>
+    <string name="smart_pos_printing_failure">Wir konnten dein Kunstwerk nicht drucken. Bitte versuche es erneut.</string>
+</resources>

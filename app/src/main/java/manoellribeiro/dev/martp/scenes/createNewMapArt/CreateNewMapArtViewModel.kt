@@ -32,6 +32,7 @@ import manoellribeiro.dev.martp.core.models.failures.UnknownErrorFailure
 import manoellribeiro.dev.martp.core.services.GenerateAIContentService
 import manoellribeiro.dev.martp.core.services.GetAddressService
 import manoellribeiro.dev.martp.core.services.LocationService
+import manoellribeiro.dev.martp.core.services.MapArtPrinterService
 import manoellribeiro.dev.martp.core.sketches.MartpSketch
 import manoellribeiro.dev.martp.core.utils.PromptGenerator
 import java.io.File
@@ -47,7 +48,8 @@ class CreateNewMapArtViewModel @Inject constructor(
     private val getAddressService: GetAddressService,
     private val generateAIContentService: GenerateAIContentService,
     private val promptGenerator: PromptGenerator,
-    private val errorLogger: ErrorLogger
+    private val errorLogger: ErrorLogger,
+    private val printerService: MapArtPrinterService
 ): ViewModel() {
 
     private val _state: MutableStateFlow<CreateNewMapArtUiState> = MutableStateFlow(CreateNewMapArtUiState.Idle)
@@ -81,6 +83,9 @@ class CreateNewMapArtViewModel @Inject constructor(
                     Triple(sketchArtType.await(), location.await(), user.await())
                 }
                 currentArtLocation = location
+                val canvasWidth = canvasWidthFor(sketchArtType, canvasToDrawArtWidth)
+                val canvasHeight = canvasHeightFor(sketchArtType, canvasToDrawArtHeight)
+                val frameSize = frameSizeFor(sketchArtType)
                 val horizontalTilesCount = 4
                 val verticalTilesCount = 4
                 val horizontalPaddingsNumber = horizontalTilesCount + 1
@@ -101,8 +106,8 @@ class CreateNewMapArtViewModel @Inject constructor(
                             sketchArtType = sketchArtType,
                             longitude = location.longitude,
                             latitude = location.latitude,
-                            mapWidth = canvasToDrawArtWidth - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(),
-                            mapHeight = min(canvasToDrawArtHeight - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(), 1280),
+                            mapWidth = canvasWidth - frameSize,
+                            mapHeight = min(canvasHeight - frameSize, 1280),
                             //mapWidth = canvasToDrawArtWidth - (horizontalPaddingsNumber * padding) - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(), this is the right one to use when creating arts with tiles
                             //mapHeight = canvasToDrawArtHeight - (verticalPaddingsNumber * padding) - (2 * MartpSketch.frameThickness).toInt() - (2 * MartpSketch.framePadding).toInt(), this is the right one to use when creating arts with tiles
                             dir = directory
@@ -120,12 +125,34 @@ class CreateNewMapArtViewModel @Inject constructor(
                         colorPalette = colorPalette,
                         latitude = location.latitude,
                         longitude = location.longitude,
-                        user = user
+                        user = user,
+                        canvasWidth = canvasWidth,
+                        canvasHeight = canvasHeight
                     )
                 )
             } catch (failure: Failure) {
                 emitNewState(CreateNewMapArtUiState.Error(failure))
             }
+        }
+    }
+
+    private fun isPrintableMap(sketchArtType: SketchArtType): Boolean {
+        return sketchArtType == SketchArtType.PRINTABLE_MAP && printerService.isAvailable
+    }
+
+    private fun canvasWidthFor(sketchArtType: SketchArtType, canvasToDrawArtWidth: Int): Int {
+        return if (isPrintableMap(sketchArtType)) printerService.printableWidthPixels else canvasToDrawArtWidth
+    }
+
+    private fun canvasHeightFor(sketchArtType: SketchArtType, canvasToDrawArtHeight: Int): Int {
+        return if (isPrintableMap(sketchArtType)) printerService.printableWidthPixels else canvasToDrawArtHeight
+    }
+
+    private fun frameSizeFor(sketchArtType: SketchArtType): Int {
+        return if (isPrintableMap(sketchArtType)) {
+            0
+        } else {
+            (2 * MartpSketch.frameThickness).toInt() + (2 * MartpSketch.framePadding).toInt()
         }
     }
 
@@ -157,6 +184,10 @@ class CreateNewMapArtViewModel @Inject constructor(
         return listOfNotNull(street, city, country)
             .filter { it.isNotBlank() }
             .joinToString(", ")
+    }
+
+    fun printArt(mapBitmap: Bitmap) = viewModelScope.launch {
+        printerService.printBitmap(mapBitmap)
     }
 
     fun saveArt(

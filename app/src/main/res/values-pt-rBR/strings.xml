@@ -16,6 +16,8 @@
     <string name="choose_a_title_for_you_map_art">"Escolha um título para sua nova arte de mapa "</string>
     <string name="add_a_description_for_you_map_art">Adicione uma descrição à sua arte do mapa</string>
     <string name="save_art">Salvar arte</string>
+    <string name="print">Imprimir</string>
+    <string name="made_with">Feito com:</string>
     <string name="location_permission_not_granted_failure_error">Para prosseguir com essa ação você precisa conceder acesso à sua localização.</string>
     <string name="unknown_error_failure">Um erro desconhecido aconteceu. Tente novamente.</string>
     <string name="this_is_your_new_art">Essa é a sua nova arte!</string>
@@ -73,12 +75,15 @@
     <string name="walking_people_description">Um mapa colorido com uma simulação de pessoas caminhando nas áreas dos prédios</string>
     <string name="classic">Clássico</string>
     <string name="classic_description">O primeiro estilo de arte criado no projeto, é gerado utilizando as cores fixas da nossa logo</string>
+    <string name="printable_map">Mapa Imprimível</string>
+    <string name="printable_map_description">Um estilo de mapa em preto e branco que pode ser impresso</string>
     <string name="latitude_value">Latitude: %s</string>
     <string name="longitude_value">Longitude: %s</string>
     <string name="layer_buildings">Edifícios e área construída</string>
     <string name="layer_water">Água</string>
     <string name="layer_road_paths">Calçadas</string>
     <string name="layer_roads_tunnels_bridges">Ruas, túneis e pontes</string>
+    <string name="layer_buildings_water_roads_footpaths">Edifícios, água, ruas, túneis, pontes e calçadas</string>
     <string name="layer_building_delimitations">Delimitações dos edifícios</string>
     <string name="layer_roads_bridges_footpaths">Ruas, pontes, calçadas</string>
     <string name="layer_everything_else">Todo o resto</string>
@@ -89,6 +94,7 @@
     <string name="downloading_map_image">Baixando a imagem do mapa…</string>
     <string name="error_downloading_location_image">Um erro aconteceu ao baixar a imagem da sua localização, tente novamente.</string>
     <string name="tap_map_to_shuffle_colors">Você pode tocar no mapa para embaralhar as cores até encontrar a melhor combinação.</string>
+    <string name="tap_map_to_invert_colors">Você pode tocar no mapa para inverter as cores preto e branco.</string>
     <string name="unknown_location">Localização desconhecida</string>
     <string name="martp_api_failure_message">Um erro aconteceu ao buscar os dados dos serviços internos do Martp, tente novamente.</string>
     <string name="shown_in_gallery_as">Aparece na galeria como</string>
